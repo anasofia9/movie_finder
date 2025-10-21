@@ -1,0 +1,44 @@
+name: Movie Finder
+
+on:
+  schedule:
+    # Run every Thursday at 10 AM EST (3 PM UTC)
+    - cron: '0 15 * * 4'
+  workflow_dispatch:  # Allow manual triggers
+
+jobs:
+  find-movies:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+    
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+    
+    - name: Run movie finder
+      env:
+        SENDGRID_API_KEY: ${{ secrets.SENDGRID_API_KEY }}
+        RECIPIENT_EMAIL: ${{ secrets.RECIPIENT_EMAIL }}
+      run: |
+        python src/main.py
+    
+    - name: Commit newsletter
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add newsletters/
+        git diff --quiet && git diff --staged --quiet || git commit -m "Add newsletter $(date +%Y-%m-%d)"
+        git push

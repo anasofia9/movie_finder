@@ -1,0 +1,81 @@
+<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="X-UA-Compatible" content="ie=edge"><base href="/"/><link rel="stylesheet" href="/3rd-party/hib2ovh.css"><title>Alamo Drafthouse Cinema</title><script src="/3rd-party/runtime.min.js"></script><meta name="importmap-type" content="systemjs-importmap"/><script type="systemjs-importmap">{
+      "imports": {
+        "single-spa": "/3rd-party/single-spa.min.js",
+        "singleSpaAngularjs": "/3rd-party/single-spa-angularjs.min.js",
+        "singleSpaCss": "/3rd-party/single-spa-css.min.js"
+      }
+    }</script><link rel="preload" href="/3rd-party/single-spa.min.js" as="script" crossorigin><script type="systemjs-importmap">{
+        "imports": {
+          "@drafthouse/root-config": "/drafthouse-root-config.js",
+          "singleSpaAngularjs": "/3rd-party/single-spa-angularjs.min.js",
+          "singleSpaCss": "/3rd-party/single-spa-css.min.js",
+        
+          "@drafthouse/adc-ui-ionic": "/assets/ionic/sspa.js",
+          "@drafthouse/adc-website": "/assets/angular/s/res/scripts/main.bundle.js"
+        }
+      }</script><link rel="apple-touch-icon" href="/assets/angular/s/res/images/apple-touch-icon.png"><link rel="apple-touch-icon" sizes="57x57" href="/assets/angular/s/res/images/favicons/apple-touch-icon-57x57.png"><link rel="apple-touch-icon" sizes="60x60" href="/assets/angular/s/res/images/favicons/apple-touch-icon-60x60.png"><link rel="apple-touch-icon" sizes="72x72" href="/assets/angular/s/res/images/favicons/apple-touch-icon-72x72.png"><link rel="apple-touch-icon" sizes="76x76" href="/assets/angular/s/res/images/favicons/apple-touch-icon-76x76.png"><link rel="apple-touch-icon" sizes="114x114" href="/assets/angular/s/res/images/favicons/apple-touch-icon-114x114.png"><link rel="apple-touch-icon" sizes="120x120" href="/assets/angular/s/res/images/favicons/apple-touch-icon-120x120.png"><link rel="apple-touch-icon" sizes="144x144" href="/assets/angular/s/res/images/favicons/apple-touch-icon-144x144.png"><link rel="apple-touch-icon" sizes="152x152" href="/assets/angular/s/res/images/favicons/apple-touch-icon-152x152.png"><link rel="apple-touch-icon" sizes="180x180" href="/assets/angular/s/res/images/favicons/apple-touch-icon-180x180.png"><link rel="icon" type="image/png" href="/assets/angular/s/res/images/favicons/favicon-32x32.png" sizes="32x32"><link rel="icon" type="image/png" href="/assets/angular/s/res/images/favicons/android-chrome-192x192.png" sizes="192x192"><link rel="icon" type="image/png" href="/assets/angular/s/res/images/favicons/favicon-96x96.png" sizes="96x96"><link rel="icon" type="image/png" href="/assets/angular/s/res/images/favicons/favicon-16x16.png" sizes="16x16"><script src="/3rd-party/import-map-overrides.js"></script><script src="/3rd-party/system.js"></script><script src="/3rd-party/amd.js"></script><style>alamo-load-animation {
+  transform: translateY(-50%);
+  position: absolute;
+  top: 50%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button__spinner {
+  height: 73px;
+  transform: translateY(-50%);
+  top: 50%;
+  animation: rotate 1s steps(12);
+  animation-iteration-count: infinite;
+}
+.chromeless .button__spinner {
+  display: none;
+}
+
+.sspa-loading-overlay {
+  background: #333333;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: none;
+  position: fixed;
+  z-index: 10001;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  .button__spinner {
+    height: 73px;
+    z-index: 5;
+    animation: rotate 1s steps(12);
+    animation-iteration-count: infinite;
+  }
+}
+
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+@keyframes pulsate {
+  0% {
+    transform: scale(.1);
+    opacity: 0.0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}</style></head><body style="background: #090909"><noscript>You need to enable JavaScript to run this app.</noscript><main></main><div id="sspa-loading" class="sspa-loading-overlay"><img class="button__spinner" src="/assets/angular/s/res/images/spinner-alt-with-opacity.svg" alt="The Application is Loading"/></div><script>System.import('@drafthouse/root-config');</script><import-map-overrides-full show-when-local-storage="devtools" dev-libs></import-map-overrides-full></body></html>
