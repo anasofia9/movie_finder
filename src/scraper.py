@@ -20,17 +20,28 @@ class MovieScraper:
         # Convert title to lowercase and handle year format
         # "Frankenstein (2025)" -> "frankenstein-2025"
         
+        # Remove common suffixes
+        clean_title = re.sub(r'\s*\(Subtitled\)$', '', title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\s*\(Dubbed\)$', '', clean_title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\s*Remastered$', '', clean_title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\s*Movie Party$', '', clean_title, flags=re.IGNORECASE)
+        clean_title = re.sub(r':\s*\d+(?:st|nd|rd|th)\s*Anniversary$', '', clean_title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\s*Early Access$', '', clean_title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\s*with Live Q&A$', '', clean_title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\s*Rerelease$', '', clean_title, flags=re.IGNORECASE)
+        clean_title = re.sub(r'\s*A Sing-Along Event$', '', clean_title, flags=re.IGNORECASE)
+        
         # Extract year if in parentheses
-        year_match = re.search(r'\((\d{4})\)', title)
+        year_match = re.search(r'\((\d{4})\)', clean_title)
         if year_match:
             year = year_match.group(1)
             # Remove year and parentheses from title
-            clean_title = re.sub(r'\s*\(\d{4}\)', '', title)
+            clean_title = re.sub(r'\s*\(\d{4}\)', '', clean_title)
         else:
             year = ''
-            clean_title = title
         
-        # Convert to lowercase and replace spaces/special chars with hyphens
+        # Remove apostrophes and periods, then convert to lowercase and replace spaces/special chars with hyphens
+        clean_title = clean_title.replace("'", "").replace(".", "")
         slug = re.sub(r'[^a-zA-Z0-9]+', '-', clean_title.lower())
         # Remove leading/trailing hyphens
         slug = slug.strip('-')
@@ -88,6 +99,7 @@ class MovieScraper:
                         });
                     }
                 ''')
+                # print(f"movie data = {movie_data}")
                 
                 await browser.close()
                 

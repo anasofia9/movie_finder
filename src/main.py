@@ -14,19 +14,27 @@ def main():
     # Get Letterboxd ratings
     print("\n⭐ Fetching Letterboxd ratings...")
     letterboxd = LetterboxdAPI()
+    movies_not_found = []
     
     for movie in movies:
         # print(movie)
         # Use direct URL if available (from Alamo scraper), otherwise search
         if 'letterboxd_url' in movie and movie['letterboxd_url']:
             rating_data = letterboxd.get_rating_from_url(movie['letterboxd_url'], movie['title'])
-        else:
-            rating_data = letterboxd.get_rating(movie['title'])
+        # else:
+        #     rating_data = letterboxd.get_rating(movie['title'])
         
         movie['letterboxd_rating'] = rating_data['rating']
         movie['letterboxd_url'] = rating_data['url']
         movie['year'] = rating_data['year']
-        print(f"  {movie['title']}: {rating_data['rating']}")
+        
+        if rating_data['rating'] is None:
+            movies_not_found.append(movie)
+        else:
+            print(f"  {movie['title']}: {rating_data['rating']}")
+    # print("---------- ITEMS NOT FOUND ON LETTERBOXD ----------")
+    # for movie in movies_not_found:
+    #     print(f" title = {movie['title']}, url = {movie['letterboxd_url']}")
     
     # Filter and sort
     print("\n🔍 Filtering and sorting...")
@@ -49,6 +57,14 @@ def main():
     
     # Send email
     generator.send_email(html_content)
+    
+    # Print movies not found on Letterboxd
+    if movies_not_found:
+        print(f"\n❌ Movies not found on Letterboxd ({len(movies_not_found)}):")
+        for movie in movies_not_found:
+            print(f" title = {movie['title']}, url = {movie['letterboxd_url']}")
+    else:
+        print("\n✅ All movies found on Letterboxd!")
     
     print("\n✅ Done!")
 
