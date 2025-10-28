@@ -139,8 +139,8 @@ class LetterboxdAPI:
         if title in self.cache:
             return self.cache[title]
         
-        # Rate limiting
-        time.sleep(1)
+        # Rate limiting - commented out for maximum speed with threading
+        # time.sleep(0.2)
         
         # Try the original URL first
         result = self._fetch_rating_from_url(letterboxd_url, title)
@@ -455,7 +455,7 @@ class LetterboxdAPI:
         
         return cached_movies, uncached_movies
     
-    def process_movie_batch(self, movies: List[Dict], progress_callback=None, max_workers=5) -> List[Dict]:
+    def process_movie_batch(self, movies: List[Dict], progress_callback=None, max_workers=12) -> List[Dict]:
         """Process multiple movies concurrently with threading"""
         if not movies:
             return []
