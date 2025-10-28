@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}NYC Movie Newsletter{% endblock %}
+
+{% block content %}
+<div class="controls">
+    <a href="/" class="btn secondary">← Back to Movies</a>
+    <button class="btn" onclick="window.print()">🖨️ Print Newsletter</button>
+</div>
+
+<div class="newsletter-content">
+    {{ html_content | safe }}
+</div>
+
+<style>
+    .newsletter-content {
+        background: white;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin: 20px 0;
+    }
+    
+    @media print {
+        body {
+            background: white;
+        }
+        
+        .header, .controls {
+            display: none;
+        }
+        
+        .newsletter-content {
+            box-shadow: none;
+            padding: 0;
+        }
+    }
+</style>
+{% endblock %}

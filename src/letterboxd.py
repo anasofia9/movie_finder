@@ -8,7 +8,9 @@ import csv
 import os
 from datetime import datetime, timedelta
 from playwright.async_api import async_playwright
-from typing import Optional, Dict
+from typing import Optional, Dict, List
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 class LetterboxdAPI:
     """Fetch Letterboxd ratings for movies"""
@@ -23,6 +25,7 @@ class LetterboxdAPI:
         self.cache_file = 'letterboxd_cache.csv'
         self.csv_cache = {}
         self._load_csv_cache()
+        self._lock = threading.Lock()  # For thread-safe operations
     
     def _load_csv_cache(self):
         """Load existing cache from CSV file"""
@@ -147,7 +150,7 @@ class LetterboxdAPI:
         # If failed and URL contains a year, try without the year
         if re.search(r'-\d{4}/?$', letterboxd_url):
             # Import the scraper to regenerate clean URL without year
-            from scraper import MovieScraper
+            from .scraper import MovieScraper
             scraper = MovieScraper()
             # Remove year from title and regenerate URL
             title_without_year = re.sub(r'\s*\(\d{4}\)', '', title)
@@ -159,7 +162,7 @@ class LetterboxdAPI:
                 return result_no_year
             
             # Both attempts failed - try more fallbacks
-            from scraper import MovieScraper
+            from .scraper import MovieScraper
             scraper = MovieScraper()
             
             # Try removing "with xxxxx" suffix
@@ -192,7 +195,7 @@ class LetterboxdAPI:
         # If URL doesn't have year and failed, try removing "with xxxxx" suffix
         if ' with ' in title.lower():
             # print(f"Movie not found at {letterboxd_url} - trying without 'with' suffix...")
-            from scraper import MovieScraper
+            from .scraper import MovieScraper
             scraper = MovieScraper()
             # Remove "with xxxxx" suffix and regenerate URL
             title_without_with = re.sub(r'\s+with\s+.*$', '', title, flags=re.IGNORECASE)
@@ -204,7 +207,7 @@ class LetterboxdAPI:
         # Try removing & completely (for cases like "Stiller & Meara" -> "Stiller Meara")
         if '&' in title:
             # print(f"Movie not found at {letterboxd_url} - trying without ampersand...")
-            from scraper import MovieScraper
+            from .scraper import MovieScraper
             scraper = MovieScraper()
             title_no_ampersand = re.sub(r'\s*&\s*', ' ', title)
             title_no_ampersand = re.sub(r'\s+', ' ', title_no_ampersand).strip()  # Clean up extra spaces
@@ -431,3 +434,93 @@ class LetterboxdAPI:
                 return average_rating, total_count, True  # True = computed from histogram
         
         return None, None, False
+    
+    def filter_movies_by_cache(self, movies: List[Dict]) -> tuple[List[Dict], List[Dict]]:
+        """Separate movies into cached and uncached lists"""
+        cached_movies = []
+        uncached_movies = []
+        
+        for movie in movies:
+            letterboxd_url = movie.get('letterboxd_url')
+            if letterboxd_url and letterboxd_url in self.csv_cache:
+                # Movie is in cache, add cached data
+                cached_data = self.csv_cache[letterboxd_url]
+                movie['letterboxd_rating'] = cached_data['rating']
+                movie['letterboxd_url'] = cached_data['url']
+                movie['year'] = cached_data['year']
+                cached_movies.append(movie)
+            else:
+                # Movie needs to be processed
+                uncached_movies.append(movie)
+        
+        return cached_movies, uncached_movies
+    
+    def process_movie_batch(self, movies: List[Dict], progress_callback=None, max_workers=5) -> List[Dict]:
+        """Process multiple movies concurrently with threading"""
+        if not movies:
+            return []
+        
+        # Filter movies by cache first
+        cached_movies, uncached_movies = self.filter_movies_by_cache(movies)
+        
+        if progress_callback:
+            progress_callback(f"📂 Found {len(cached_movies)} movies in cache, processing {len(uncached_movies)} new movies")
+        
+        if not uncached_movies:
+            return cached_movies
+        
+        # Process uncached movies with threading
+        processed_movies = []
+        movies_not_found = []
+        
+        def process_single_movie(movie):
+            """Process a single movie - thread-safe"""
+            letterboxd_url = movie.get('letterboxd_url')
+            title = movie.get('title', 'Unknown')
+            
+            if letterboxd_url:
+                rating_data = self.get_rating_from_url(letterboxd_url, title)
+                
+                # Thread-safe update of movie data
+                movie['letterboxd_rating'] = rating_data['rating']
+                movie['letterboxd_url'] = rating_data['url']
+                movie['year'] = rating_data['year']
+                
+                if rating_data['rating'] is None and rating_data['url'] is None:
+                    with self._lock:
+                        movies_not_found.append(movie)
+            
+            return movie
+        
+        # Use ThreadPoolExecutor for concurrent processing
+        with ThreadPoolExecutor(max_workers=max_workers) as executor:
+            # Submit all jobs
+            future_to_movie = {executor.submit(process_single_movie, movie): movie for movie in uncached_movies}
+            
+            # Process completed jobs
+            completed = 0
+            for future in as_completed(future_to_movie):
+                try:
+                    processed_movie = future.result()
+                    processed_movies.append(processed_movie)
+                    completed += 1
+                    
+                    if progress_callback and completed % max(1, len(uncached_movies) // 10) == 0:
+                        progress_callback(f"📊 Processed {completed}/{len(uncached_movies)} movies ({completed/len(uncached_movies)*100:.0f}%)")
+                        
+                except Exception as e:
+                    movie = future_to_movie[future]
+                    if progress_callback:
+                        progress_callback(f"❌ Error processing {movie.get('title', 'Unknown')}: {e}")
+        
+        # Update the movies_not_found list in a thread-safe way
+        with self._lock:
+            self.movies_found_no_rating.extend([url for movie in movies_not_found for url in [movie.get('letterboxd_url')] if url])
+        
+        # Combine cached and processed movies
+        all_movies = cached_movies + processed_movies
+        
+        if progress_callback:
+            progress_callback(f"✅ Completed processing {len(all_movies)} total movies ({len(cached_movies)} from cache, {len(processed_movies)} newly processed)")
+        
+        return all_movies

@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}NYC Movie Finder - Home{% endblock %}
+
+{% block content %}
+<div class="controls">
+    <div class="theater-selection">
+        <h3>Select Theaters to Scrape:</h3>
+        <div class="theater-grid">
+            <label class="theater-checkbox">
+                <input type="checkbox" id="alamo" checked>
+                <span class="checkmark"></span>
+                🎬 Alamo Drafthouse
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="metrograph" checked>
+                <span class="checkmark"></span>
+                📽️ Metrograph
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="ifc" checked>
+                <span class="checkmark"></span>
+                🎭 IFC Center
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="angelika" checked>
+                <span class="checkmark"></span>
+                🎪 Angelika Film Center
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="angelika_village_east" checked>
+                <span class="checkmark"></span>
+                🎨 Angelika Village East
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="paris_theater" checked>
+                <span class="checkmark"></span>
+                🏛️ Paris Theater
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="nitehawk_williamsburg" checked>
+                <span class="checkmark"></span>
+                🦉 Nitehawk Williamsburg
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="nitehawk_prospect_park" checked>
+                <span class="checkmark"></span>
+                🌳 Nitehawk Prospect Park
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="moving_image" checked>
+                <span class="checkmark"></span>
+                🎞️ Museum of Moving Image
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="film_forum" checked>
+                <span class="checkmark"></span>
+                📺 Film Forum
+            </label>
+        </div>
+        <div class="selection-controls">
+            <button class="btn-small" onclick="selectAllTheaters()">Select All</button>
+            <button class="btn-small" onclick="deselectAllTheaters()">Deselect All</button>
+        </div>
+    </div>
+    <div class="rating-threshold">
+        <label for="ratingThreshold">⭐ Minimum Rating for "High-Rated" Movies:</label>
+        <input type="number" id="ratingThreshold" min="1.0" max="5.0" step="0.1" value="{{ rating_threshold or 4.0 }}">
+        <span class="rating-help">Ratings from 1.0 to 5.0 stars</span>
+    </div>
+    <button class="btn" onclick="refreshData()">🔄 Refresh Data</button>
+</div>
+
+<div id="status" class="status">
+    {% if is_scraping %}
+        <div class="spinner"></div>
+        <div class="status-header">Scraping movie data... This may take a few minutes.</div>
+        {% if status_messages %}
+            <div class="status-log">
+                {% for message in status_messages %}
+                    <div class="status-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% elif last_updated %}
+        Last updated: {{ last_updated.strftime('%B %d, %Y at %I:%M %p') }} | {{ movies|length }} movies found
+        {% if status_messages %}
+            <details class="status-details">
+                <summary>View last scraping log</summary>
+                <div class="status-log">
+                    {% for message in status_messages %}
+                        <div class="status-message">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            </details>
+        {% endif %}
+        <div id="cache-status" class="cache-status"></div>
+    {% else %}
+        No data available. Click refresh to start scraping.
+    {% endif %}
+</div>
+
+{% if is_scraping and not movies %}
+<div class="loading-section">
+    <div class="spinner"></div>
+    <p>Scraping movie data... Results will appear here when complete.</p>
+</div>
+{% elif movies %}
+<div class="section">
+    <h2 id="high-rated-title">🌟 High-Rated Movies (≥{{ rating_threshold or 4.0 }}⭐)</h2>
+    {% set threshold = rating_threshold or 4.0 %}
+    {% set high_rated = movies | selectattr('letterboxd_rating') | selectattr('letterboxd_rating', '>=', threshold) | sort(attribute='letterboxd_rating', reverse=true) %}
+    
+    {% if high_rated %}
+        <div class="movies-grid">
+            {% for movie in high_rated %}
+            <div class="movie">
+                <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
+                <div class="rating high">⭐ {{ "%.1f"|format(movie.letterboxd_rating) }}</div>
+                <div class="venue">📍 {{ movie.venue }}</div>
+                <div class="links">
+                    {% if movie.letterboxd_url %}
+                    <a href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd</a>
+                    {% endif %}
+                    {% if movie.url %}
+                    <a href="{{ movie.url }}" target="_blank">Tickets</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No high-rated movies found this week.</p>
+    {% endif %}
+</div>
+
+<div class="section">
+    <h2>⚠️ Movies Found on Letterboxd (No Ratings Yet)</h2>
+    {% set no_rating_movies = movies | selectattr('letterboxd_url') | rejectattr('letterboxd_rating') %}
+    
+    {% if no_rating_movies %}
+        <div class="movies-grid">
+            {% for movie in no_rating_movies %}
+            <div class="movie" style="opacity: 0.7;">
+                <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
+                <div class="rating warning">⚠️ No rating yet</div>
+                <div class="venue">📍 {{ movie.venue }}</div>
+                <div class="links">
+                    {% if movie.letterboxd_url %}
+                    <a href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd</a>
+                    {% endif %}
+                    {% if movie.url %}
+                    <a href="{{ movie.url }}" target="_blank">Tickets</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No movies found on Letterboxd without ratings.</p>
+    {% endif %}
+</div>
+
+<div class="section">
+    <h2>❌ Screenings Not Found on Letterboxd</h2>
+    {% set not_found_movies = movies | rejectattr('letterboxd_url') %}
+    
+    {% if not_found_movies %}
+        <div class="movies-grid">
+            {% for movie in not_found_movies %}
+            <div class="movie" style="opacity: 0.6;">
+                <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
+                <div class="rating error">❌ Not found</div>
+                <div class="venue">📍 {{ movie.venue }}</div>
+                <div class="links">
+                    {% if movie.url %}
+                    <a href="{{ movie.url }}" target="_blank">Tickets</a>
+                    {% else %}
+                    <span style="color: #999;">No ticket link available</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>All movies found on Letterboxd!</p>
+    {% endif %}
+</div>
+
+{% else %}
+<div class="loading">
+    <div class="spinner"></div>
+    <p>Loading movie data...</p>
+</div>
+{% endif %}
+
+{% if is_scraping and not newsletter_content %}
+<div class="section newsletter-section">
+    <h2>📰 Weekly Newsletter</h2>
+    <div class="loading-newsletter">
+        <div class="spinner"></div>
+        <p>Generating newsletter... Will appear when scraping completes.</p>
+    </div>
+</div>
+{% elif newsletter_content %}
+<div class="section newsletter-section">
+    <h2>📰 Weekly Newsletter</h2>
+    <div class="newsletter-content">
+        {{ newsletter_content | safe }}
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

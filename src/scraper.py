@@ -3,15 +3,102 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
 from typing import List, Dict
 import asyncio
+import json
+import os
+import pytz
 from playwright.async_api import async_playwright
 
 class MovieScraper:
     """Scrape movie listings from various NYC sources"""
     
-    def __init__(self):
+    def __init__(self, log_callback=None):
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
+        self.log = log_callback or print
+        self.cache_file = 'theater_cache.json'
+        self.theater_cache = {}
+        self.eastern_tz = pytz.timezone('US/Eastern')
+        self._load_theater_cache()
+    
+    def _load_theater_cache(self):
+        """Load theater cache from JSON file"""
+        if os.path.exists(self.cache_file):
+            try:
+                with open(self.cache_file, 'r', encoding='utf-8') as f:
+                    self.theater_cache = json.load(f)
+                self.log(f"📂 Loaded theater cache with {len(self.theater_cache)} entries")
+            except Exception as e:
+                self.log(f"⚠️  Error loading theater cache: {e}")
+                self.theater_cache = {}
+    
+    def _save_theater_cache(self):
+        """Save theater cache to JSON file"""
+        try:
+            with open(self.cache_file, 'w', encoding='utf-8') as f:
+                json.dump(self.theater_cache, f, indent=2, default=str)
+        except Exception as e:
+            self.log(f"⚠️  Error saving theater cache: {e}")
+    
+    def _get_eastern_date_string(self):
+        """Get current date string in Eastern timezone (YYYY-MM-DD)"""
+        eastern_now = datetime.now(self.eastern_tz)
+        return eastern_now.strftime('%Y-%m-%d')
+    
+    def _is_cache_valid(self, theater_id: str) -> bool:
+        """Check if cached data for theater is still valid (same day in Eastern time)"""
+        if theater_id not in self.theater_cache:
+            return False
+        
+        cached_date = self.theater_cache[theater_id].get('date')
+        current_date = self._get_eastern_date_string()
+        
+        return cached_date == current_date
+    
+    def _get_cached_movies(self, theater_id: str) -> List[Dict]:
+        """Get cached movies for a theater"""
+        if self._is_cache_valid(theater_id):
+            return self.theater_cache[theater_id].get('movies', [])
+        return []
+    
+    def _cache_movies(self, theater_id: str, movies: List[Dict]):
+        """Cache movies for a theater with current date"""
+        self.theater_cache[theater_id] = {
+            'date': self._get_eastern_date_string(),
+            'movies': movies,
+            'cached_at': datetime.now(self.eastern_tz).isoformat()
+        }
+        self._save_theater_cache()
+    
+    def get_cache_status(self) -> Dict:
+        """Get cache status for all theaters"""
+        theater_names = {
+            'alamo': 'Alamo Drafthouse',
+            'metrograph': 'Metrograph', 
+            'ifc': 'IFC Center',
+            'angelika': 'Angelika Film Center',
+            'angelika_village_east': 'Angelika Village East',
+            'paris_theater': 'Paris Theater',
+            'nitehawk_williamsburg': 'Nitehawk Williamsburg',
+            'nitehawk_prospect_park': 'Nitehawk Prospect Park',
+            'moving_image': 'Museum of Moving Image',
+            'film_forum': 'Film Forum'
+        }
+        
+        current_date = self._get_eastern_date_string()
+        cache_info = {}
+        
+        for theater_id, theater_name in theater_names.items():
+            is_cached = self._is_cache_valid(theater_id)
+            movie_count = len(self._get_cached_movies(theater_id)) if is_cached else 0
+            cache_info[theater_id] = {
+                'name': theater_name,
+                'cached': is_cached,
+                'movie_count': movie_count,
+                'date': current_date
+            }
+            
+        return cache_info
     
     def generate_letterboxd_url(self, title: str) -> str:
         """Generate Letterboxd URL from movie title"""
@@ -126,11 +213,11 @@ class MovieScraper:
                 try:
                     load_more_button = page.locator('ion-button:has-text("Load more"), button:has-text("Load more"), [aria-label*="load more" i]')
                     while await load_more_button.count() > 0:
-                        print("Found 'Load more' button, clicking...")
+                        self.log("Found 'Load more' button, clicking...")
                         await load_more_button.first.click()
                         await page.wait_for_timeout(2000)  # Wait for new content to load
                 except Exception as e:
-                    print(f"No 'Load more' button found or error clicking: {e}")
+                    self.log(f"No 'Load more' button found or error clicking: {e}")
                 
                 # Get the rendered HTML content
                 # html_content = await page.content()
@@ -168,10 +255,10 @@ class MovieScraper:
                             'letterboxd_url': self.generate_letterboxd_url(item['title'])
                         })
                 
-                print(f"Found {len(movies)} movies at Alamo Drafthouse")
+                self.log(f"Found {len(movies)} movies at Alamo Drafthouse")
                 
         except Exception as e:
-            print(f"Error scraping Alamo with Playwright: {e}")
+            self.log(f"Error scraping Alamo with Playwright: {e}")
         
         return movies
     
@@ -201,7 +288,7 @@ class MovieScraper:
                         'letterboxd_url': self.generate_letterboxd_url(title)
                     })
         except Exception as e:
-            print(f"Error scraping Metrograph: {e}")
+            self.log(f"Error scraping Metrograph: {e}")
         
         return movies
     
@@ -235,7 +322,7 @@ class MovieScraper:
                         
             
         except Exception as e:
-            print(f"Error scraping IFC: {e}")
+            self.log(f"Error scraping IFC: {e}")
         
         return movies
     
@@ -257,14 +344,14 @@ class MovieScraper:
                 try:
                     anytime_button = page.locator('.common-filter:has-text("ANYTIME")')
                     if await anytime_button.count() > 0:
-                        print("Found 'ANYTIME' filter button, clicking...")
+                        self.log("Found 'ANYTIME' filter button, clicking...")
                         await anytime_button.click()
                         await page.wait_for_timeout(2000)  # Wait for filter to apply
-                        print("Clicked 'ANYTIME' filter successfully")
+                        self.log("Clicked 'ANYTIME' filter successfully")
                     else:
-                        print("No 'ANYTIME' filter button found")
+                        self.log("No 'ANYTIME' filter button found")
                 except Exception as e:
-                    print(f"Error clicking ANYTIME filter: {e}")
+                    self.log(f"Error clicking ANYTIME filter: {e}")
                 
                 # Look for and click "show more" button
                 try:
@@ -273,20 +360,20 @@ class MovieScraper:
                     # Use .first to handle multiple buttons
                     show_more_button = page.locator('.show-more p:has-text("SHOW MORE")')
                     if await show_more_button.count() > 0:
-                        print(f"Found {await show_more_button.count()} 'SHOW MORE' button(s), clicking first one...")
+                        self.log(f"Found {await show_more_button.count()} 'SHOW MORE' button(s), clicking first one...")
                         await show_more_button.first.click()
                         await page.wait_for_timeout(3000)  # Wait for new content to load
-                        print("Clicked 'SHOW MORE' button successfully")
+                        self.log("Clicked 'SHOW MORE' button successfully")
                     else:
                         # Check if button already shows "SHOW LESS" (meaning all content is already loaded)
                         show_less_button = page.locator('.show-more p:has-text("SHOW LESS")')
                         if await show_less_button.count() > 0:
-                            print("All movies already showing (SHOW LESS button present)")
+                            self.log("All movies already showing (SHOW LESS button present)")
                         else:
-                            print("No 'SHOW MORE' button found")
+                            self.log("No 'SHOW MORE' button found")
                         
                 except Exception as e:
-                    print(f"Error with show more button: {e}")
+                    self.log(f"Error with show more button: {e}")
                 
                 # Extract movie information using the correct selectors
                 movie_data = await page.evaluate('''
@@ -337,10 +424,10 @@ class MovieScraper:
                             'letterboxd_url': self.generate_letterboxd_url(title)
                         })
                 
-                print(f"Found {len(movies)} movies at Angelika Film Center")
+                self.log(f"Found {len(movies)} movies at Angelika Film Center")
                 
         except Exception as e:
-            print(f"Error scraping Angelika with Playwright: {e}")
+            self.log(f"Error scraping Angelika with Playwright: {e}")
         
         return movies
     
@@ -366,14 +453,14 @@ class MovieScraper:
                 try:
                     anytime_button = page.locator('.common-filter:has-text("ANYTIME")')
                     if await anytime_button.count() > 0:
-                        print("Found 'ANYTIME' filter button, clicking...")
+                        self.log("Found 'ANYTIME' filter button, clicking...")
                         await anytime_button.click()
                         await page.wait_for_timeout(2000)  # Wait for filter to apply
-                        print("Clicked 'ANYTIME' filter successfully")
+                        self.log("Clicked 'ANYTIME' filter successfully")
                     else:
-                        print("No 'ANYTIME' filter button found")
+                        self.log("No 'ANYTIME' filter button found")
                 except Exception as e:
-                    print(f"Error clicking ANYTIME filter: {e}")
+                    self.log(f"Error clicking ANYTIME filter: {e}")
                 
                 # Look for and click "show more" button
                 try:
@@ -382,20 +469,20 @@ class MovieScraper:
                     # Use .first to handle multiple buttons
                     show_more_button = page.locator('.show-more p:has-text("SHOW MORE")')
                     if await show_more_button.count() > 0:
-                        print(f"Found {await show_more_button.count()} 'SHOW MORE' button(s), clicking first one...")
+                        self.log(f"Found {await show_more_button.count()} 'SHOW MORE' button(s), clicking first one...")
                         await show_more_button.first.click()
                         await page.wait_for_timeout(3000)  # Wait for new content to load
-                        print("Clicked 'SHOW MORE' button successfully")
+                        self.log("Clicked 'SHOW MORE' button successfully")
                     else:
                         # Check if button already shows "SHOW LESS" (meaning all content is already loaded)
                         show_less_button = page.locator('.show-more p:has-text("SHOW LESS")')
                         if await show_less_button.count() > 0:
-                            print("All movies already showing (SHOW LESS button present)")
+                            self.log("All movies already showing (SHOW LESS button present)")
                         else:
-                            print("No 'SHOW MORE' button found")
+                            self.log("No 'SHOW MORE' button found")
                         
                 except Exception as e:
-                    print(f"Error with show more button: {e}")
+                    self.log(f"Error with show more button: {e}")
                 
                 # Extract movie information using the correct selectors
                 movie_data = await page.evaluate('''
@@ -917,20 +1004,45 @@ class MovieScraper:
         """Scrape Film Forum - wrapper for async method"""
         return asyncio.run(self.scrape_film_forum_async())
     
-    def get_all_movies(self) -> List[Dict]:
-        """Aggregate movies from all sources"""
+    def get_all_movies(self, selected_theaters=None) -> List[Dict]:
+        """Aggregate movies from selected sources"""
+        if selected_theaters is None:
+            # Default to all theaters if none specified
+            selected_theaters = ['alamo', 'metrograph', 'ifc', 'angelika', 'angelika_village_east', 
+                               'paris_theater', 'nitehawk_williamsburg', 'nitehawk_prospect_park', 
+                               'moving_image', 'film_forum']
+        
         all_movies = []
-        all_movies.extend(self.scrape_alamo_drafthouse())
-        # print(f'metrograph: {self.scrape_metrograph()}')
-        all_movies.extend(self.scrape_metrograph())
-        all_movies.extend(self.scrape_ifc_center())
-        all_movies.extend(self.scrape_angelika())
-        all_movies.extend(self.scrape_angelika_village_east())
-        all_movies.extend(self.scrape_paris_theater())
-        all_movies.extend(self.scrape_nitehawk_williamsburg())
-        all_movies.extend(self.scrape_nitehawk_prospect_park())
-        all_movies.extend(self.scrape_moving_image())
-        all_movies.extend(self.scrape_film_forum())
+        theater_scrapers = {
+            'alamo': self.scrape_alamo_drafthouse,
+            'metrograph': self.scrape_metrograph,
+            'ifc': self.scrape_ifc_center,
+            'angelika': self.scrape_angelika,
+            'angelika_village_east': self.scrape_angelika_village_east,
+            'paris_theater': self.scrape_paris_theater,
+            'nitehawk_williamsburg': self.scrape_nitehawk_williamsburg,
+            'nitehawk_prospect_park': self.scrape_nitehawk_prospect_park,
+            'moving_image': self.scrape_moving_image,
+            'film_forum': self.scrape_film_forum
+        }
+        
+        for theater_id in selected_theaters:
+            if theater_id in theater_scrapers:
+                # Check cache first
+                cached_movies = self._get_cached_movies(theater_id)
+                if cached_movies:
+                    self.log(f"📂 Using cached data for {theater_id.replace('_', ' ').title()} ({len(cached_movies)} movies)")
+                    all_movies.extend(cached_movies)
+                else:
+                    self.log(f"🎭 Scraping {theater_id.replace('_', ' ').title()}...")
+                    try:
+                        movies = theater_scrapers[theater_id]()
+                        all_movies.extend(movies)
+                        # Cache the results
+                        self._cache_movies(theater_id, movies)
+                        self.log(f"💾 Cached {len(movies)} movies for {theater_id.replace('_', ' ').title()}")
+                    except Exception as e:
+                        self.log(f"❌ Error scraping {theater_id}: {e}")
         
         # Deduplicate by Letterboxd URL and collect all sources
         movie_dict = {}
@@ -950,5 +1062,5 @@ class MovieScraper:
                     movie_dict[letterboxd_url]['venue'] = f"{existing_venue}, {movie['venue']}"
         
         deduplicated_movies = list(movie_dict.values())
-        print(f"Deduplicated from {len(all_movies)} to {len(deduplicated_movies)} unique movies by Letterboxd URL")
+        self.log(f"📊 Deduplicated from {len(all_movies)} to {len(deduplicated_movies)} unique movies")
         return deduplicated_movies
