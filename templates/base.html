@@ -509,6 +509,62 @@
             100% { transform: rotate(360deg); }
         }
         
+        .goose-container {
+            height: 150px;
+            width: 100%;
+            position: relative;
+            overflow: visible;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .goose {
+            max-width: 120px;
+            max-height: 120px;
+            width: auto;
+            height: auto;
+        }
+        
+        @keyframes gooseWalk {
+            0% {
+                left: -60px;
+                transform: scaleX(1);
+            }
+            45% {
+                left: calc(100% - 30px);
+                transform: scaleX(1);
+            }
+            50% {
+                left: calc(100% - 30px);
+                transform: scaleX(-1);
+            }
+            95% {
+                left: -60px;
+                transform: scaleX(-1);
+            }
+            100% {
+                left: -60px;
+                transform: scaleX(1);
+            }
+        }
+        
+        @keyframes gooseWaddle {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-3px) rotate(-2deg);
+            }
+            50% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            75% {
+                transform: translateY(-3px) rotate(2deg);
+            }
+        }
+        
         @media (max-width: 768px) {
             body {
                 padding: 10px;
@@ -677,15 +733,10 @@
             // Show loading states
             const loadingHTML = `
                 <div class="loading-section" id="temp-loading">
-                    <div class="spinner"></div>
-                    <p>Scraping movie data... Results will appear here when complete.</p>
-                </div>
-                <div class="section newsletter-section" id="temp-newsletter-loading">
-                    <h2>📰 Weekly Newsletter</h2>
-                    <div class="loading-newsletter">
-                        <div class="spinner"></div>
-                        <p>Generating newsletter... Will appear when scraping completes.</p>
+                    <div class="goose-container">
+                        <img src="https://media.tenor.com/BfOZ3AhO2C0AAAAM/honk-gooooseszn.gif" alt="Waddling goose" class="goose">
                     </div>
+                    <p>Scraping movie data... Results will appear here when complete.</p>
                 </div>
             `;
             
@@ -730,5 +781,6 @@
                 });
         }
     </script>
+    <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </body>
 </html>

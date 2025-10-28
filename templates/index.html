@@ -102,7 +102,9 @@
 
 {% if is_scraping and not movies %}
 <div class="loading-section">
-    <div class="spinner"></div>
+    <div class="goose-container">
+        <img src="https://media.tenor.com/BfOZ3AhO2C0AAAAM/honk-gooooseszn.gif" alt="Waddling goose" class="goose">
+    </div>
     <p>Scraping movie data... Results will appear here when complete.</p>
 </div>
 {% elif movies %}
@@ -189,26 +191,12 @@
 
 {% else %}
 <div class="loading">
-    <div class="spinner"></div>
+    <div class="goose-container">
+        <img src="https://media.tenor.com/BfOZ3AhO2C0AAAAM/honk-gooooseszn.gif" alt="Waddling goose" class="goose">
+    </div>
     <p>Loading movie data...</p>
 </div>
 {% endif %}
 
-{% if is_scraping and not newsletter_content %}
-<div class="section newsletter-section">
-    <h2>📰 Weekly Newsletter</h2>
-    <div class="loading-newsletter">
-        <div class="spinner"></div>
-        <p>Generating newsletter... Will appear when scraping completes.</p>
-    </div>
-</div>
-{% elif newsletter_content %}
-<div class="section newsletter-section">
-    <h2>📰 Weekly Newsletter</h2>
-    <div class="newsletter-content">
-        {{ newsletter_content | safe }}
-    </div>
-</div>
-{% endif %}
 
 {% endblock %}
