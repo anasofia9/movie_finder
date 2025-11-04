@@ -11,7 +11,7 @@ from playwright.async_api import async_playwright
 class MovieScraper:
     """Scrape movie listings from various NYC sources"""
     
-    def __init__(self, log_callback=None):
+    def __init__(self, log_callback=None, use_cache=True):
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
         }
@@ -19,7 +19,9 @@ class MovieScraper:
         self.cache_file = 'theater_cache.json'
         self.theater_cache = {}
         self.eastern_tz = pytz.timezone('US/Eastern')
-        self._load_theater_cache()
+        self.use_cache = use_cache
+        if self.use_cache:
+            self._load_theater_cache()
     
     def _load_theater_cache(self):
         """Load theater cache from JSON file"""
@@ -1028,19 +1030,23 @@ class MovieScraper:
         
         for theater_id in selected_theaters:
             if theater_id in theater_scrapers:
-                # Check cache first
-                cached_movies = self._get_cached_movies(theater_id)
-                if cached_movies:
+                # Check cache first (only if use_cache is True)
+                cached_movies = self._get_cached_movies(theater_id) if self.use_cache else []
+                if cached_movies and self.use_cache:
                     self.log(f"📂 Using cached data for {theater_id.replace('_', ' ').title()} ({len(cached_movies)} movies)")
                     all_movies.extend(cached_movies)
                 else:
-                    self.log(f"🎭 Scraping {theater_id.replace('_', ' ').title()}...")
+                    if not self.use_cache:
+                        self.log(f"🔄 Cache disabled - Scraping {theater_id.replace('_', ' ').title()}...")
+                    else:
+                        self.log(f"🎭 Scraping {theater_id.replace('_', ' ').title()}...")
                     try:
                         movies = theater_scrapers[theater_id]()
                         all_movies.extend(movies)
-                        # Cache the results
-                        self._cache_movies(theater_id, movies)
-                        self.log(f"💾 Cached {len(movies)} movies for {theater_id.replace('_', ' ').title()}")
+                        # Cache the results (only if use_cache is True)
+                        if self.use_cache:
+                            self._cache_movies(theater_id, movies)
+                            self.log(f"💾 Cached {len(movies)} movies for {theater_id.replace('_', ' ').title()}")
                     except Exception as e:
                         self.log(f"❌ Error scraping {theater_id}: {e}")
         

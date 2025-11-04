@@ -68,6 +68,13 @@
         <input type="number" id="ratingThreshold" min="1.0" max="5.0" step="0.1" value="{{ rating_threshold or 4.0 }}">
         <span class="rating-help">Ratings from 1.0 to 5.0 stars</span>
     </div>
+    <div class="cache-control">
+        <label class="theater-checkbox">
+            <input type="checkbox" id="disableCache">
+            <span class="checkmark"></span>
+            🚫 Disable Cache (Force Fresh Data)
+        </label>
+    </div>
     <button class="btn" onclick="refreshData()">🔄 Refresh Data</button>
 </div>
 

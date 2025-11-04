@@ -761,6 +761,8 @@
                 return;
             }
             
+            const disableCache = document.getElementById('disableCache').checked;
+            
             // Immediately hide old content and show loading
             hideOldContentAndShowLoading();
             
@@ -771,7 +773,8 @@
                 },
                 body: JSON.stringify({
                     theaters: selectedTheaters,
-                    rating_threshold: parseFloat(ratingThreshold)
+                    rating_threshold: parseFloat(ratingThreshold),
+                    disable_cache: disableCache
                 })
             })
                 .then(response => response.json())

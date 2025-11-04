@@ -35,7 +35,7 @@ def log_status(message):
     if len(status_messages) > 50:
         status_messages.pop(0)
 
-def scrape_movies(selected_theaters=None):
+def scrape_movies(selected_theaters=None, disable_cache=False):
     """Background task to scrape movies"""
     global movies_data
     
@@ -51,7 +51,7 @@ def scrape_movies(selected_theaters=None):
         log_status("🎬 Starting Movie Scraping...")
         
         # Scrape movie listings
-        scraper = MovieScraper(log_callback=log_status)
+        scraper = MovieScraper(log_callback=log_status, use_cache=not disable_cache)
         if selected_theaters:
             theater_names = [t.replace('_', ' ').title() for t in selected_theaters]
             log_status(f"📍 Scraping selected theaters: {', '.join(theater_names)}")
@@ -121,9 +121,12 @@ def api_refresh():
         selected_theaters = None
         rating_threshold = 4.0
         
+        disable_cache = False
+        
         if request.method == 'POST' and request.is_json:
             data = request.get_json()
             selected_theaters = data.get('theaters')
+            disable_cache = data.get('disable_cache', False)
             if 'rating_threshold' in data:
                 try:
                     rating_threshold = float(data['rating_threshold'])
@@ -131,7 +134,7 @@ def api_refresh():
                 except (ValueError, TypeError):
                     rating_threshold = 4.0
         
-        thread = threading.Thread(target=scrape_movies, args=(selected_theaters,))
+        thread = threading.Thread(target=scrape_movies, args=(selected_theaters, disable_cache))
         thread.daemon = True
         thread.start()
         return jsonify({'status': 'started', 'message': 'Scraping started'})
