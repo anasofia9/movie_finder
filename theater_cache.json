@@ -1,6 +1,6 @@
 {
   "alamo": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
       {
         "title": "Frankenstein (2025)",
@@ -17,32 +17,25 @@
         "letterboxd_url": "https://letterboxd.com/film/wicked-for-good/"
       },
       {
-        "title": "Chainsaw Man - The Movie: Reze Arc (Subtitled)",
+        "title": "Predator: Badlands",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/chainsaw-man-the-movie-reze-arc/"
+        "letterboxd_url": "https://letterboxd.com/film/predator-badlands/"
       },
       {
-        "title": "KPop Demon Hunters A Sing-Along Event",
+        "title": "National Lampoon's Christmas Vacation Movie Party",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/kpop-demon-hunters/"
+        "letterboxd_url": "https://letterboxd.com/film/national-lampoons-christmas-vacation/"
       },
       {
-        "title": "The Return of Godzilla",
+        "title": "Elf Movie Party",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/the-return-of-godzilla/"
-      },
-      {
-        "title": "Bugonia",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/bugonia/"
+        "letterboxd_url": "https://letterboxd.com/film/elf/"
       },
       {
         "title": "The Running Man (2025)",
@@ -52,11 +45,18 @@
         "letterboxd_url": "https://letterboxd.com/film/the-running-man-2025/"
       },
       {
-        "title": "Day of the Dead (1985) 40th Anniversary",
+        "title": "Zootopia 2",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/day-of-the-dead-1985/"
+        "letterboxd_url": "https://letterboxd.com/film/zootopia-2/"
+      },
+      {
+        "title": "The Return of Godzilla",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/the-return-of-godzilla/"
       },
       {
         "title": "Knives Out",
@@ -66,32 +66,32 @@
         "letterboxd_url": "https://letterboxd.com/film/knives-out/"
       },
       {
-        "title": "Shelby Oaks",
+        "title": "Bugonia",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/shelby-oaks/"
+        "letterboxd_url": "https://letterboxd.com/film/bugonia/"
       },
       {
-        "title": "Zootopia 2",
+        "title": "Die My Love",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/zootopia-2/"
+        "letterboxd_url": "https://letterboxd.com/film/die-my-love/"
       },
       {
-        "title": "Regretting You",
+        "title": "Hamnet",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/regretting-you/"
+        "letterboxd_url": "https://letterboxd.com/film/hamnet/"
       },
       {
-        "title": "Springsteen: Deliver Me From Nowhere",
+        "title": "Chainsaw Man - The Movie: Reze Arc (Subtitled)",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/springsteen-deliver-me-from-nowhere/"
+        "letterboxd_url": "https://letterboxd.com/film/chainsaw-man-the-movie-reze-arc/"
       },
       {
         "title": "Wake Up Dead Man: A Knives Out Mystery with Livestream Q&A",
@@ -101,11 +101,39 @@
         "letterboxd_url": "https://letterboxd.com/film/wake-up-dead-man-a-knives-out-mystery-with-livestream-qanda/"
       },
       {
-        "title": "Back to the Future: 40th Anniversary Movie Party",
+        "title": "The Lighthouse Movie Party",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/back-to-the-future/"
+        "letterboxd_url": "https://letterboxd.com/film/the-lighthouse/"
+      },
+      {
+        "title": "Keeper",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/keeper/"
+      },
+      {
+        "title": "Springsteen: Deliver Me From Nowhere",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/springsteen-deliver-me-from-nowhere/"
+      },
+      {
+        "title": "Wicked: For Good Movie Party",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/wicked-for-good/"
+      },
+      {
+        "title": "The Descent",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/the-descent/"
       },
       {
         "title": "Wake Up Dead Man: A Knives Out Mystery",
@@ -122,91 +150,28 @@
         "letterboxd_url": "https://letterboxd.com/film/black-phone-2/"
       },
       {
-        "title": "The Lighthouse Movie Party",
+        "title": "Christy",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/the-lighthouse/"
+        "letterboxd_url": "https://letterboxd.com/film/christy/"
       },
       {
-        "title": "Wicked: For Good Movie Party",
+        "title": "Nuremberg",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/wicked-for-good/"
+        "letterboxd_url": "https://letterboxd.com/film/nuremberg/"
       },
       {
-        "title": "Chainsaw Man - The Movie: Reze Arc (Dubbed)",
+        "title": "To Live and Die in L.A.",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/chainsaw-man-the-movie-reze-arc/"
-      },
-      {
-        "title": "Good Fortune",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/good-fortune/"
-      },
-      {
-        "title": "Back to the Future: 40th Anniversary",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/back-to-the-future/"
-      },
-      {
-        "title": "One Battle After Another",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/one-battle-after-another/"
-      },
-      {
-        "title": "28 Days Later",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/28-days-later/"
+        "letterboxd_url": "https://letterboxd.com/film/to-live-and-die-in-la/"
       },
       {
         "title": "Sentimental Value Early Access",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/sentimental-value/"
-      },
-      {
-        "title": "Predator: Badlands",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/predator-badlands/"
-      },
-      {
-        "title": "If I Had Legs I'd Kick You",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/if-i-had-legs-id-kick-you/"
-      },
-      {
-        "title": "Fleischer Halloween Party",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/fleischer-halloween-party/"
-      },
-      {
-        "title": "If You See Something with Live Q&A",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/if-you-see-something/"
-      },
-      {
-        "title": "Sentimental Value",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
@@ -220,18 +185,81 @@
         "letterboxd_url": "https://letterboxd.com/film/wicked/"
       },
       {
-        "title": "Train Dreams",
+        "title": "Little Am\u00e9lie or the Character of Rain (Dubbed)",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/train-dreams/"
+        "letterboxd_url": "https://letterboxd.com/film/little-amelie-or-the-character-of-rain/"
       },
       {
-        "title": "After the Hunt",
+        "title": "Desperately Seeking Susan",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/after-the-hunt/"
+        "letterboxd_url": "https://letterboxd.com/film/desperately-seeking-susan/"
+      },
+      {
+        "title": "Don't Look Now",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/dont-look-now/"
+      },
+      {
+        "title": "Regretting You",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/regretting-you/"
+      },
+      {
+        "title": "Now You See Me: Now You Don't",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/now-you-see-me-now-you-dont/"
+      },
+      {
+        "title": "Sentimental Value",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/sentimental-value/"
+      },
+      {
+        "title": "Back to the Future: 40th Anniversary",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/back-to-the-future/"
+      },
+      {
+        "title": "Dr. Seuss' How the Grinch Stole Christmas (2000): 25th Anniversary Movie Party",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/dr-seuss-how-the-grinch-stole-christmas-2000/"
+      },
+      {
+        "title": "The Polar Express Movie Party",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/the-polar-express/"
+      },
+      {
+        "title": "Chainsaw Man - The Movie: Reze Arc (Dubbed)",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/chainsaw-man-the-movie-reze-arc/"
+      },
+      {
+        "title": "Shelby Oaks",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/shelby-oaks/"
       },
       {
         "title": "Pee-Wee's Big Adventure",
@@ -255,46 +283,46 @@
         "letterboxd_url": "https://letterboxd.com/film/nouvelle-vague/"
       },
       {
-        "title": "Tron: Ares",
+        "title": "Good Fortune",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/tron-ares/"
+        "letterboxd_url": "https://letterboxd.com/film/good-fortune/"
       },
       {
-        "title": "The Descent",
+        "title": "Rental Family",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/the-descent/"
+        "letterboxd_url": "https://letterboxd.com/film/rental-family/"
       },
       {
-        "title": "Desperately Seeking Susan",
+        "title": "One Battle After Another",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/desperately-seeking-susan/"
+        "letterboxd_url": "https://letterboxd.com/film/one-battle-after-another/"
       },
       {
-        "title": "Depeche Mode: M",
+        "title": "Batman Returns",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/depeche-mode-m/"
+        "letterboxd_url": "https://letterboxd.com/film/batman-returns/"
       },
       {
-        "title": "D(e)ad",
+        "title": "Brazil: The Director's Cut",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/d-e-ad/"
+        "letterboxd_url": "https://letterboxd.com/film/brazil/"
       },
       {
-        "title": "Jeopardy! Interactive",
+        "title": "Train Dreams",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/jeopardy-interactive/"
+        "letterboxd_url": "https://letterboxd.com/film/train-dreams/"
       },
       {
         "title": "Mary J. Blige: For My Fans",
@@ -304,11 +332,46 @@
         "letterboxd_url": "https://letterboxd.com/film/mary-j-blige-for-my-fans/"
       },
       {
+        "title": "Eyes Wide Shut",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/eyes-wide-shut/"
+      },
+      {
         "title": "Glass Onion: A Knives Out Mystery",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
         "letterboxd_url": "https://letterboxd.com/film/glass-onion-a-knives-out-mystery/"
+      },
+      {
+        "title": "If I Had Legs I'd Kick You",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/if-i-had-legs-id-kick-you/"
+      },
+      {
+        "title": "Jay Kelly",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/jay-kelly/"
+      },
+      {
+        "title": "D(e)ad",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/d-e-ad/"
+      },
+      {
+        "title": "Mystery Machine 11/10/2025",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/mystery-machine-11-10-2025/"
       },
       {
         "title": "Gumby (4K Restoration)",
@@ -318,11 +381,46 @@
         "letterboxd_url": "https://letterboxd.com/film/gumby-4k-restoration/"
       },
       {
-        "title": "If You See Something",
+        "title": "It's a Wonderful Life",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/if-you-see-something/"
+        "letterboxd_url": "https://letterboxd.com/film/its-a-wonderful-life/"
+      },
+      {
+        "title": "Dr. Seuss' How the Grinch Stole Christmas (2000): 25th Anniversary",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/dr-seuss-how-the-grinch-stole-christmas-2000/"
+      },
+      {
+        "title": "Jeopardy! Interactive",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/jeopardy-interactive/"
+      },
+      {
+        "title": "Kiss Kiss Bang Bang",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/kiss-kiss-bang-bang/"
+      },
+      {
+        "title": "Love Actually",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/love-actually/"
+      },
+      {
+        "title": "The Doors: When You're Strange",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/the-doors-when-youre-strange/"
       },
       {
         "title": "Chicken Run: 25th Anniversary",
@@ -332,18 +430,11 @@
         "letterboxd_url": "https://letterboxd.com/film/chicken-run/"
       },
       {
-        "title": "Planes, Trains & Automobiles",
+        "title": "Last Night to Login: OVERLORD 10th Anniversary Celebration (Dubbed)",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/planes-trains-and-automobiles/"
-      },
-      {
-        "title": "To Live and Die in L.A.",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/to-live-and-die-in-la/"
+        "letterboxd_url": "https://letterboxd.com/film/last-night-to-login-overlord-10th-anniversary-celebration/"
       },
       {
         "title": "Wicked + Wicked: For Good Double Feature",
@@ -353,46 +444,67 @@
         "letterboxd_url": "https://letterboxd.com/film/wicked-wicked-for-good-double-feature/"
       },
       {
-        "title": "Hedda",
+        "title": "Planes, Trains & Automobiles",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/hedda/"
+        "letterboxd_url": "https://letterboxd.com/film/planes-trains-and-automobiles/"
       },
       {
-        "title": "Baahubali: The Epic",
+        "title": "The Apartment",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/baahubali-the-epic/"
+        "letterboxd_url": "https://letterboxd.com/film/the-apartment/"
       },
       {
-        "title": "Queens of the Dead",
+        "title": "Reflection in a Dead Diamond",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/queens-of-the-dead/"
+        "letterboxd_url": "https://letterboxd.com/film/reflection-in-a-dead-diamond/"
       },
       {
-        "title": "Alamo Crafthouse: Chicken Run: 25th Anniversary",
+        "title": "UFC 322: Della Maddalena vs Makhachev",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/alamo-crafthouse-chicken-run/"
+        "letterboxd_url": "https://letterboxd.com/film/ufc-322-della-maddalena-vs-makhachev/"
       },
       {
-        "title": "The Lost Boys",
+        "title": "When Harry Met Sally...",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/the-lost-boys/"
+        "letterboxd_url": "https://letterboxd.com/film/when-harry-met-sally/"
       },
       {
-        "title": "Roofman",
+        "title": "Top Secret Mystery Movie",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/roofman/"
+        "letterboxd_url": "https://letterboxd.com/film/top-secret-mystery-movie/"
+      },
+      {
+        "title": "After the Hunt",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/after-the-hunt/"
+      },
+      {
+        "title": "If You See Something",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/if-you-see-something/"
+      },
+      {
+        "title": "Tron: Ares",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/tron-ares/"
       },
       {
         "title": "Chainsaws Were Singing",
@@ -402,18 +514,18 @@
         "letterboxd_url": "https://letterboxd.com/film/chainsaws-were-singing/"
       },
       {
-        "title": "ParaNorman Remastered",
+        "title": "Choose Me",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/paranorman/"
+        "letterboxd_url": "https://letterboxd.com/film/choose-me/"
       },
       {
-        "title": "The Goonies",
+        "title": "Alamo Crafthouse: Chicken Run: 25th Anniversary",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/the-goonies/"
+        "letterboxd_url": "https://letterboxd.com/film/alamo-crafthouse-chicken-run/"
       },
       {
         "title": "Heads or Fails",
@@ -423,32 +535,11 @@
         "letterboxd_url": "https://letterboxd.com/film/heads-or-fails/"
       },
       {
-        "title": "Eli Roth Presents: Dream Eater",
+        "title": "Urchin",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/dream-eater/"
-      },
-      {
-        "title": "Confessions of a Young American Housewife",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/confessions-of-a-young-american-housewife/"
-      },
-      {
-        "title": "Invasion of Astro-Monster",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/invasion-of-astro-monster/"
-      },
-      {
-        "title": "Top Secret Mystery Movie",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/top-secret-mystery-movie/"
+        "letterboxd_url": "https://letterboxd.com/film/urchin/"
       },
       {
         "title": "Angel's Egg (Dubbed)",
@@ -463,6 +554,62 @@
         "url": "",
         "source": "alamo",
         "letterboxd_url": "https://letterboxd.com/film/angels-egg/"
+      },
+      {
+        "title": "REBBECA: BECKY G",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/rebbeca-becky-g/"
+      },
+      {
+        "title": "Bat-Fam Free Victory Screening",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/bat-fam-free-victory-screening/"
+      },
+      {
+        "title": "Frankenstein (2025) Free Victory Screening",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/frankenstein-free-victory-screening-2025/"
+      },
+      {
+        "title": "The Mighty Nein Free Victory Screening",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/the-mighty-nein-free-victory-screening/"
+      },
+      {
+        "title": "Die My Love with Livestream Q&A",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/die-my-love-with-livestream-qanda/"
+      },
+      {
+        "title": "Back to the Future: 40th Anniversary Movie Party",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/back-to-the-future/"
+      },
+      {
+        "title": "Confessions of a Young American Housewife",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/confessions-of-a-young-american-housewife/"
+      },
+      {
+        "title": "Invasion of Astro-Monster",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/invasion-of-astro-monster/"
       },
       {
         "title": "Beyond the Darkness",
@@ -486,25 +633,11 @@
         "letterboxd_url": "https://letterboxd.com/film/land-of-the-dead/"
       },
       {
-        "title": "The Beyond (1981)",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/the-beyond-1981/"
-      },
-      {
         "title": "The Fog",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
         "letterboxd_url": "https://letterboxd.com/film/the-fog/"
-      },
-      {
-        "title": "Mystery Transmission 029",
-        "venue": "Alamo Drafthouse",
-        "url": "",
-        "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/mystery-transmission-029/"
       },
       {
         "title": "Mystery Transmission 030",
@@ -528,129 +661,80 @@
         "letterboxd_url": "https://letterboxd.com/film/beach-party/"
       },
       {
-        "title": "Bloodthirsty Butchers",
+        "title": "Four Rooms",
         "venue": "Alamo Drafthouse",
         "url": "",
         "source": "alamo",
-        "letterboxd_url": "https://letterboxd.com/film/bloodthirsty-butchers/"
+        "letterboxd_url": "https://letterboxd.com/film/four-rooms/"
+      },
+      {
+        "title": "Carol",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/carol/"
+      },
+      {
+        "title": "Desperado",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/desperado/"
+      },
+      {
+        "title": "Lethal Weapon",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/lethal-weapon/"
+      },
+      {
+        "title": "Safe (1995)",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/safe-1995/"
+      },
+      {
+        "title": "The Night of the Hunter",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/the-night-of-the-hunter/"
+      },
+      {
+        "title": "LITTLE WOMEN (2019)",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/little-women-2019/"
+      },
+      {
+        "title": "THE HOLIDAY",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/the-holiday/"
+      },
+      {
+        "title": "OLDBOY (2003)",
+        "venue": "Alamo Drafthouse",
+        "url": "",
+        "source": "alamo",
+        "letterboxd_url": "https://letterboxd.com/film/oldboy-2003/"
       }
     ],
-    "cached_at": "2025-10-27T21:35:52.626268-04:00"
+    "cached_at": "2025-11-04T16:22:16.491970-05:00"
   },
   "metrograph": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
       {
-        "title": "Happy Together",
+        "title": "Tokyo Story [DCP]",
         "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999000497",
+        "url": "https://metrograph.com/film/?vista_film_id=9999004541",
         "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/happy-together/"
-      },
-      {
-        "title": "Wallace & Gromit: The Curse of the Were-Rabbit",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999002743",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/wallace-and-gromit-the-curse-of-the-were-rabbit/"
-      },
-      {
-        "title": "The Unbearable Lightness of Being",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004497",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-unbearable-lightness-of-being/"
-      },
-      {
-        "title": "The Wedding Banquet",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999000475",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-wedding-banquet/"
-      },
-      {
-        "title": "Morgiana",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999002075",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/morgiana/"
-      },
-      {
-        "title": "The Beaches of Agn\u00e8s",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999002440",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-beaches-of-agnes/"
-      },
-      {
-        "title": "Alexandria: Again and Forever",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004513",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/alexandria-again-and-forever/"
-      },
-      {
-        "title": "Coup 53",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004520",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/coup-53/"
-      },
-      {
-        "title": "Kikujiro",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999000536",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/kikujiro/"
-      },
-      {
-        "title": "The Lobster",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999003115",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-lobster/"
-      },
-      {
-        "title": "Charley Varrick",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999000699",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/charley-varrick/"
-      },
-      {
-        "title": "The Handmaiden",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999000494",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-handmaiden/"
-      },
-      {
-        "title": "An Egyptian Story",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004511",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/an-egyptian-story/"
-      },
-      {
-        "title": "The Death of Mr. Lazarescu",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004510",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-death-of-mr-lazarescu/"
-      },
-      {
-        "title": "The Talented Mr. Ripley",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999000664",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-talented-mr-ripley/"
-      },
-      {
-        "title": "Bye Bye Love",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004128",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/bye-bye-love/"
+        "letterboxd_url": "https://letterboxd.com/film/tokyo-story/"
       },
       {
         "title": "Return to Oz",
@@ -667,125 +751,6 @@
         "letterboxd_url": "https://letterboxd.com/film/the-girl-with-the-dragon-tattoo/"
       },
       {
-        "title": "Ghost",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999003968",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/ghost/"
-      },
-      {
-        "title": "Hereditary",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004507",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/hereditary/"
-      },
-      {
-        "title": "A Nightmare on Elm Street [35mm]",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004521",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/a-nightmare-on-elm-street/"
-      },
-      {
-        "title": "Ferat Vampire",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999002077",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/ferat-vampire/"
-      },
-      {
-        "title": "Possession [35mm]",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004056",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/possession/"
-      },
-      {
-        "title": "Mars Attacks!",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004526",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/mars-attacks/"
-      },
-      {
-        "title": "The Ninth Heart",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004522",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-ninth-heart/"
-      },
-      {
-        "title": "The Last Hope",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004537",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-last-hope/"
-      },
-      {
-        "title": "Please Forgive Me",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004538",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/please-forgive-me/"
-      },
-      {
-        "title": "The Shootist",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004539",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-shootist/"
-      },
-      {
-        "title": "Nomad",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999002262",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/nomad/"
-      },
-      {
-        "title": "The Cremator",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999002058",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/the-cremator/"
-      },
-      {
-        "title": "Tokyo Story [DCP]",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004541",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/tokyo-story/"
-      },
-      {
-        "title": "Traveling Circus",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004540",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/traveling-circus/"
-      },
-      {
-        "title": "Stateless Things",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004536",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/stateless-things/"
-      },
-      {
-        "title": "Escape from Alcatraz",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999004512",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/escape-from-alcatraz/"
-      },
-      {
-        "title": "Beauty and the Beast",
-        "venue": "Metrograph",
-        "url": "https://metrograph.com/film/?vista_film_id=9999002078",
-        "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/beauty-and-the-beast/"
-      },
-      {
         "title": "The Land",
         "venue": "Metrograph",
         "url": "https://metrograph.com/film/?vista_film_id=9999004523",
@@ -798,6 +763,13 @@
         "url": "https://metrograph.com/film/?vista_film_id=9999004503",
         "source": "metrograph",
         "letterboxd_url": "https://letterboxd.com/film/cairo-station-cairo-as-seen-by-chahine/"
+      },
+      {
+        "title": "Morgiana",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999002075",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/morgiana/"
       },
       {
         "title": "PRIVATE EVENT TODAY IN THEATER & COMMISSARY",
@@ -863,18 +835,18 @@
         "letterboxd_url": "https://letterboxd.com/film/la-chinoise/"
       },
       {
-        "title": "M\u00e4dchen am Kreuz",
+        "title": "The Girl on the Cross (M\u00e4dchen am Kreuz)",
         "venue": "Metrograph",
         "url": "https://metrograph.com/film/?vista_film_id=9999004544",
         "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/madchen-am-kreuz/"
+        "letterboxd_url": "https://letterboxd.com/film/the-girl-on-the-cross-madchen-am-kreuz/"
       },
       {
-        "title": "Frauenarzt Dr. Sch\u00e4fer",
+        "title": "Dr. Sch\u00e4fer  Gynecologist (Frauenarzt Dr. Sch\u00e4fer)",
         "venue": "Metrograph",
         "url": "https://metrograph.com/film/?vista_film_id=9999004545",
         "source": "metrograph",
-        "letterboxd_url": "https://letterboxd.com/film/frauenarzt-dr-schafer/"
+        "letterboxd_url": "https://letterboxd.com/film/dr-schafer-gynecologist-frauenarzt-dr-schafer/"
       },
       {
         "title": "Gerry",
@@ -905,6 +877,13 @@
         "letterboxd_url": "https://letterboxd.com/film/shadows-of-forgotten-ancestors/"
       },
       {
+        "title": "The Cremator",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999002058",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/the-cremator/"
+      },
+      {
         "title": "Dazed and Confused",
         "venue": "Metrograph",
         "url": "https://metrograph.com/film/?vista_film_id=9999003714",
@@ -931,6 +910,27 @@
         "url": "https://metrograph.com/film/?vista_film_id=9999004549",
         "source": "metrograph",
         "letterboxd_url": "https://letterboxd.com/film/betty-blue/"
+      },
+      {
+        "title": "The Talented Mr. Ripley",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999000664",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/the-talented-mr-ripley/"
+      },
+      {
+        "title": "When the Tenth Month Comes",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999004519",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/when-the-tenth-month-comes/"
+      },
+      {
+        "title": "A Nightmare on Elm Street",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999004521",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/a-nightmare-on-elm-street/"
       },
       {
         "title": "Mean Streets",
@@ -1204,19 +1204,159 @@
         "url": "https://metrograph.com/film/?vista_film_id=9999004577",
         "source": "metrograph",
         "letterboxd_url": "https://letterboxd.com/film/girls-school/"
+      },
+      {
+        "title": "Fantasia",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999004578",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/fantasia/"
+      },
+      {
+        "title": "Four Adventures of Reinette and Mirabelle",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999000659",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/four-adventures-of-reinette-and-mirabelle/"
+      },
+      {
+        "title": "Chungking Express",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999000735",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/chungking-express/"
+      },
+      {
+        "title": "The Freshman",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999004579",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/the-freshman/"
+      },
+      {
+        "title": "Aquarius",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999004580",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/aquarius/"
+      },
+      {
+        "title": "My Own Private Idaho",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999000468",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/my-own-private-idaho/"
+      },
+      {
+        "title": "Pola X",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999002175",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/pola-x/"
+      },
+      {
+        "title": "Bram Stoker's Dracula",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999001199",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/bram-stokers-dracula/"
+      },
+      {
+        "title": "Eat Drink Man Woman",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999000525",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/eat-drink-man-woman/"
+      },
+      {
+        "title": "Seven Chances",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999004581",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/seven-chances/"
+      },
+      {
+        "title": "That Day  On The Beach",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999001444",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/that-day-on-the-beach/"
+      },
+      {
+        "title": "Bill & Ted's Bogus Journey",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999004582",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/bill-and-teds-bogus-journey/"
+      },
+      {
+        "title": "Crooklyn",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999000877",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/crooklyn/"
+      },
+      {
+        "title": "Twentynine Palms",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999003825",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/twentynine-palms/"
+      },
+      {
+        "title": "Millennium Mambo",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999001804",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/millennium-mambo/"
+      },
+      {
+        "title": "Boyfriends and Girlfriends",
+        "venue": "Metrograph",
+        "url": "https://metrograph.com/film/?vista_film_id=9999002871",
+        "source": "metrograph",
+        "letterboxd_url": "https://letterboxd.com/film/boyfriends-and-girlfriends/"
       }
     ],
-    "cached_at": "2025-10-27T21:35:52.747064-04:00"
+    "cached_at": "2025-11-04T16:22:16.617896-05:00"
   },
   "ifc": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
       {
-        "title": "Nirvanna The Band The Show The Tour",
+        "title": "E.T. the Extra-Terrestrial",
         "venue": "IFC Center",
-        "url": "https://www.ifccenter.com/films/nirvanna-the-band-the-show-the-tour/",
+        "url": "https://www.ifccenter.com/films/e-t-the-extra-terrestrial/",
         "source": "ifc",
-        "letterboxd_url": "https://letterboxd.com/film/nirvanna-the-band-the-show-the-tour/"
+        "letterboxd_url": "https://letterboxd.com/film/et-the-extra-terrestrial/"
+      },
+      {
+        "title": "Nouvelle Vague",
+        "venue": "IFC Center",
+        "url": "https://www.ifccenter.com/films/nouvelle-vague/",
+        "source": "ifc",
+        "letterboxd_url": "https://letterboxd.com/film/nouvelle-vague/"
+      },
+      {
+        "title": "Love + War",
+        "venue": "IFC Center",
+        "url": "https://www.ifccenter.com/films/love-war/",
+        "source": "ifc",
+        "letterboxd_url": "https://letterboxd.com/film/love-war/"
+      },
+      {
+        "title": "Dracula",
+        "venue": "IFC Center",
+        "url": "https://www.ifccenter.com/films/dracula/",
+        "source": "ifc",
+        "letterboxd_url": "https://letterboxd.com/film/dracula/"
+      },
+      {
+        "title": "Coexistence, My Ass!",
+        "venue": "IFC Center",
+        "url": "https://www.ifccenter.com/films/coexistence-my-ass/",
+        "source": "ifc",
+        "letterboxd_url": "https://letterboxd.com/film/coexistence-my-ass/"
       },
       {
         "title": "Queens of the Dead",
@@ -1238,40 +1378,12 @@
         "url": "https://www.ifccenter.com/films/mistress-dispeller/",
         "source": "ifc",
         "letterboxd_url": "https://letterboxd.com/film/mistress-dispeller/"
-      },
-      {
-        "title": "Stiller & Meara: Nothing is Lost",
-        "venue": "IFC Center",
-        "url": "https://www.ifccenter.com/films/stiller-meara-nothing-is-lost/",
-        "source": "ifc",
-        "letterboxd_url": "https://letterboxd.com/film/stiller-and-meara-nothing-is-lost/"
-      },
-      {
-        "title": "Fuck My Son!",
-        "venue": "IFC Center",
-        "url": "https://www.ifccenter.com/films/fuck-my-son/",
-        "source": "ifc",
-        "letterboxd_url": "https://letterboxd.com/film/fuck-my-son/"
-      },
-      {
-        "title": "K\u00f6ln 75",
-        "venue": "IFC Center",
-        "url": "https://www.ifccenter.com/films/koln-75/",
-        "source": "ifc",
-        "letterboxd_url": "https://letterboxd.com/film/koln-75/"
-      },
-      {
-        "title": "Ballad of a Small Player",
-        "venue": "IFC Center",
-        "url": "https://www.ifccenter.com/films/ballad-of-a-small-player/",
-        "source": "ifc",
-        "letterboxd_url": "https://letterboxd.com/film/ballad-of-a-small-player/"
       }
     ],
-    "cached_at": "2025-10-27T21:35:52.853384-04:00"
+    "cached_at": "2025-11-04T16:22:16.738009-05:00"
   },
   "angelika": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
       {
         "title": "FRANKENSTEIN in 35MM",
@@ -1288,25 +1400,18 @@
         "letterboxd_url": "https://letterboxd.com/film/jay-kelly/"
       },
       {
-        "title": "BLUE MOON",
+        "title": "SENTIMENTAL VALUE",
         "venue": "Angelika Film Center",
-        "url": "https://angelikafilmcenter.com/nyc/movies/details/blue-moon",
+        "url": "https://angelikafilmcenter.com/nyc/movies/details/sentimental-value",
         "source": "angelika",
-        "letterboxd_url": "https://letterboxd.com/film/blue-moon/"
+        "letterboxd_url": "https://letterboxd.com/film/sentimental-value/"
       },
       {
-        "title": "THE MASTERMIND",
+        "title": "HAMNET",
         "venue": "Angelika Film Center",
-        "url": "https://angelikafilmcenter.com/nyc/movies/details/the-mastermind",
+        "url": "https://angelikafilmcenter.com/nyc/movies/details/hamnet",
         "source": "angelika",
-        "letterboxd_url": "https://letterboxd.com/film/the-mastermind/"
-      },
-      {
-        "title": "FRANKENSTEIN",
-        "venue": "Angelika Film Center",
-        "url": "https://angelikafilmcenter.com/nyc/movies/details/frankenstein",
-        "source": "angelika",
-        "letterboxd_url": "https://letterboxd.com/film/frankenstein/"
+        "letterboxd_url": "https://letterboxd.com/film/hamnet/"
       },
       {
         "title": "REBUILDING",
@@ -1316,18 +1421,39 @@
         "letterboxd_url": "https://letterboxd.com/film/rebuilding/"
       },
       {
+        "title": "BLUE MOON",
+        "venue": "Angelika Film Center",
+        "url": "https://angelikafilmcenter.com/nyc/movies/details/blue-moon",
+        "source": "angelika",
+        "letterboxd_url": "https://letterboxd.com/film/blue-moon/"
+      },
+      {
+        "title": "ARCO",
+        "venue": "Angelika Film Center",
+        "url": "https://angelikafilmcenter.com/nyc/movies/details/arco",
+        "source": "angelika",
+        "letterboxd_url": "https://letterboxd.com/film/arco/"
+      },
+      {
+        "title": "FRANKENSTEIN",
+        "venue": "Angelika Film Center",
+        "url": "https://angelikafilmcenter.com/nyc/movies/details/frankenstein",
+        "source": "angelika",
+        "letterboxd_url": "https://letterboxd.com/film/frankenstein/"
+      },
+      {
+        "title": "THE MASTERMIND",
+        "venue": "Angelika Film Center",
+        "url": "https://angelikafilmcenter.com/nyc/movies/details/the-mastermind",
+        "source": "angelika",
+        "letterboxd_url": "https://letterboxd.com/film/the-mastermind/"
+      },
+      {
         "title": "LITTLE AM\u00c9LIE OR THE CHARACTER OF RAIN",
         "venue": "Angelika Film Center",
         "url": "https://angelikafilmcenter.com/nyc/movies/details/little-amelie-or-the-character-of-rain",
         "source": "angelika",
         "letterboxd_url": "https://letterboxd.com/film/little-amelie-or-the-character-of-rain/"
-      },
-      {
-        "title": "SENTIMENTAL VALUE",
-        "venue": "Angelika Film Center",
-        "url": "https://angelikafilmcenter.com/nyc/movies/details/sentimental-value",
-        "source": "angelika",
-        "letterboxd_url": "https://letterboxd.com/film/sentimental-value/"
       },
       {
         "title": "THE AGE OF DISCLOSURE",
@@ -1337,11 +1463,11 @@
         "letterboxd_url": "https://letterboxd.com/film/the-age-of-disclosure/"
       },
       {
-        "title": "IF I HAD LEGS I'D KICK YOU",
+        "title": "KOKUHO",
         "venue": "Angelika Film Center",
-        "url": "https://angelikafilmcenter.com/nyc/movies/details/if-i-had-legs-id-kick-you",
+        "url": "https://angelikafilmcenter.com/nyc/movies/details/kokuho",
         "source": "angelika",
-        "letterboxd_url": "https://letterboxd.com/film/if-i-had-legs-id-kick-you/"
+        "letterboxd_url": "https://letterboxd.com/film/kokuho/"
       },
       {
         "title": "AFTER THE HUNT",
@@ -1351,6 +1477,13 @@
         "letterboxd_url": "https://letterboxd.com/film/after-the-hunt/"
       },
       {
+        "title": "IF I HAD LEGS I'D KICK YOU",
+        "venue": "Angelika Film Center",
+        "url": "https://angelikafilmcenter.com/nyc/movies/details/if-i-had-legs-id-kick-you",
+        "source": "angelika",
+        "letterboxd_url": "https://letterboxd.com/film/if-i-had-legs-id-kick-you/"
+      },
+      {
         "title": "SENTIMENTAL VALUE (EARLY ACCESS)",
         "venue": "Angelika Film Center",
         "url": "https://angelikafilmcenter.com/nyc/movies/details/sentimental-value-early-access",
@@ -1358,10 +1491,10 @@
         "letterboxd_url": "https://letterboxd.com/film/sentimental-value-early-access/"
       }
     ],
-    "cached_at": "2025-10-27T21:36:08.234137-04:00"
+    "cached_at": "2025-11-04T16:22:33.148195-05:00"
   },
   "angelika_village_east": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
       {
         "title": "ONE BATTLE AFTER ANOTHER in 70MM",
@@ -1399,6 +1532,13 @@
         "letterboxd_url": "https://letterboxd.com/film/wicked-for-good/"
       },
       {
+        "title": "BUCHA",
+        "venue": "Angelika Village East",
+        "url": "https://angelikafilmcenter.com/villageeast/movies/details/bucha",
+        "source": "angelika_village_east",
+        "letterboxd_url": "https://letterboxd.com/film/bucha/"
+      },
+      {
         "title": "CHAINSAW MAN \u2013 THE MOVIE: REZE ARC",
         "venue": "Angelika Village East",
         "url": "https://angelikafilmcenter.com/villageeast/movies/details/chainsaw-man--the-movie-reze-arc",
@@ -1413,13 +1553,6 @@
         "letterboxd_url": "https://letterboxd.com/film/springsteen-deliver-me-from-nowhere/"
       },
       {
-        "title": "SHELBY OAKS",
-        "venue": "Angelika Village East",
-        "url": "https://angelikafilmcenter.com/villageeast/movies/details/shelby-oaks",
-        "source": "angelika_village_east",
-        "letterboxd_url": "https://letterboxd.com/film/shelby-oaks/"
-      },
-      {
         "title": "BUGONIA",
         "venue": "Angelika Village East",
         "url": "https://angelikafilmcenter.com/villageeast/movies/details/bugonia",
@@ -1427,32 +1560,11 @@
         "letterboxd_url": "https://letterboxd.com/film/bugonia/"
       },
       {
-        "title": "PSYCHO",
+        "title": "SHELBY OAKS",
         "venue": "Angelika Village East",
-        "url": "https://angelikafilmcenter.com/villageeast/movies/details/psycho",
+        "url": "https://angelikafilmcenter.com/villageeast/movies/details/shelby-oaks",
         "source": "angelika_village_east",
-        "letterboxd_url": "https://letterboxd.com/film/psycho/"
-      },
-      {
-        "title": "BUCHA",
-        "venue": "Angelika Village East",
-        "url": "https://angelikafilmcenter.com/villageeast/movies/details/bucha",
-        "source": "angelika_village_east",
-        "letterboxd_url": "https://letterboxd.com/film/bucha/"
-      },
-      {
-        "title": "BACK TO THE FUTURE: 40th ANNIVERSARY",
-        "venue": "Angelika Village East",
-        "url": "https://angelikafilmcenter.com/villageeast/movies/details/back-to-the-future-40th-anniversary",
-        "source": "angelika_village_east",
-        "letterboxd_url": "https://letterboxd.com/film/back-to-the-future/"
-      },
-      {
-        "title": "ONE BATTLE AFTER ANOTHER",
-        "venue": "Angelika Village East",
-        "url": "https://angelikafilmcenter.com/villageeast/movies/details/one-battle-after-another",
-        "source": "angelika_village_east",
-        "letterboxd_url": "https://letterboxd.com/film/one-battle-after-another/"
+        "letterboxd_url": "https://letterboxd.com/film/shelby-oaks/"
       },
       {
         "title": "LIFE OF MIKE",
@@ -1462,33 +1574,46 @@
         "letterboxd_url": "https://letterboxd.com/film/life-of-mike/"
       },
       {
-        "title": "KPOP DEMON HUNTERS: A SING-ALONG EVENT",
+        "title": "BACK TO THE FUTURE: 40th ANNIVERSARY",
         "venue": "Angelika Village East",
-        "url": "https://angelikafilmcenter.com/villageeast/movies/details/kpop-demon-hunters-a-sing-along-event",
+        "url": "https://angelikafilmcenter.com/villageeast/movies/details/back-to-the-future-40th-anniversary",
         "source": "angelika_village_east",
-        "letterboxd_url": "https://letterboxd.com/film/kpop-demon-hunters/"
+        "letterboxd_url": "https://letterboxd.com/film/back-to-the-future/"
       },
       {
-        "title": "DEPECHE MODE: M",
+        "title": "DR. STRANGELOVE OR: HOW I LEARNED TO STOP WORRYING AND LOVE THE BOMB",
         "venue": "Angelika Village East",
-        "url": "https://angelikafilmcenter.com/villageeast/movies/details/depeche-mode-m",
+        "url": "https://angelikafilmcenter.com/villageeast/movies/details/dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb",
         "source": "angelika_village_east",
-        "letterboxd_url": "https://letterboxd.com/film/depeche-mode-m/"
+        "letterboxd_url": "https://letterboxd.com/film/dr-strangelove-or-how-i-learned-to-stop-worrying-and-love-the-bomb/"
+      },
+      {
+        "title": "PURPLE RAIN",
+        "venue": "Angelika Village East",
+        "url": "https://angelikafilmcenter.com/villageeast/movies/details/purple-rain",
+        "source": "angelika_village_east",
+        "letterboxd_url": "https://letterboxd.com/film/purple-rain/"
+      },
+      {
+        "title": "SOME LIKE IT HOT",
+        "venue": "Angelika Village East",
+        "url": "https://angelikafilmcenter.com/villageeast/movies/details/some-like-it-hot",
+        "source": "angelika_village_east",
+        "letterboxd_url": "https://letterboxd.com/film/some-like-it-hot/"
+      },
+      {
+        "title": "THE DOORS: WHEN YOU'RE STRANGE",
+        "venue": "Angelika Village East",
+        "url": "https://angelikafilmcenter.com/villageeast/movies/details/the-doors-when-youre-strange",
+        "source": "angelika_village_east",
+        "letterboxd_url": "https://letterboxd.com/film/the-doors-when-youre-strange/"
       }
     ],
-    "cached_at": "2025-10-27T21:36:22.170977-04:00"
+    "cached_at": "2025-11-04T16:22:48.296892-05:00"
   },
   "paris_theater": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
-      {
-        "title": "McCabe & Mrs. Miller",
-        "display_title": "McCabe & Mrs. Miller (TUE SEP 2 - SUN NOV 2)",
-        "venue": "Paris Theater",
-        "url": "https://www.paristheaternyc.com/film/mccabe-and-mrs-miller-big-and-loud-2025",
-        "source": "paris_theater",
-        "letterboxd_url": "https://letterboxd.com/film/mccabe-and-mrs-miller/"
-      },
       {
         "title": "Frankenstein",
         "display_title": "Frankenstein (FRI OCT 17 - THU NOV 6)",
@@ -1496,22 +1621,6 @@
         "url": "https://www.paristheaternyc.com/film/frankenstein-paris",
         "source": "paris_theater",
         "letterboxd_url": "https://letterboxd.com/film/frankenstein/"
-      },
-      {
-        "title": "Knives Out",
-        "display_title": "Knives Out (FRI OCT 31)",
-        "venue": "Paris Theater",
-        "url": "https://www.paristheaternyc.com/film/knives-out",
-        "source": "paris_theater",
-        "letterboxd_url": "https://letterboxd.com/film/knives-out/"
-      },
-      {
-        "title": "Glass Onion: A Knives Out Mystery",
-        "display_title": "Glass Onion: A Knives Out Mystery (SAT NOV 1)",
-        "venue": "Paris Theater",
-        "url": "https://www.paristheaternyc.com/film/glass-onion",
-        "source": "paris_theater",
-        "letterboxd_url": "https://letterboxd.com/film/glass-onion-a-knives-out-mystery/"
       },
       {
         "title": "Wake Up Dead Man: A Knives Out Mystery",
@@ -1682,10 +1791,10 @@
         "letterboxd_url": "https://letterboxd.com/film/mimic/"
       }
     ],
-    "cached_at": "2025-10-27T21:36:26.967390-04:00"
+    "cached_at": "2025-11-04T16:22:53.748431-05:00"
   },
   "nitehawk_williamsburg": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
       {
         "title": "If I Had Legs I\u2019d Kick You",
@@ -1695,13 +1804,6 @@
         "letterboxd_url": "https://letterboxd.com/film/if-i-had-legs-id-kick-you/"
       },
       {
-        "title": "One Battle After Another",
-        "venue": "Nitehawk Cinema Williamsburg",
-        "url": "https://nitehawkcinema.com/williamsburg/movies/one-battle-after-another/?date=today",
-        "source": "nitehawk_williamsburg",
-        "letterboxd_url": "https://letterboxd.com/film/one-battle-after-another/"
-      },
-      {
         "title": "Frankenstein (2025)",
         "venue": "Nitehawk Cinema Williamsburg",
         "url": "https://nitehawkcinema.com/williamsburg/movies/frankenstein-2025/?date=today",
@@ -1709,25 +1811,32 @@
         "letterboxd_url": "https://letterboxd.com/film/frankenstein-2025/"
       },
       {
-        "title": "House on Haunted Hill",
+        "title": "Bugonia (DCP)",
         "venue": "Nitehawk Cinema Williamsburg",
-        "url": "https://nitehawkcinema.com/williamsburg/movies/house-on-haunted-hill-lwam/?date=today",
+        "url": "https://nitehawkcinema.com/williamsburg/movies/bugonia-dcp/?date=today",
         "source": "nitehawk_williamsburg",
-        "letterboxd_url": "https://letterboxd.com/film/house-on-haunted-hill/"
+        "letterboxd_url": "https://letterboxd.com/film/bugonia-dcp/"
+      },
+      {
+        "title": "One Battle After Another",
+        "venue": "Nitehawk Cinema Williamsburg",
+        "url": "https://nitehawkcinema.com/williamsburg/movies/one-battle-after-another/?date=today",
+        "source": "nitehawk_williamsburg",
+        "letterboxd_url": "https://letterboxd.com/film/one-battle-after-another/"
+      },
+      {
+        "title": "Mississippi Masala",
+        "venue": "Nitehawk Cinema Williamsburg",
+        "url": "https://nitehawkcinema.com/williamsburg/movies/mississippi-masala-fofif/?date=today",
+        "source": "nitehawk_williamsburg",
+        "letterboxd_url": "https://letterboxd.com/film/mississippi-masala/"
       }
     ],
-    "cached_at": "2025-10-27T21:36:35.416882-04:00"
+    "cached_at": "2025-11-04T16:23:00.899494-05:00"
   },
   "nitehawk_prospect_park": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
-      {
-        "title": "Shelby Oaks",
-        "venue": "Nitehawk Cinema Prospect Park",
-        "url": "https://nitehawkcinema.com/prospectpark/movies/shelby-oaks/?date=today",
-        "source": "nitehawk_prospect_park",
-        "letterboxd_url": "https://letterboxd.com/film/shelby-oaks/"
-      },
       {
         "title": "If I Had Legs I\u2019d Kick You",
         "venue": "Nitehawk Cinema Prospect Park",
@@ -1743,25 +1852,11 @@
         "letterboxd_url": "https://letterboxd.com/film/blue-moon/"
       },
       {
-        "title": "Frankenstein (2025)",
-        "venue": "Nitehawk Cinema Prospect Park",
-        "url": "https://nitehawkcinema.com/prospectpark/movies/frankenstein-2025/?date=today",
-        "source": "nitehawk_prospect_park",
-        "letterboxd_url": "https://letterboxd.com/film/frankenstein-2025/"
-      },
-      {
         "title": "Springsteen: Deliver Me From Nowhere",
         "venue": "Nitehawk Cinema Prospect Park",
         "url": "https://nitehawkcinema.com/prospectpark/movies/springsteen-deliver-me-from-nowhere/?date=today",
         "source": "nitehawk_prospect_park",
         "letterboxd_url": "https://letterboxd.com/film/springsteen-deliver-me-from-nowhere/"
-      },
-      {
-        "title": "After the Hunt",
-        "venue": "Nitehawk Cinema Prospect Park",
-        "url": "https://nitehawkcinema.com/prospectpark/movies/after-the-hunt/?date=today",
-        "source": "nitehawk_prospect_park",
-        "letterboxd_url": "https://letterboxd.com/film/after-the-hunt/"
       },
       {
         "title": "One Battle After Another",
@@ -1771,53 +1866,67 @@
         "letterboxd_url": "https://letterboxd.com/film/one-battle-after-another/"
       },
       {
-        "title": "Spook Show with Zabrecky: Bride of Frankenstein",
+        "title": "Frankenstein (2025)",
         "venue": "Nitehawk Cinema Prospect Park",
-        "url": "https://nitehawkcinema.com/prospectpark/movies/spook-show/?date=today",
+        "url": "https://nitehawkcinema.com/prospectpark/movies/frankenstein-2025/?date=today",
         "source": "nitehawk_prospect_park",
-        "letterboxd_url": "https://letterboxd.com/film/spook-show-with-zabrecky-bride-of-frankenstein/"
+        "letterboxd_url": "https://letterboxd.com/film/frankenstein-2025/"
+      },
+      {
+        "title": "Bugonia (35mm)",
+        "venue": "Nitehawk Cinema Prospect Park",
+        "url": "https://nitehawkcinema.com/prospectpark/movies/bugonia-35mm/?date=today",
+        "source": "nitehawk_prospect_park",
+        "letterboxd_url": "https://letterboxd.com/film/bugonia-35mm/"
+      },
+      {
+        "title": "Nouvelle Vague",
+        "venue": "Nitehawk Cinema Prospect Park",
+        "url": "https://nitehawkcinema.com/prospectpark/movies/nouvelle-vague/?date=today",
+        "source": "nitehawk_prospect_park",
+        "letterboxd_url": "https://letterboxd.com/film/nouvelle-vague/"
+      },
+      {
+        "title": "Bugonia (DCP)",
+        "venue": "Nitehawk Cinema Prospect Park",
+        "url": "https://nitehawkcinema.com/prospectpark/movies/bugonia-dcp/?date=today",
+        "source": "nitehawk_prospect_park",
+        "letterboxd_url": "https://letterboxd.com/film/bugonia-dcp/"
+      },
+      {
+        "title": "Shock-a-go-go Shorts Program",
+        "venue": "Nitehawk Cinema Prospect Park",
+        "url": "https://nitehawkcinema.com/prospectpark/movies/shock-a-go-go-shorts/?date=today",
+        "source": "nitehawk_prospect_park",
+        "letterboxd_url": "https://letterboxd.com/film/shock-a-go-go-shorts-program/"
+      },
+      {
+        "title": "After the Hunt",
+        "venue": "Nitehawk Cinema Prospect Park",
+        "url": "https://nitehawkcinema.com/prospectpark/movies/after-the-hunt/?date=today",
+        "source": "nitehawk_prospect_park",
+        "letterboxd_url": "https://letterboxd.com/film/after-the-hunt/"
+      },
+      {
+        "title": "The Color Purple (1985)",
+        "venue": "Nitehawk Cinema Prospect Park",
+        "url": "https://nitehawkcinema.com/prospectpark/movies/the-color-purple-1985/?date=today",
+        "source": "nitehawk_prospect_park",
+        "letterboxd_url": "https://letterboxd.com/film/the-color-purple-1985/"
+      },
+      {
+        "title": "Shelby Oaks",
+        "venue": "Nitehawk Cinema Prospect Park",
+        "url": "https://nitehawkcinema.com/prospectpark/movies/shelby-oaks/?date=today",
+        "source": "nitehawk_prospect_park",
+        "letterboxd_url": "https://letterboxd.com/film/shelby-oaks/"
       }
     ],
-    "cached_at": "2025-10-27T21:36:42.897490-04:00"
+    "cached_at": "2025-11-04T16:23:08.558373-05:00"
   },
   "moving_image": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
-      {
-        "title": "Abbott and Costello\u2019s Scaredy Cat Double Feature",
-        "venue": "Museum of the Moving Image",
-        "url": "https://movingimage.org/event/abbott-and-costellos-scaredy-cat-double-feature/",
-        "source": "moving_image",
-        "letterboxd_url": "https://letterboxd.com/film/abbott-and-costellos-scaredy-cat-double-feature/"
-      },
-      {
-        "title": "The Tree of Life",
-        "venue": "Museum of the Moving Image",
-        "url": "https://movingimage.org/event/the-tree-of-life-2/2025-11-01/",
-        "source": "moving_image",
-        "letterboxd_url": "https://letterboxd.com/film/the-tree-of-life/"
-      },
-      {
-        "title": "Wisdom of Happiness",
-        "venue": "Museum of the Moving Image",
-        "url": "https://movingimage.org/event/wisdom-of-happiness/2025-11-01/",
-        "source": "moving_image",
-        "letterboxd_url": "https://letterboxd.com/film/wisdom-of-happiness/"
-      },
-      {
-        "title": "El Equipo with Bernardo Ruiz in person",
-        "venue": "Museum of the Moving Image",
-        "url": "https://movingimage.org/event/el-equipo/",
-        "source": "moving_image",
-        "letterboxd_url": "https://letterboxd.com/film/el-equipo-with-bernardo-ruiz-in-person/"
-      },
-      {
-        "title": "The Sting",
-        "venue": "Museum of the Moving Image",
-        "url": "https://movingimage.org/event/the-sting/",
-        "source": "moving_image",
-        "letterboxd_url": "https://letterboxd.com/film/the-sting/"
-      },
       {
         "title": "Waterwick",
         "venue": "Museum of the Moving Image",
@@ -1833,11 +1942,11 @@
         "letterboxd_url": "https://letterboxd.com/film/unique-visions-the-dreamers-and-i-samland/"
       },
       {
-        "title": "Mr. Melvin",
+        "title": "Mr. Melvin with Lloyd Kaufman in person",
         "venue": "Museum of the Moving Image",
         "url": "https://movingimage.org/event/mr-melvin/",
         "source": "moving_image",
-        "letterboxd_url": "https://letterboxd.com/film/mr-melvin/"
+        "letterboxd_url": "https://letterboxd.com/film/mr-melvin-with-lloyd-kaufman-in-person/"
       },
       {
         "title": "Caravan",
@@ -1852,19 +1961,61 @@
         "url": "https://movingimage.org/event/butch-cassidy-and-the-sundance-kid/2025-11-08/",
         "source": "moving_image",
         "letterboxd_url": "https://letterboxd.com/film/butch-cassidy-and-the-sundance-kid/"
+      },
+      {
+        "title": "Achievements: Remembering Big: Juan \u201cChi Chi\u201d Rodriguez Story + Aliza Nisenbaum: Painting from Life",
+        "venue": "Museum of the Moving Image",
+        "url": "https://movingimage.org/event/achievements/",
+        "source": "moving_image",
+        "letterboxd_url": "https://letterboxd.com/film/achievements-remembering-big-juan-chi-chi-rodriguez-story-aliza-nisenbaum-painting-from-life/"
+      },
+      {
+        "title": "Meat",
+        "venue": "Museum of the Moving Image",
+        "url": "https://movingimage.org/event/meat/",
+        "source": "moving_image",
+        "letterboxd_url": "https://letterboxd.com/film/meat/"
+      },
+      {
+        "title": "A Woman Under the Influence",
+        "venue": "Museum of the Moving Image",
+        "url": "https://movingimage.org/event/a-woman-under-the-influence/2025-11-14/",
+        "source": "moving_image",
+        "letterboxd_url": "https://letterboxd.com/film/a-woman-under-the-influence/"
+      },
+      {
+        "title": "Klute + A Conversation with Molly Haskell",
+        "venue": "Museum of the Moving Image",
+        "url": "https://movingimage.org/event/klute/",
+        "source": "moving_image",
+        "letterboxd_url": "https://letterboxd.com/film/klute-a-conversation-with-molly-haskell/"
+      },
+      {
+        "title": "The Grand Budapest Hotel + Book Signing",
+        "venue": "Museum of the Moving Image",
+        "url": "https://movingimage.org/event/the-grand-budapest-hotel/",
+        "source": "moving_image",
+        "letterboxd_url": "https://letterboxd.com/film/the-grand-budapest-hotel-book-signing/"
+      },
+      {
+        "title": "Eva Papamargariti: Screening and Artist Talk",
+        "venue": "Museum of the Moving Image",
+        "url": "https://movingimage.org/event/eva-papamargariti/",
+        "source": "moving_image",
+        "letterboxd_url": "https://letterboxd.com/film/eva-papamargariti-screening-and-artist-talk/"
       }
     ],
-    "cached_at": "2025-10-27T21:36:54.055555-04:00"
+    "cached_at": "2025-11-04T16:23:14.077512-05:00"
   },
   "film_forum": {
-    "date": "2025-10-27",
+    "date": "2025-11-04",
     "movies": [
       {
-        "title": "SCREEN DECO",
+        "title": "AUCTION",
         "venue": "Film Forum",
-        "url": "https://filmforum.org/series/screen-deco#now-playing",
+        "url": "https://filmforum.org/film/auction",
         "source": "film_forum",
-        "letterboxd_url": "https://letterboxd.com/film/screen-deco/"
+        "letterboxd_url": "https://letterboxd.com/film/auction/"
       },
       {
         "title": "KEVIN BROWNLOW",
@@ -1895,13 +2046,13 @@
         "letterboxd_url": "https://letterboxd.com/film/the-librarians/"
       },
       {
-        "title": "Zhang Yimou\u2019s JU DOU",
+        "title": "SCREEN DECO",
         "venue": "Film Forum",
-        "url": "https://filmforum.org/film/ju-dou",
+        "url": "https://filmforum.org/series/screen-deco#now-playing",
         "source": "film_forum",
-        "letterboxd_url": "https://letterboxd.com/film/zhang-yimous-ju-dou/"
+        "letterboxd_url": "https://letterboxd.com/film/screen-deco/"
       }
     ],
-    "cached_at": "2025-10-27T21:38:00.334706-04:00"
+    "cached_at": "2025-11-04T16:24:19.989380-05:00"
   }
 }
