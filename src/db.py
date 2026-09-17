@@ -126,19 +126,15 @@ def get_all_genres() -> List[str]:
 # theater_showings
 # ---------------------------------------------------------------------------
 
-def get_todays_showings(date_str: str) -> Dict[str, Dict]:
-    """Return today's cached showings keyed by theater_id, shaped like the
-    existing theater_cache dict: {theater_id: {date, movies, cached_at}}."""
+def get_latest_showings() -> Dict[str, Dict]:
+    """Return the latest cached showings per theater (one row per theater_id),
+    shaped like the theater_cache dict: {theater_id: {date, movies, cached_at}}.
+    Freshness/staleness is decided by the caller."""
     client = get_client()
     if client is None:
         return {}
     try:
-        resp = (
-            client.table('theater_showings')
-            .select('*')
-            .eq('show_date', date_str)
-            .execute()
-        )
+        resp = client.table('theater_showings').select('*').execute()
         return {
             row['theater_id']: {
                 'date': row['show_date'],
@@ -148,7 +144,7 @@ def get_todays_showings(date_str: str) -> Dict[str, Dict]:
             for row in (resp.data or [])
         }
     except Exception as e:
-        print(f"⚠️  Supabase get_todays_showings failed: {e}")
+        print(f"⚠️  Supabase get_latest_showings failed: {e}")
         return {}
 
 
@@ -167,12 +163,12 @@ def upsert_theater_showings(theater_id: str, date_str: str, movies: List[Dict]) 
         print(f"⚠️  Supabase upsert_theater_showings failed for {theater_id}: {e}")
 
 
-def delete_stale_showings(current_date_str: str) -> None:
-    """TTL cleanup: delete showings rows older than the current (Eastern) date."""
+def delete_stale_showings(cutoff_date_str: str) -> None:
+    """TTL cleanup: delete showings rows with show_date older than the cutoff."""
     client = get_client()
     if client is None:
         return
     try:
-        client.table('theater_showings').delete().lt('show_date', current_date_str).execute()
+        client.table('theater_showings').delete().lt('show_date', cutoff_date_str).execute()
     except Exception as e:
         print(f"⚠️  Supabase delete_stale_showings failed: {e}")

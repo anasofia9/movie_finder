@@ -31,9 +31,11 @@ class MovieScraper:
     def _load_theater_cache(self):
         """Load theater cache from Supabase (if configured) or local JSON file"""
         if db.is_enabled():
-            today = self._get_eastern_date_string()
-            db.delete_stale_showings(today)  # 1-day TTL cleanup
-            self.theater_cache = db.get_todays_showings(today)
+            # 7-day TTL cleanup: keep recent showings so the app can display
+            # the latest cached data on startup even if it isn't from today
+            week_ago = (datetime.now(self.eastern_tz) - timedelta(days=7)).strftime('%Y-%m-%d')
+            db.delete_stale_showings(week_ago)
+            self.theater_cache = db.get_latest_showings()
             if self.theater_cache:
                 self.log(f"📂 Loaded theater cache from Supabase with {len(self.theater_cache)} entries")
             return
@@ -1206,21 +1208,22 @@ class MovieScraper:
         self.log(f"📊 Deduplicated from {len(all_movies)} to {len(deduplicated_movies)} unique movies")
         return deduplicated_movies
 
-    def get_cached_movies_only(self) -> tuple:
-        """Return (movies, newest_cached_at) from today's theater cache only.
-        Never scrapes; returns ([], None) if nothing fresh is cached."""
+    def get_cached_movies_only(self, max_age_days: int = 7) -> tuple:
+        """Return (movies, newest_cached_at) from the most recent cached
+        showings, accepting entries up to max_age_days old. Never scrapes.
+
+        If cached data exists but is all older than max_age_days, returns
+        ([], newest_stale_cached_at) so callers can tell 'stale' from 'empty'
+        (([], None) means no cached data at all)."""
+        cutoff = (datetime.now(self.eastern_tz) - timedelta(days=max_age_days)).strftime('%Y-%m-%d')
         all_movies = []
         newest_cached_at = None
-        for theater_id in list(self.theater_cache.keys()):
-            if not self._is_cache_valid(theater_id):
-                continue
-            movies = self._get_cached_movies(theater_id)
-            if not movies:
-                continue
-            all_movies.extend(movies)
-            cached_at = self.theater_cache[theater_id].get('cached_at')
+        for theater_id, entry in self.theater_cache.items():
+            cached_at = entry.get('cached_at')
             if cached_at and (newest_cached_at is None or str(cached_at) > str(newest_cached_at)):
                 newest_cached_at = cached_at
+            if (entry.get('date') or '') >= cutoff:
+                all_movies.extend(entry.get('movies') or [])
         if not all_movies:
-            return [], None
+            return [], newest_cached_at
         return self._dedupe_movies(all_movies), newest_cached_at

@@ -24,7 +24,8 @@ movies_data = {
     'movies_found_no_rating': [],
     'last_updated': None,
     'is_scraping': False,
-    'rating_threshold': 4.0
+    'rating_threshold': 4.0,
+    'data_notice': None
 }
 
 # Status logging system
@@ -53,7 +54,8 @@ def scrape_movies(selected_theaters=None, disable_cache=False):
         movies_data['movies_not_found'] = []
         movies_data['movies_found_no_rating'] = []
         movies_data['last_updated'] = None
-        
+        movies_data['data_notice'] = None
+
         status_messages.clear()  # Clear previous messages
         log_status("🎬 Starting Movie Scraping...")
         
@@ -104,7 +106,12 @@ def load_cached_data():
         scraper = MovieScraper(log_callback=log_status)
         movies, newest_cached_at = scraper.get_cached_movies_only()
         if not movies:
-            log_status("📭 No fresh cached data for today — click Refresh Data to scrape.")
+            if newest_cached_at:
+                movies_data['data_notice'] = ("⚠️ All cached data is more than a week old. "
+                                              "Click Refresh Data to scrape fresh listings.")
+                log_status("📭 Cached data is more than a week old — click Refresh Data to scrape.")
+            else:
+                log_status("📭 No cached data yet — click Refresh Data to scrape.")
             return
 
         letterboxd = LetterboxdAPI()
@@ -167,6 +174,7 @@ def index():
                          rating_threshold=movies_data['rating_threshold'],
                          status_messages=status_messages[-10:],
                          all_genres=all_genres,
+                         data_notice=movies_data['data_notice'],
                          newsletter_content=newsletter_content)
 
 @app.route('/api/movies')

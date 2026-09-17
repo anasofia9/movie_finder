@@ -103,7 +103,7 @@
         {% endif %}
         <div id="cache-status" class="cache-status"></div>
     {% else %}
-        No fresh data cached for today — click Refresh Data to scrape the latest listings.
+        {{ data_notice or 'No data cached yet — click Refresh Data to scrape the latest listings.' }}
     {% endif %}
 </div>
 
