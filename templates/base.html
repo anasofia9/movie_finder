@@ -6,741 +6,580 @@
     <title>{% block title %}NYC Movie Finder{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0d0d10;
-            --surface: #17171e;
-            --surface-2: #1e1e28;
-            --border: #2a2a35;
+            --bg: #0d0c0a;
+            --panel: #161511;
+            --panel-2: #12110e;
+            --border: #292620;
             --text: #ece7dc;
-            --muted: #9a94a6;
+            --muted: #97907f;
+            --faint: #6e6858;
             --gold: #d4a94e;
-            --gold-bright: #e8c168;
-            --gold-dim: rgba(212, 169, 78, 0.15);
+            --gold-dim: rgba(212, 169, 78, 0.35);
             --green: #7dc98f;
-            --red: #e07a6b;
-            --orange: #e0b06b;
+            --serif: 'Instrument Serif', Georgia, serif;
+            --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 1600px;
+            font-family: var(--sans);
+            max-width: 1220px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 48px 32px 32px;
             background-color: var(--bg);
-            background-image: radial-gradient(ellipse at top, #16121e 0%, var(--bg) 55%);
-            background-repeat: no-repeat;
             color: var(--text);
             line-height: 1.5;
+            font-size: 15px;
         }
+
+        a { color: inherit; }
 
         /* ------------------------------------------------------------------ */
-        /* Header — marquee                                                    */
+        /* Header                                                              */
         /* ------------------------------------------------------------------ */
-        .header {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 40px 30px 34px;
-            background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
-            border: 1px solid var(--border);
-            border-bottom: 3px solid var(--gold);
-            border-radius: 14px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
-            position: relative;
-            overflow: hidden;
+        .masthead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 40px;
+            margin-bottom: 28px;
         }
 
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 1px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-            opacity: 0.7;
-        }
-
-        .header-title {
+        .eyebrow {
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 18px;
-        }
-
-        .header h1 {
-            margin: 0;
-            font-family: 'Bebas Neue', 'Inter', sans-serif;
-            font-size: 3.4em;
-            font-weight: 400;
-            letter-spacing: 6px;
-            color: var(--text);
-            text-shadow: 0 0 30px rgba(212, 169, 78, 0.25);
-        }
-
-        .header h1 .gold {
-            color: var(--gold);
-        }
-
-        .header-goose {
-            height: 56px;
-            width: auto;
-            /* tint the gray silhouette gold */
-            filter: brightness(0) saturate(100%) invert(72%) sepia(38%) saturate(551%) hue-rotate(1deg) brightness(95%) contrast(88%);
-            transform: scaleX(-1);
-            animation: headerGooseWaddle 2.5s ease-in-out infinite;
-        }
-
-        @keyframes headerGooseWaddle {
-            0%, 100% {
-                transform: scaleX(-1) translateY(0px) rotate(0deg);
-            }
-            25% {
-                transform: scaleX(-1) translateY(-3px) rotate(2deg);
-            }
-            50% {
-                transform: scaleX(-1) translateY(0px) rotate(0deg);
-            }
-            75% {
-                transform: scaleX(-1) translateY(-3px) rotate(-2deg);
-            }
-        }
-
-        .header p {
-            margin: 12px 0 0 0;
+            gap: 8px;
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
             color: var(--muted);
-            font-size: 0.95em;
-            letter-spacing: 0.4px;
+            margin-bottom: 18px;
         }
 
-        /* ------------------------------------------------------------------ */
-        /* Controls                                                            */
-        /* ------------------------------------------------------------------ */
-        .controls {
-            margin-bottom: 30px;
+        .eyebrow .dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--green);
+            flex-shrink: 0;
         }
 
-        .theater-selection,
-        .filter-panel,
-        .rating-threshold,
-        .cache-control {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 16px;
-        }
-
-        .filter-panel h3,
-        .theater-selection h3 {
-            margin: 0 0 16px 0;
-            text-align: center;
-            font-family: 'Bebas Neue', 'Inter', sans-serif;
+        .masthead h1 {
+            font-family: var(--serif);
             font-weight: 400;
-            font-size: 1.5em;
-            letter-spacing: 3px;
+            font-size: 58px;
+            line-height: 1;
+            margin: 0 0 18px;
+            letter-spacing: 0.5px;
+        }
+
+        .masthead .lede {
+            margin: 0;
+            color: var(--muted);
+            font-size: 16px;
+            max-width: 620px;
+        }
+
+        .journal-card {
+            flex-shrink: 0;
+            width: 260px;
+            border: 1px solid var(--gold-dim);
+            border-radius: 12px;
+            padding: 18px 20px;
+            background: linear-gradient(160deg, rgba(212,169,78,0.05), transparent 60%);
+        }
+
+        .journal-card .kicker {
+            font-size: 10px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
             color: var(--gold);
+            margin-bottom: 8px;
         }
 
-        .theater-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-            margin-bottom: 18px;
+        .journal-card h2 {
+            font-family: var(--serif);
+            font-weight: 400;
+            font-size: 22px;
+            margin: 0 0 8px;
         }
 
-        .theater-checkbox {
+        .journal-card p {
+            margin: 0 0 12px;
+            font-size: 12.5px;
+            color: var(--muted);
+        }
+
+        .journal-card a {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--gold);
+            text-decoration: none;
+        }
+
+        .journal-card a:hover { text-decoration: underline; }
+
+        .rule {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 26px 0;
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* Venue chips                                                         */
+        /* ------------------------------------------------------------------ */
+        .venues-head {
             display: flex;
-            align-items: center;
-            cursor: pointer;
-            padding: 12px 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-            background: var(--surface-2);
-            transition: border-color 0.2s ease, background 0.2s ease;
-            font-weight: 500;
-            font-size: 0.92em;
-            width: 100%;
-            color: var(--text);
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 12px;
         }
 
-        .theater-checkbox:hover {
-            border-color: var(--gold);
-            background: var(--gold-dim);
+        .venues-head .label {
+            font-size: 11px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: var(--muted);
         }
 
-        .theater-checkbox input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.15);
-            accent-color: var(--gold);
-        }
-
-        .selection-controls {
+        .venues-head .links {
             display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .genre-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-
-        .genre-grid .theater-checkbox {
-            padding: 8px 12px;
-            font-size: 0.85em;
-        }
-
-        .date-inputs {
-            display: flex;
-            justify-content: center;
-            align-items: center;
             gap: 18px;
-            flex-wrap: wrap;
-            margin-bottom: 10px;
         }
 
-        .date-inputs label {
+        .venues-head button {
+            background: none;
+            border: none;
+            padding: 0;
+            font-family: var(--sans);
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--muted);
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .venues-head button:hover { color: var(--text); }
+
+        .chips {
             display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 26px;
+        }
+
+        .chip {
+            display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: var(--text);
-            font-weight: 500;
-            font-size: 0.9em;
+            padding: 7px 15px;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            background: transparent;
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--faint);
+            cursor: pointer;
+            transition: border-color .15s, color .15s;
         }
 
-        .date-inputs input[type="date"] {
-            padding: 8px 12px;
+        .chip .chip-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--faint);
+            transition: background .15s;
+        }
+
+        .chip.on {
+            border-color: var(--gold-dim);
+            color: var(--text);
+        }
+
+        .chip.on .chip-dot { background: var(--gold); }
+
+        .chip:hover { border-color: var(--gold-dim); }
+
+        /* ------------------------------------------------------------------ */
+        /* Filter panel                                                        */
+        /* ------------------------------------------------------------------ */
+        .filter-panel {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 22px;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 22px;
+        }
+
+        .filter-group { display: flex; flex-direction: column; gap: 8px; }
+
+        .filter-group label {
+            font-size: 10px;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        .filter-group select,
+        .filter-group input[type="date"] {
+            background: var(--panel-2);
             border: 1px solid var(--border);
             border-radius: 8px;
-            background: var(--surface-2);
             color: var(--text);
-            font-family: inherit;
+            font-family: var(--sans);
+            font-size: 13.5px;
+            padding: 9px 12px;
+            min-width: 160px;
             color-scheme: dark;
         }
 
-        .date-inputs input[type="date"]:focus {
-            outline: none;
-            border-color: var(--gold);
+        .filter-group select:focus,
+        .filter-group input:focus { outline: 1px solid var(--gold-dim); }
+
+        .rating-group { min-width: 220px; }
+
+        .rating-group .rating-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
         }
 
-        .date-filter .rating-help {
-            text-align: center;
-        }
-
-        .btn-small {
-            background: transparent;
-            color: var(--muted);
-            padding: 8px 16px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85em;
-            font-weight: 500;
-            font-family: inherit;
-            transition: all 0.2s ease;
-        }
-
-        .btn-small:hover {
+        .rating-group .rating-value {
+            font-size: 12.5px;
+            font-weight: 600;
             color: var(--gold);
-            border-color: var(--gold);
         }
 
-        .rating-threshold {
-            text-align: center;
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 3px;
+            border-radius: 2px;
+            background: var(--border);
+            margin: 12px 0 8px;
         }
 
-        .rating-threshold label {
-            display: block;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 10px;
-            font-size: 1em;
-        }
-
-        .rating-threshold input[type="number"] {
-            padding: 10px 16px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            background: var(--surface-2);
-            color: var(--gold-bright);
-            font-size: 1.2em;
-            font-weight: 600;
-            font-family: inherit;
-            text-align: center;
-            width: 90px;
-            margin: 0 10px;
-            transition: border-color 0.2s ease;
-        }
-
-        .rating-threshold input[type="number"]:focus {
-            outline: none;
-            border-color: var(--gold);
-            box-shadow: 0 0 0 3px var(--gold-dim);
-        }
-
-        .rating-help {
-            display: block;
-            font-size: 0.82em;
-            color: var(--muted);
-            margin-top: 8px;
-            font-style: italic;
-        }
-
-        .cache-control {
-            padding: 8px 20px;
-        }
-
-        .cache-control .theater-checkbox {
-            border: none;
-            background: transparent;
-            justify-content: center;
-        }
-
-        .cache-control .theater-checkbox:hover {
-            background: transparent;
-            color: var(--gold-bright);
-        }
-
-        .btn {
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
             background: var(--gold);
-            color: #14100a;
-            padding: 14px 34px;
-            border: none;
-            border-radius: 8px;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            font-weight: 700;
-            font-family: inherit;
-            font-size: 1em;
-            letter-spacing: 0.5px;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 18px rgba(212, 169, 78, 0.25);
         }
 
-        .btn:hover {
-            background: var(--gold-bright);
-            transform: translateY(-1px);
-            box-shadow: 0 6px 24px rgba(212, 169, 78, 0.4);
+        input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            border: none;
+            border-radius: 50%;
+            background: var(--gold);
+            cursor: pointer;
         }
 
-        .controls .btn {
-            display: block;
-            margin: 0 auto 10px;
-            text-align: center;
+        .btn-refresh {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--gold);
+            color: #1a1508;
+            border: none;
+            border-radius: 9px;
+            padding: 11px 20px;
+            font-family: var(--sans);
+            font-size: 13.5px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: auto;
         }
 
-        .btn.secondary {
-            background: var(--surface-2);
-            color: var(--text);
-            border: 1px solid var(--border);
+        .btn-refresh:hover { background: #e0b95e; }
+
+        .panel-foot {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 10px;
         }
 
-        .btn.secondary:hover {
-            border-color: var(--gold);
+        .panel-foot label {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            font-size: 12px;
+            color: var(--faint);
+            cursor: pointer;
         }
+
+        .panel-foot input { accent-color: var(--gold); }
 
         /* ------------------------------------------------------------------ */
         /* Status                                                              */
         /* ------------------------------------------------------------------ */
         .status {
-            text-align: center;
-            margin: 20px 0;
-            padding: 16px;
-            border-radius: 10px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--gold);
-            color: var(--muted);
-            font-size: 0.95em;
+            margin: 22px 0 6px;
+            font-size: 12.5px;
+            color: var(--faint);
         }
 
         .status.loading {
-            border-left-color: var(--orange);
-            color: var(--text);
-        }
-
-        .status-header {
-            font-weight: 600;
-            margin-bottom: 15px;
-            color: var(--text);
-        }
-
-        .status-log {
-            background: #0a0a0d;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            max-height: 300px;
-            overflow-y: auto;
-            text-align: left;
-        }
-
-        .status-message {
-            font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-            font-size: 0.82em;
-            padding: 4px 0;
-            border-bottom: 1px solid #1c1c24;
-            color: #b8b2a4;
-        }
-
-        .status-message:last-child {
-            border-bottom: none;
-        }
-
-        .status-details {
-            margin-top: 15px;
-        }
-
-        .status-details summary {
-            cursor: pointer;
-            color: var(--gold);
-            font-weight: 500;
-        }
-
-        .status-details summary:hover {
-            color: var(--gold-bright);
-        }
-
-        .cache-status {
-            margin-top: 15px;
-            padding: 12px;
-            background: var(--surface-2);
-            border-radius: 8px;
-            border-left: 3px solid var(--green);
-            font-size: 0.9em;
-            text-align: left;
-        }
-
-        .cache-status-title {
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 8px;
-        }
-
-        .cache-item {
-            display: inline-block;
-            margin: 2px 8px 2px 0;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: 500;
-        }
-
-        .cache-item.cached {
-            background: rgba(125, 201, 143, 0.12);
-            color: var(--green);
-            border: 1px solid rgba(125, 201, 143, 0.3);
-        }
-
-        .cache-item.not-cached {
-            background: rgba(224, 122, 107, 0.1);
-            color: var(--red);
-            border: 1px solid rgba(224, 122, 107, 0.3);
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Movie sections + cards                                              */
-        /* ------------------------------------------------------------------ */
-        .section {
-            margin: 44px 0;
-        }
-
-        .section h2 {
-            font-family: 'Bebas Neue', 'Inter', sans-serif;
-            font-weight: 400;
-            font-size: 2em;
-            letter-spacing: 3px;
-            color: var(--text);
-            border-bottom: 2px solid var(--gold);
-            padding-bottom: 10px;
-            margin-bottom: 25px;
-        }
-
-        .movies-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 18px;
-            margin-bottom: 20px;
-        }
-
-        @media (max-width: 1200px) {
-            .movies-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 768px) {
-            .movies-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .movie {
-            background: var(--surface);
+            background: var(--panel);
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 0;
-            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .movie:hover {
-            transform: translateY(-3px);
-            border-color: var(--gold);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--gold-dim);
-        }
-
-        .movie.dimmed {
-            opacity: 0.65;
-        }
-
-        .movie.dimmed:hover {
-            opacity: 1;
-        }
-
-        .movie-title {
-            font-size: 1.15em;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 10px;
-        }
-
-        .movie-genres {
-            color: var(--gold);
-            font-size: 0.8em;
-            letter-spacing: 0.3px;
-            margin: -4px 0 10px;
-        }
-
-        .movie-dates {
+            text-align: center;
             color: var(--muted);
-            font-size: 0.85em;
-            margin-bottom: 12px;
         }
 
-        .rating {
-            display: inline-block;
-            font-weight: 700;
-            font-size: 0.9em;
-            margin-bottom: 8px;
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
+        .status-header { font-size: 14px; margin-bottom: 10px; }
 
-        .rating.high {
-            color: var(--gold-bright);
-            background: var(--gold-dim);
-            border: 1px solid rgba(212, 169, 78, 0.35);
-        }
-
-        .rating.warning {
-            color: var(--orange);
-            background: rgba(224, 176, 107, 0.1);
-            border: 1px solid rgba(224, 176, 107, 0.3);
-        }
-
-        .rating.error {
-            color: var(--red);
-            background: rgba(224, 122, 107, 0.1);
-            border: 1px solid rgba(224, 122, 107, 0.3);
-        }
-
-        .venue {
-            color: var(--muted);
-            font-size: 0.88em;
-            margin-bottom: 12px;
-        }
-
-        .links {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .links a {
-            color: var(--gold);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9em;
-            transition: color 0.15s ease;
-        }
-
-        .links a:hover {
-            color: var(--gold-bright);
-            text-decoration: underline;
-        }
-
-        .no-link {
-            color: #5a5563;
-            font-size: 0.9em;
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Newsletter                                                          */
-        /* ------------------------------------------------------------------ */
-        .newsletter-section {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-left: 3px solid var(--gold);
-            border-radius: 12px;
-            padding: 30px;
-            margin-top: 40px;
-        }
-
-        .newsletter-content {
-            line-height: 1.6;
-            column-count: 3;
-            column-gap: 20px;
-            column-fill: balance;
-        }
-
-        .newsletter-content h1,
-        .newsletter-content h2,
-        .newsletter-content h3 {
-            color: var(--text);
-            margin-top: 30px;
-            margin-bottom: 15px;
-            column-span: all;
-        }
-
-        .newsletter-content h1 {
-            font-size: 1.8em;
-            border-bottom: 2px solid var(--gold);
-            padding-bottom: 10px;
-        }
-
-        .newsletter-content h2 {
-            font-size: 1.4em;
-        }
-
-        .newsletter-content h3 {
-            font-size: 1.2em;
-        }
-
-        .newsletter-content p:first-child {
-            column-span: all;
-        }
-
-        .newsletter-content ul {
-            padding-left: 20px;
-        }
-
-        .newsletter-content li {
-            margin-bottom: 10px;
-        }
-
-        .newsletter-content strong {
-            color: var(--text);
-        }
-
-        .newsletter-content a {
-            color: var(--gold);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .newsletter-content a:hover {
-            text-decoration: underline;
-        }
-
-        .newsletter-content .movie {
-            background: var(--surface-2);
+        .status-log {
+            max-height: 180px;
+            overflow-y: auto;
+            text-align: left;
+            background: var(--panel-2);
             border: 1px solid var(--border);
             border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            break-inside: avoid;
-        }
-
-        .newsletter-content .movie-title {
-            font-size: 16px !important;
-            font-weight: 600 !important;
-            color: var(--text) !important;
-            margin-bottom: 8px !important;
-        }
-
-        .newsletter-content .rating {
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            margin-bottom: 5px !important;
-        }
-
-        .newsletter-content .venue {
-            font-size: 13px !important;
-            color: var(--muted) !important;
-            margin-bottom: 8px !important;
-        }
-
-        @media (max-width: 1200px) {
-            .newsletter-content {
-                column-count: 2;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .newsletter-content {
-                column-count: 1;
-            }
-        }
-
-        /* ------------------------------------------------------------------ */
-        /* Loading + goose                                                     */
-        /* ------------------------------------------------------------------ */
-        .loading, .loading-section {
-            text-align: center;
-            padding: 50px;
+            padding: 10px 14px;
+            margin-top: 10px;
+            font-size: 12px;
             color: var(--muted);
         }
 
-        .loading-newsletter {
-            text-align: center;
-            padding: 40px;
-            color: var(--muted);
+        .status-message { padding: 1.5px 0; }
+
+        .status-details summary {
+            cursor: pointer;
+            color: var(--faint);
         }
 
-        .loading-newsletter p {
-            margin-top: 15px;
-            font-style: italic;
-        }
+        .data-notice { color: var(--gold); }
 
         .spinner {
             border: 3px solid var(--border);
             border-top: 3px solid var(--gold);
             border-radius: 50%;
-            width: 40px;
-            height: 40px;
+            width: 34px;
+            height: 34px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 14px;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ------------------------------------------------------------------ */
+        /* Sections + cards                                                    */
+        /* ------------------------------------------------------------------ */
+        .sec { margin-top: 44px; }
+
+        .sec-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 20px;
+            margin-bottom: 22px;
+        }
+
+        .sec-head h2 {
+            font-family: var(--serif);
+            font-weight: 400;
+            font-size: 34px;
+            margin: 0;
+        }
+
+        .sec-head h2 .sec-note {
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--faint);
+            margin-left: 10px;
+        }
+
+        .match-count {
+            font-size: 12.5px;
+            color: var(--faint);
+            white-space: nowrap;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        /* Metallic header tones */
+        .m-0 { --m-bg: #262013; --m-ac: #d4a94e; }  /* brass */
+        .m-1 { --m-bg: #271b12; --m-ac: #c98a63; }  /* copper */
+        .m-2 { --m-bg: #161e27; --m-ac: #8badc9; }  /* steel */
+        .m-3 { --m-bg: #142420; --m-ac: #74b295; }  /* verdigris */
+        .m-4 { --m-bg: #201f26; --m-ac: #b2b2c4; }  /* pewter */
+        .m-5 { --m-bg: #271a1d; --m-ac: #cf9288; }  /* rose gold */
+        .m-6 { --m-bg: #181d20; --m-ac: #93a4ad; }  /* gunmetal */
+        .m-7 { --m-bg: #231c10; --m-ac: #bd9a60; }  /* bronze */
+
+        .card-head {
+            background: var(--m-bg, var(--panel-2));
+            border-bottom: 1px solid var(--border);
+            padding: 16px 20px 18px;
+        }
+
+        .card-head-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .rate-badge {
+            display: inline-block;
+            padding: 3px 9px;
+            border: 1px solid var(--gold-dim);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--gold);
+        }
+
+        .rate-badge.quiet {
+            border-color: var(--border);
+            color: var(--muted);
+            font-weight: 500;
+        }
+
+        .head-label {
+            font-size: 9.5px;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--faint);
+        }
+
+        .card-title {
+            font-family: var(--serif);
+            font-weight: 400;
+            font-size: 29px;
+            line-height: 1.08;
+            margin: 0;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .title-rule {
+            width: 44px;
+            height: 2px;
+            background: var(--m-ac, var(--gold));
+            margin-top: 13px;
+        }
+
+        .card-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 15px 20px 17px;
+            flex-grow: 1;
+        }
+
+        .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        .tag {
+            padding: 2.5px 9px;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            font-size: 11px;
+            color: var(--muted);
+        }
+
+        .venue-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            font-weight: 500;
+        }
+
+        .venue-line .v-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--m-ac, var(--gold));
+            flex-shrink: 0;
+        }
+
+        .when {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 12px;
+            font-size: 12.5px;
+            color: var(--muted);
+            margin-top: auto;
+        }
+
+        .card-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border);
+            padding: 12px 20px;
+        }
+
+        .card-foot a {
+            font-size: 12.5px;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .card-foot .lb-link { color: var(--gold); }
+        .card-foot .lb-link:hover { text-decoration: underline; }
+        .card-foot .venue-link { color: var(--muted); }
+        .card-foot .venue-link:hover { color: var(--text); }
+        .card-foot .no-link { font-size: 12.5px; color: var(--faint); }
+
+        .card.dimmed { opacity: 0.75; }
+
+        .empty-note { color: var(--faint); font-size: 13.5px; }
+
+        /* ------------------------------------------------------------------ */
+        /* Loading goose                                                       */
+        /* ------------------------------------------------------------------ */
+        .loading-section, .loading {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--muted);
         }
 
         .goose-container {
-            height: 150px;
+            height: 130px;
             width: 100%;
             position: relative;
             overflow: hidden;
-            margin: 20px 0;
+            margin: 10px 0;
         }
 
         .goose {
-            max-width: 110px;
-            max-height: 110px;
-            width: auto;
-            height: auto;
+            max-width: 100px;
             position: absolute;
             bottom: 10px;
             left: -60px;
@@ -748,226 +587,69 @@
             animation: gooseWalk 14s linear infinite;
         }
 
-        .goose-inner {
-            animation: gooseWaddle 0.8s ease-in-out infinite;
-        }
-
         @keyframes gooseWalk {
-            0% {
-                left: -110px;
-                transform: scaleX(-1);
-            }
-            45% {
-                left: calc(100% + 10px);
-                transform: scaleX(-1);
-            }
-            50% {
-                left: calc(100% + 10px);
-                transform: scaleX(1);
-            }
-            95% {
-                left: -110px;
-                transform: scaleX(1);
-            }
-            100% {
-                left: -110px;
-                transform: scaleX(-1);
-            }
-        }
-
-        @keyframes gooseWaddle {
-            0%, 100% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            25% {
-                transform: translateY(-3px) rotate(-2deg);
-            }
-            50% {
-                transform: translateY(0px) rotate(0deg);
-            }
-            75% {
-                transform: translateY(-3px) rotate(2deg);
-            }
+            0%   { left: -110px; transform: scaleX(-1); }
+            45%  { left: calc(100% + 10px); transform: scaleX(-1); }
+            50%  { left: calc(100% + 10px); transform: scaleX(1); }
+            95%  { left: -110px; transform: scaleX(1); }
+            100% { left: -110px; transform: scaleX(-1); }
         }
 
         /* ------------------------------------------------------------------ */
-        /* Responsive                                                          */
+        /* Footer                                                              */
         /* ------------------------------------------------------------------ */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
+        .site-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            margin-top: 56px;
+            padding-top: 22px;
+            border-top: 1px solid var(--border);
+            font-size: 12px;
+            color: var(--faint);
+        }
 
-            .header h1 {
-                font-size: 2.2em;
-                letter-spacing: 3px;
-            }
+        .site-foot a { color: var(--muted); }
 
-            .header-goose {
-                height: 38px;
-            }
-
-            .controls {
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .theater-grid {
-                grid-template-columns: 1fr;
-            }
+        @media (max-width: 900px) {
+            body { padding: 28px 16px; }
+            .masthead { flex-direction: column; gap: 24px; }
+            .masthead h1 { font-size: 42px; }
+            .journal-card { width: 100%; }
+            .btn-refresh { margin-left: 0; width: 100%; justify-content: center; }
+            .filter-group select, .filter-group input[type="date"] { min-width: 130px; }
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        <div class="header-title">
-            <img src="{{ url_for('static', filename='goose.png') }}" alt="Goose" class="header-goose">
-            <h1>NYC <span class="gold">Movie</span> Finder</h1>
-        </div>
-        <p>Finding movie listings can feel like a goose chase. Discover the best rated movies playing in (some) New York City theaters.</p>
-    </div>
-
     {% block content %}{% endblock %}
 
+    <footer class="site-foot">
+        <span>© 2026 NYC Movie Finder. Not affiliated with Letterboxd or its associated platforms.</span>
+        <a href="/newsletter">Weekly journal →</a>
+    </footer>
+
     <script>
-        // Auto-refresh status every 10 seconds when scraping
-        let statusInterval;
+        let statusInterval = null;
         let wasScraping = false;
 
-        function updateStatus() {
-            fetch('/api/status')
-                .then(response => response.json())
-                .then(data => {
-                    const statusDiv = document.getElementById('status');
-                    if (statusDiv) {
-                        if (data.is_scraping) {
-                            wasScraping = true;
-                            statusDiv.className = 'status loading';
-                            let html = '<div class="spinner"></div><div class="status-header">Scraping movie data... This may take a few minutes.</div>';
-
-                            if (data.status_messages && data.status_messages.length > 0) {
-                                html += '<div class="status-log">';
-                                data.status_messages.forEach(msg => {
-                                    html += `<div class="status-message">${msg}</div>`;
-                                });
-                                html += '</div>';
-                            }
-
-                            statusDiv.innerHTML = html;
-
-                            // Auto-scroll to bottom of status log
-                            const statusLog = statusDiv.querySelector('.status-log');
-                            if (statusLog) {
-                                statusLog.scrollTop = statusLog.scrollHeight;
-                            }
-
-                            if (!statusInterval) {
-                                statusInterval = setInterval(updateStatus, 5000); // Check every 5 seconds
-                            }
-                        } else {
-                            // If we were scraping but now we're not, reload the page to show new content
-                            if (wasScraping) {
-                                wasScraping = false;
-                                location.reload();
-                                return;
-                            }
-                            statusDiv.className = 'status';
-                            let html = '';
-                            if (data.last_updated) {
-                                const lastUpdate = new Date(data.last_updated).toLocaleString();
-                                html = `Last updated: ${lastUpdate} | ${data.total_movies} movies found`;
-
-                                if (data.status_messages && data.status_messages.length > 0) {
-                                    html += `
-                                        <details class="status-details">
-                                            <summary>View last scraping log</summary>
-                                            <div class="status-log">`;
-                                    data.status_messages.forEach(msg => {
-                                        html += `<div class="status-message">${msg}</div>`;
-                                    });
-                                    html += `</div></details>`;
-                                }
-
-                                // Add cache status
-                                if (data.cache_status) {
-                                    html += `<div class="cache-status">
-                                        <div class="cache-status-title">📂 Theater Cache Status (${data.cache_status[Object.keys(data.cache_status)[0]]?.date || 'today'})</div>`;
-
-                                    Object.entries(data.cache_status).forEach(([theaterId, status]) => {
-                                        const className = status.cached ? 'cached' : 'not-cached';
-                                        const icon = status.cached ? '✅' : '🔄';
-                                        const movieText = status.cached ? ` (${status.movie_count})` : '';
-                                        html += `<span class="cache-item ${className}">${icon} ${status.name}${movieText}</span>`;
-                                    });
-
-                                    html += `</div>`;
-                                }
-                            } else {
-                                html = 'No data available. Click refresh to start scraping.';
-                            }
-                            statusDiv.innerHTML = html;
-
-                            if (statusInterval) {
-                                clearInterval(statusInterval);
-                                statusInterval = null;
-                            }
-                        }
-                    }
-                });
+        /* ------------------------- venue chips ------------------------- */
+        function toggleChip(el) {
+            el.classList.toggle('on');
+            applyFilters();
         }
 
-        // Update rating threshold display
-        function updateRatingThreshold() {
-            const threshold = document.getElementById('ratingThreshold').value;
-            const titleElement = document.getElementById('high-rated-title');
-            if (titleElement) {
-                titleElement.textContent = `🌟 Highly Rated Movies (≥${threshold}⭐)`;
-            }
-        }
-
-        // Initial status check
-        document.addEventListener('DOMContentLoaded', function() {
-            updateStatus();
-
-            // Add event listener for rating threshold changes
-            const ratingInput = document.getElementById('ratingThreshold');
-            if (ratingInput) {
-                ratingInput.addEventListener('input', updateRatingThreshold);
-            }
-        });
-
-        // Theater selection functions
-        function selectAllTheaters() {
-            const checkboxes = document.querySelectorAll('.theater-selection .theater-checkbox input[type="checkbox"]');
-            checkboxes.forEach(checkbox => checkbox.checked = true);
-        }
-
-        function deselectAllTheaters() {
-            const checkboxes = document.querySelectorAll('.theater-selection .theater-checkbox input[type="checkbox"]');
-            checkboxes.forEach(checkbox => checkbox.checked = false);
+        function setAllVenues(on) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', on));
+            applyFilters();
         }
 
         function getSelectedTheaters() {
-            const checkboxes = document.querySelectorAll('.theater-selection .theater-checkbox input[type="checkbox"]:checked');
-            return Array.from(checkboxes).map(checkbox => checkbox.id);
+            return Array.from(document.querySelectorAll('.chip.on')).map(c => c.dataset.id);
         }
 
-        // Theater + genre + date filter functions
-        function setAllTheaterFilters(checked) {
-            document.querySelectorAll('.theater-filter-checkbox').forEach(cb => cb.checked = checked);
-            applyFilters();
-        }
-
-        function selectAllGenres() {
-            document.querySelectorAll('.genre-checkbox').forEach(cb => cb.checked = true);
-            applyFilters();
-        }
-
-        function deselectAllGenres() {
-            document.querySelectorAll('.genre-checkbox').forEach(cb => cb.checked = false);
-            applyFilters();
-        }
-
+        /* --------------------------- filters --------------------------- */
         function clearDateFilter() {
             const from = document.getElementById('dateFrom');
             const to = document.getElementById('dateTo');
@@ -977,30 +659,32 @@
         }
 
         function applyFilters() {
-            const theaterBoxes = Array.from(document.querySelectorAll('.theater-filter-checkbox'));
-            const selectedTheaters = new Set(theaterBoxes.filter(cb => cb.checked).map(cb => cb.value));
-            const theaterFilterActive = theaterBoxes.length > 0 && selectedTheaters.size < theaterBoxes.length;
+            const chips = Array.from(document.querySelectorAll('.chip'));
+            const selectedVenues = new Set(chips.filter(c => c.classList.contains('on')).map(c => c.dataset.id));
+            const venueFilterActive = chips.length > 0 && selectedVenues.size < chips.length;
 
-            const genreBoxes = Array.from(document.querySelectorAll('.genre-checkbox'));
-            const selected = new Set(genreBoxes.filter(cb => cb.checked).map(cb => cb.value));
-            const genreFilterActive = genreBoxes.length > 0 && selected.size < genreBoxes.length;
+            const genreSel = document.getElementById('genreSelect');
+            const genre = genreSel ? genreSel.value : '';
 
             const fromVal = document.getElementById('dateFrom')?.value || '';
             const toVal = document.getElementById('dateTo')?.value || '';
             const dateFilterActive = !!(fromVal || toVal);
 
+            const slider = document.getElementById('ratingSlider');
+            const minRating = slider ? parseFloat(slider.value) : 0;
+
             const now = new Date();
             const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-            document.querySelectorAll('.section .movie').forEach(card => {
+            document.querySelectorAll('.card[data-theaters]').forEach(card => {
                 let visible = true;
-                if (theaterFilterActive) {
+                if (venueFilterActive) {
                     const theaters = (card.dataset.theaters || '').split('|').filter(t => t);
-                    visible = theaters.some(t => selectedTheaters.has(t));
+                    visible = theaters.some(t => selectedVenues.has(t));
                 }
-                if (visible && genreFilterActive) {
+                if (visible && genre) {
                     const genres = (card.dataset.genres || '').split('|').filter(g => g);
-                    visible = genres.some(g => selected.has(g));
+                    visible = genres.includes(genre);
                 }
                 if (visible && dateFilterActive) {
                     const dates = (card.dataset.dates || '').split(',').filter(d => d);
@@ -1008,77 +692,96 @@
                     // Movies without listed dates are assumed to be showing today
                     visible = dates.length ? dates.some(inRange) : inRange(today);
                 }
+                if (visible && card.dataset.rating) {
+                    visible = parseFloat(card.dataset.rating) >= minRating;
+                }
                 card.style.display = visible ? '' : 'none';
             });
-        }
 
-        // Function to immediately hide old content and show loading
-        function hideOldContentAndShowLoading() {
-            // Hide movie sections
-            const movieSections = document.querySelectorAll('.section');
-            movieSections.forEach(section => {
-                section.style.display = 'none';
+            // Per-section match counts + slider labels
+            document.querySelectorAll('.sec').forEach(sec => {
+                const count = sec.querySelectorAll('.card[data-theaters]:not([style*="none"])').length;
+                const counter = sec.querySelector('.match-count');
+                if (counter) counter.textContent = `Showing ${count} match${count === 1 ? '' : 'es'}`;
             });
-
-            // Hide newsletter section
-            const newsletterSection = document.querySelector('.newsletter-section');
-            if (newsletterSection) {
-                newsletterSection.style.display = 'none';
-            }
-
-            // Show loading states
-            const loadingHTML = `
-                <div class="loading-section" id="temp-loading">
-                    <div class="goose-container">
-                        <img src="/static/goose.png" alt="Waddling goose" class="goose">
-                    </div>
-                    <p>Scraping movie data... Results will appear here when complete.</p>
-                </div>
-            `;
-
-            // Insert loading content after the status div
-            const statusDiv = document.getElementById('status');
-            if (statusDiv) {
-                statusDiv.insertAdjacentHTML('afterend', loadingHTML);
-            }
+            const label = document.getElementById('ratingValue');
+            if (label && slider) label.textContent = `${parseFloat(slider.value).toFixed(1)}★ or higher`;
+            const note = document.getElementById('highRatedNote');
+            if (note && slider) note.textContent = `(Rated ${parseFloat(slider.value).toFixed(1)}★+ by Letterboxd users)`;
         }
 
-        // Refresh button handler
+        /* --------------------------- refresh ---------------------------- */
         function refreshData() {
-            const selectedTheaters = getSelectedTheaters();
-            if (selectedTheaters.length === 0) {
-                alert('Please select at least one theater to scrape.');
+            const theaters = getSelectedTheaters();
+            if (theaters.length === 0) {
+                alert('Select at least one venue to scrape.');
                 return;
             }
-
-            const ratingThreshold = document.getElementById('ratingThreshold').value;
-            if (!ratingThreshold || ratingThreshold < 1.0 || ratingThreshold > 5.0) {
-                alert('Please enter a valid rating threshold between 1.0 and 5.0');
-                return;
-            }
-
-            const disableCache = document.getElementById('disableCache').checked;
-
-            // Immediately hide old content and show loading
-            hideOldContentAndShowLoading();
+            const slider = document.getElementById('ratingSlider');
+            const payload = {
+                theaters: theaters,
+                rating_threshold: slider ? parseFloat(slider.value) : 4.0,
+                disable_cache: document.getElementById('forceFresh')?.checked || false
+            };
 
             fetch('/api/refresh', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    theaters: selectedTheaters,
-                    rating_threshold: parseFloat(ratingThreshold),
-                    disable_cache: disableCache
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             })
-                .then(response => response.json())
-                .then(data => {
+            .then(r => r.json())
+            .then(data => {
+                if (data.status === 'started' || data.status === 'already_running') {
+                    const results = document.getElementById('results');
+                    if (results) results.style.display = 'none';
+                    const loading = document.getElementById('scrape-loading');
+                    if (loading) loading.style.display = '';
+                    wasScraping = true;
                     updateStatus();
-                    // The page will auto-reload when scraping completes via the status checking
-                });
+                    if (!statusInterval) statusInterval = setInterval(updateStatus, 5000);
+                }
+            })
+            .catch(() => alert('Could not start the refresh — is the server running?'));
         }
+
+        /* ---------------------------- status ---------------------------- */
+        function updateStatus() {
+            fetch('/api/status')
+                .then(r => r.json())
+                .then(data => {
+                    const statusDiv = document.getElementById('status');
+                    if (!statusDiv) return;
+
+                    if (data.is_scraping) {
+                        wasScraping = true;
+                        statusDiv.className = 'status loading';
+                        let html = '<div class="spinner"></div><div class="status-header">Scraping movie data… this may take a few minutes.</div>';
+                        if (data.status_messages && data.status_messages.length) {
+                            html += '<div class="status-log">';
+                            data.status_messages.forEach(m => { html += `<div class="status-message">${m}</div>`; });
+                            html += '</div>';
+                        }
+                        statusDiv.innerHTML = html;
+                        const log = statusDiv.querySelector('.status-log');
+                        if (log) log.scrollTop = log.scrollHeight;
+                        if (!statusInterval) statusInterval = setInterval(updateStatus, 5000);
+                    } else {
+                        if (wasScraping) { wasScraping = false; location.reload(); return; }
+                        if (statusInterval) { clearInterval(statusInterval); statusInterval = null; }
+                    }
+                })
+                .catch(() => {});
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            applyFilters();
+            const scrapingNow = document.getElementById('scrape-loading') && document.getElementById('scrape-loading').style.display !== 'none';
+            if (scrapingNow) {
+                wasScraping = true;
+                statusInterval = setInterval(updateStatus, 5000);
+            }
+            updateStatus();
+        });
     </script>
 </body>
 </html>

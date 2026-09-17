@@ -177,6 +177,20 @@ def index():
                          data_notice=movies_data['data_notice'],
                          newsletter_content=newsletter_content)
 
+@app.route('/newsletter')
+def newsletter():
+    """Standalone view of the generated weekly newsletter."""
+    if not movies_data['movies']:
+        return Response("<p style='font-family: sans-serif; padding: 40px'>No data yet — refresh the movie listings first.</p>", mimetype='text/html')
+    generator = NewsletterGenerator(rating_threshold=movies_data['rating_threshold'])
+    content = generator.generate_html(
+        movies_data['movies'],
+        movies_data['movies_not_found'],
+        movies_data['movies_found_no_rating']
+    )
+    return Response(content, mimetype='text/html')
+
+
 @app.route('/api/movies')
 def api_movies():
     """API endpoint to get all movies data"""

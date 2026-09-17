@@ -1,310 +1,243 @@
 {% extends "base.html" %}
 
-{% block title %}NYC Movie Finder - Home{% endblock %}
+{% block title %}NYC Movie Finder{% endblock %}
 
 {% block content %}
-<div class="controls">
-    <div class="theater-selection">
-        <h3>Select Theaters to Scrape:</h3>
-        <div class="theater-grid">
-            <label class="theater-checkbox">
-                <input type="checkbox" id="alamo" checked>
-                <span class="checkmark"></span>
-                🎬 Alamo Drafthouse
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="metrograph" checked>
-                <span class="checkmark"></span>
-                📽️ Metrograph
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="ifc" checked>
-                <span class="checkmark"></span>
-                🎭 IFC Center
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="angelika" checked>
-                <span class="checkmark"></span>
-                🎪 Angelika Film Center
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="angelika_village_east" checked>
-                <span class="checkmark"></span>
-                🎨 Angelika Village East
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="paris_theater" checked>
-                <span class="checkmark"></span>
-                🏛️ Paris Theater
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="nitehawk_williamsburg" checked>
-                <span class="checkmark"></span>
-                🦉 Nitehawk Williamsburg
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="nitehawk_prospect_park" checked>
-                <span class="checkmark"></span>
-                🌳 Nitehawk Prospect Park
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="moving_image" checked>
-                <span class="checkmark"></span>
-                🎞️ Museum of Moving Image
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="film_forum" checked>
-                <span class="checkmark"></span>
-                📺 Film Forum
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="bam" checked>
-                <span class="checkmark"></span>
-                🎩 BAM Rose Cinemas
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="roxy" checked>
-                <span class="checkmark"></span>
-                🍸 Roxy Cinema
-            </label>
-            <label class="theater-checkbox">
-                <input type="checkbox" id="film_linc" checked>
-                <span class="checkmark"></span>
-                🎼 Film at Lincoln Center
-            </label>
+{% set theater_names = {
+    'alamo': 'Alamo Drafthouse',
+    'metrograph': 'Metrograph',
+    'ifc': 'IFC Center',
+    'angelika': 'Angelika Film Center',
+    'angelika_village_east': 'Angelika Village East',
+    'paris_theater': 'Paris Theater',
+    'nitehawk_williamsburg': 'Nitehawk Williamsburg',
+    'nitehawk_prospect_park': 'Nitehawk Prospect Park',
+    'moving_image': 'Museum of the Moving Image',
+    'film_forum': 'Film Forum',
+    'bam': 'BAM Rose Cinemas',
+    'roxy': 'Roxy Cinema',
+    'film_linc': 'Film at Lincoln Center'
+} %}
+
+<header class="masthead">
+    <div>
+        <div class="eyebrow">
+            <span class="dot"></span>
+            {% if last_updated %}
+                Updated {{ last_updated.strftime('%b %-d, %-I:%M %p') }} ET · Sourced from {{ theater_names|length }} screening rooms across the boroughs
+            {% else %}
+                Sourced from {{ theater_names|length }} screening rooms across the boroughs
+            {% endif %}
         </div>
-        <div class="selection-controls">
-            <button class="btn-small" onclick="selectAllTheaters()">Select All</button>
-            <button class="btn-small" onclick="deselectAllTheaters()">Deselect All</button>
+        <h1>NYC Movie Finder</h1>
+        <p class="lede">The best films playing at NYC's finest independent theaters, rated by Letterboxd. A typography-led schedule without the visual clutter.</p>
+    </div>
+    <aside class="journal-card">
+        <div class="kicker">Cinephile Editions</div>
+        <h2>Weekly Cinephile Journal</h2>
+        <p>This week's top-rated screenings, formatted as a shareable newsletter.</p>
+        <a href="/newsletter">Explore journal →</a>
+    </aside>
+</header>
+
+<hr class="rule">
+
+<div class="venues-head">
+    <span class="label">Filter by venue ({{ theater_names|length }} screening rooms)</span>
+    <span class="links">
+        <button onclick="setAllVenues(true)">Select All</button>
+        <button onclick="setAllVenues(false)">Deselect All</button>
+    </span>
+</div>
+<div class="chips">
+    {% for tid, tname in theater_names.items() %}
+    <button class="chip on" data-id="{{ tid }}" onclick="toggleChip(this)">
+        <span class="chip-dot"></span>{{ tname }}
+    </button>
+    {% endfor %}
+</div>
+
+<div class="filter-panel">
+    <div class="filter-group">
+        <label for="genreSelect">Genre</label>
+        <select id="genreSelect" onchange="applyFilters()">
+            <option value="">All Genres</option>
+            {% for genre in all_genres %}
+            <option value="{{ genre }}">{{ genre }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
+        <label for="dateFrom">Date from</label>
+        <input type="date" id="dateFrom" onchange="applyFilters()">
+    </div>
+    <div class="filter-group">
+        <label for="dateTo">Date to</label>
+        <input type="date" id="dateTo" onchange="applyFilters()">
+    </div>
+    <div class="filter-group rating-group">
+        <div class="rating-head">
+            <label for="ratingSlider">Min rating</label>
+            <span class="rating-value" id="ratingValue">{{ '%.1f'|format(rating_threshold or 4.0) }}★ or higher</span>
         </div>
+        <input type="range" id="ratingSlider" min="1" max="5" step="0.1"
+               value="{{ rating_threshold or 4.0 }}" oninput="applyFilters()">
     </div>
-    <div class="rating-threshold">
-        <label for="ratingThreshold">⭐ Minimum Rating for "Highly Rated" Movies:</label>
-        <input type="number" id="ratingThreshold" min="1.0" max="5.0" step="0.1" value="{{ rating_threshold or 4.0 }}">
-        <span class="rating-help">Ratings from 1.0 to 5.0 stars</span>
-    </div>
-    <div class="cache-control">
-        <label class="theater-checkbox">
-            <input type="checkbox" id="disableCache">
-            <span class="checkmark"></span>
-            🚫 Disable Cache (Force Fresh Data)
-        </label>
-    </div>
-    <button class="btn" onclick="refreshData()">🔄 Refresh Data</button>
+    <button class="btn-refresh" onclick="refreshData()">⟳ Refresh Data</button>
+</div>
+<div class="panel-foot">
+    <label><input type="checkbox" id="forceFresh"> Force fresh scrape (ignore today's cache)</label>
 </div>
 
 <div id="status" class="status">
-    {% if is_scraping %}
-        <div class="spinner"></div>
-        <div class="status-header">Scraping movie data... This may take a few minutes.</div>
-        {% if status_messages %}
-            <div class="status-log">
-                {% for message in status_messages %}
-                    <div class="status-message">{{ message }}</div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% elif last_updated %}
-        Last updated: {{ last_updated.strftime('%B %d, %Y at %I:%M %p') }} | {{ movies|length }} movies found
-        {% if status_messages %}
-            <details class="status-details">
-                <summary>View last scraping log</summary>
-                <div class="status-log">
-                    {% for message in status_messages %}
-                        <div class="status-message">{{ message }}</div>
-                    {% endfor %}
-                </div>
-            </details>
-        {% endif %}
-        <div id="cache-status" class="cache-status"></div>
-    {% else %}
-        {{ data_notice or 'No data cached yet — click Refresh Data to scrape the latest listings.' }}
+    {% if is_scraping %}{% elif not movies %}
+        <span class="data-notice">{{ data_notice or 'No data cached yet — hit Refresh Data to scrape the latest listings.' }}</span>
     {% endif %}
 </div>
 
-{% if is_scraping and not movies %}
-<div class="loading-section">
+<div id="scrape-loading" class="loading-section" {% if not is_scraping %}style="display: none"{% endif %}>
     <div class="goose-container">
         <img src="{{ url_for('static', filename='goose.png') }}" alt="Waddling goose" class="goose">
     </div>
-    <p>Scraping movie data... Results will appear here when complete.</p>
-</div>
-{% elif movies %}
-{% set theater_names = {
-    'alamo': '🎬 Alamo Drafthouse',
-    'metrograph': '📽️ Metrograph',
-    'ifc': '🎭 IFC Center',
-    'angelika': '🎪 Angelika Film Center',
-    'angelika_village_east': '🎨 Angelika Village East',
-    'paris_theater': '🏛️ Paris Theater',
-    'nitehawk_williamsburg': '🦉 Nitehawk Williamsburg',
-    'nitehawk_prospect_park': '🌳 Nitehawk Prospect Park',
-    'moving_image': '🎞️ Museum of Moving Image',
-    'film_forum': '📺 Film Forum',
-    'bam': '🎩 BAM Rose Cinemas',
-    'roxy': '🍸 Roxy Cinema',
-    'film_linc': '🎼 Film at Lincoln Center'
-} %}
-{% set present_theaters = [] %}
-{% for movie in movies %}
-    {% for s in movie.sources or [movie.source] %}
-        {% if s and s not in present_theaters %}{% set _ = present_theaters.append(s) %}{% endif %}
-    {% endfor %}
-{% endfor %}
-<div class="section filter-bar">
-    <h2>🔍 Filter Results</h2>
-    {% if present_theaters|length > 1 %}
-    <div class="filter-panel">
-        <h3>Theater:</h3>
-        <div class="genre-grid">
-            {% for tid in present_theaters %}
-            <label class="theater-checkbox">
-                <input type="checkbox" class="theater-filter-checkbox" value="{{ tid }}" checked onchange="applyFilters()">
-                <span class="checkmark"></span>
-                {{ theater_names.get(tid, tid.replace('_', ' ').title()) }}
-            </label>
-            {% endfor %}
-        </div>
-        <div class="selection-controls">
-            <button class="btn-small" onclick="setAllTheaterFilters(true)">Select All</button>
-            <button class="btn-small" onclick="setAllTheaterFilters(false)">Deselect All</button>
-        </div>
-    </div>
-    {% endif %}
-    {% if all_genres %}
-    <div class="filter-panel">
-        <h3>Genre:</h3>
-        <div class="genre-grid">
-            {% for genre in all_genres %}
-            <label class="theater-checkbox">
-                <input type="checkbox" class="genre-checkbox" value="{{ genre }}" checked onchange="applyFilters()">
-                <span class="checkmark"></span>
-                {{ genre }}
-            </label>
-            {% endfor %}
-        </div>
-        <div class="selection-controls">
-            <button class="btn-small" onclick="selectAllGenres()">Select All</button>
-            <button class="btn-small" onclick="deselectAllGenres()">Deselect All</button>
-        </div>
-    </div>
-    {% endif %}
-    <div class="filter-panel date-filter">
-        <h3>Date:</h3>
-        <div class="date-inputs">
-            <label for="dateFrom">From</label>
-            <input type="date" id="dateFrom" onchange="applyFilters()">
-            <label for="dateTo">To</label>
-            <input type="date" id="dateTo" onchange="applyFilters()">
-            <button class="btn-small" onclick="clearDateFilter()">Clear</button>
-        </div>
-        <span class="rating-help">Movies without listed dates are assumed to be showing today.</span>
-    </div>
-</div>
-<div class="section">
-    <h2 id="high-rated-title">🌟 Highly Rated Movies (≥{{ rating_threshold or 4.0 }}⭐)</h2>
-    {% set threshold = rating_threshold or 4.0 %}
-    {% set high_rated = movies | selectattr('letterboxd_rating') | selectattr('letterboxd_rating', '>=', threshold) | sort(attribute='letterboxd_rating', reverse=true) %}
-    
-    {% if high_rated %}
-        <div class="movies-grid">
-            {% for movie in high_rated %}
-            <div class="movie" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}" data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
-                <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
-                {% if movie.genres %}
-                <div class="movie-genres">{{ movie.genres|join(' · ') }}</div>
-                {% endif %}
-                <div class="rating high">⭐ {{ "%.1f"|format(movie.letterboxd_rating) }}</div>
-                <div class="venue">📍 {{ movie.venue }}</div>
-                {% if movie.dates_display %}
-                <div class="movie-dates">📅 {{ movie.dates_display }}</div>
-                {% endif %}
-                <div class="links">
-                    {% if movie.letterboxd_url %}
-                    <a href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd</a>
-                    {% endif %}
-                    {% if movie.url %}
-                    <a href="{{ movie.url }}" target="_blank">Tickets</a>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p>No high-rated movies found this week.</p>
-    {% endif %}
+    <p>Scraping movie data… results will appear here when complete.</p>
 </div>
 
-<div class="section">
-    <h2>⚠️ Movies Found on Letterboxd (No Ratings Yet)</h2>
-    {% set no_rating_movies = movies | selectattr('letterboxd_url') | rejectattr('letterboxd_rating') %}
-    
+{% if movies %}
+<div id="results">
+
+    <section class="sec">
+        <div class="sec-head">
+            <h2>Highly Rated playing this week <span class="sec-note" id="highRatedNote">(Rated {{ '%.1f'|format(rating_threshold or 4.0) }}★+ by Letterboxd users)</span></h2>
+            <span class="match-count"></span>
+        </div>
+        {% set rated = movies | selectattr('letterboxd_rating') | sort(attribute='letterboxd_rating', reverse=true) | list %}
+        {% if rated %}
+        <div class="grid">
+            {% for movie in rated %}
+            <article class="card m-{{ loop.index0 % 8 }}"
+                     data-rating="{{ movie.letterboxd_rating }}"
+                     data-genres="{{ (movie.genres or [])|join('|') }}"
+                     data-dates="{{ (movie.show_dates or [])|join(',') }}"
+                     data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
+                <div class="card-head">
+                    <div class="card-head-row">
+                        <span class="rate-badge">{{ '%.1f'|format(movie.letterboxd_rating) }} ★</span>
+                        <span class="head-label">Letterboxd Rated</span>
+                    </div>
+                    <h3 class="card-title">{{ movie.title }}</h3>
+                    <div class="title-rule"></div>
+                </div>
+                <div class="card-body">
+                    {% if movie.genres %}
+                    <div class="tags">
+                        {% for g in movie.genres[:3] %}<span class="tag">{{ g }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
+                    <div class="when"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                </div>
+                <div class="card-foot">
+                    {% if movie.letterboxd_url %}
+                    <a class="lb-link" href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd Review ↗</a>
+                    {% else %}<span class="no-link"></span>{% endif %}
+                    {% if movie.url %}
+                    <a class="venue-link" href="{{ movie.url }}" target="_blank">Venue Tickets ›</a>
+                    {% else %}<span class="no-link">No ticket link</span>{% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="empty-note">No rated movies found — try refreshing the data.</p>
+        {% endif %}
+    </section>
+
+    {% set no_rating_movies = movies | selectattr('letterboxd_url') | rejectattr('letterboxd_rating') | list %}
     {% if no_rating_movies %}
-        <div class="movies-grid">
+    <section class="sec">
+        <div class="sec-head">
+            <h2>Awaiting ratings <span class="sec-note">(On Letterboxd, not enough audience scores yet)</span></h2>
+            <span class="match-count"></span>
+        </div>
+        <div class="grid">
             {% for movie in no_rating_movies %}
-            <div class="movie dimmed" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}" data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
-                <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
-                {% if movie.genres %}
-                <div class="movie-genres">{{ movie.genres|join(' · ') }}</div>
-                {% endif %}
-                <div class="rating warning">⚠️ No rating yet</div>
-                <div class="venue">📍 {{ movie.venue }}</div>
-                {% if movie.dates_display %}
-                <div class="movie-dates">📅 {{ movie.dates_display }}</div>
-                {% endif %}
-                <div class="links">
-                    {% if movie.letterboxd_url %}
-                    <a href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd</a>
-                    {% endif %}
-                    {% if movie.url %}
-                    <a href="{{ movie.url }}" target="_blank">Tickets</a>
-                    {% endif %}
+            <article class="card dimmed m-4"
+                     data-genres="{{ (movie.genres or [])|join('|') }}"
+                     data-dates="{{ (movie.show_dates or [])|join(',') }}"
+                     data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
+                <div class="card-head">
+                    <div class="card-head-row">
+                        <span class="rate-badge quiet">Unrated</span>
+                        <span class="head-label">On Letterboxd</span>
+                    </div>
+                    <h3 class="card-title">{{ movie.title }}</h3>
+                    <div class="title-rule"></div>
                 </div>
-            </div>
+                <div class="card-body">
+                    {% if movie.genres %}
+                    <div class="tags">
+                        {% for g in movie.genres[:3] %}<span class="tag">{{ g }}</span>{% endfor %}
+                    </div>
+                    {% endif %}
+                    <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
+                    <div class="when"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                </div>
+                <div class="card-foot">
+                    <a class="lb-link" href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd ↗</a>
+                    {% if movie.url %}
+                    <a class="venue-link" href="{{ movie.url }}" target="_blank">Venue Tickets ›</a>
+                    {% else %}<span class="no-link">No ticket link</span>{% endif %}
+                </div>
+            </article>
             {% endfor %}
         </div>
-    {% else %}
-        <p>No movies found on Letterboxd without ratings.</p>
+    </section>
     {% endif %}
-</div>
 
-<div class="section">
-    <h2>❌ Screenings Not Found on Letterboxd</h2>
-    {% set not_found_movies = movies | rejectattr('letterboxd_url') %}
-    
+    {% set not_found_movies = movies | rejectattr('letterboxd_url') | list %}
     {% if not_found_movies %}
-        <div class="movies-grid">
+    <section class="sec">
+        <div class="sec-head">
+            <h2>Off the record <span class="sec-note">(Screenings we couldn't match on Letterboxd)</span></h2>
+            <span class="match-count"></span>
+        </div>
+        <div class="grid">
             {% for movie in not_found_movies %}
-            <div class="movie dimmed" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}" data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
-                <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
-                <div class="rating error">❌ Not found</div>
-                <div class="venue">📍 {{ movie.venue }}</div>
-                {% if movie.dates_display %}
-                <div class="movie-dates">📅 {{ movie.dates_display }}</div>
-                {% endif %}
-                <div class="links">
-                    {% if movie.url %}
-                    <a href="{{ movie.url }}" target="_blank">Tickets</a>
-                    {% else %}
-                    <span class="no-link">No ticket link available</span>
-                    {% endif %}
+            <article class="card dimmed m-6"
+                     data-genres=""
+                     data-dates="{{ (movie.show_dates or [])|join(',') }}"
+                     data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
+                <div class="card-head">
+                    <div class="card-head-row">
+                        <span class="rate-badge quiet">Not matched</span>
+                        <span class="head-label">Special screening</span>
+                    </div>
+                    <h3 class="card-title">{{ movie.title }}</h3>
+                    <div class="title-rule"></div>
                 </div>
-            </div>
+                <div class="card-body">
+                    <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
+                    <div class="when"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                </div>
+                <div class="card-foot">
+                    <span class="no-link"></span>
+                    {% if movie.url %}
+                    <a class="venue-link" href="{{ movie.url }}" target="_blank">Venue Tickets ›</a>
+                    {% else %}<span class="no-link">No ticket link</span>{% endif %}
+                </div>
+            </article>
             {% endfor %}
         </div>
-    {% else %}
-        <p>All movies found on Letterboxd!</p>
+    </section>
     {% endif %}
-</div>
 
-{% else %}
+</div>
+{% elif not is_scraping %}
 <div class="loading">
     <div class="goose-container">
         <img src="{{ url_for('static', filename='goose.png') }}" alt="Waddling goose" class="goose">
     </div>
-    <p>Loading movie data...</p>
+    <p>Loading movie data…</p>
 </div>
 {% endif %}
-
-
 {% endblock %}
