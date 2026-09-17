@@ -33,7 +33,7 @@ class LetterboxdAPI:
             # Local file fallback when Supabase isn't configured
             self._load_csv_cache()
         self._lock = threading.Lock()  # For thread-safe operations
-        self._browser_sem = threading.Semaphore(2)  # Cap concurrent Playwright fallbacks
+        self._browser_sem = threading.Semaphore(1)  # Cap concurrent Playwright fallbacks (each is a full Chromium process)
     
     def _load_csv_cache(self):
         """Load existing cache from CSV file (includes negative results: no-rating/not-found)"""
@@ -469,7 +469,7 @@ class LetterboxdAPI:
         """Use Playwright to get rating from dynamically loaded content"""
         try:
             async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
+                browser = await p.chromium.launch(headless=True, args=['--disable-dev-shm-usage', '--disable-gpu'])
                 page = await browser.new_page()
                 
                 # Use shorter timeout and less strict wait condition

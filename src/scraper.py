@@ -1100,7 +1100,7 @@ class MovieScraper:
             'ifc': self.scrape_ifc_center,
         }
 
-        sem = asyncio.Semaphore(4)  # cap concurrent pages (memory on Render)
+        sem = asyncio.Semaphore(2)  # cap concurrent pages (memory on Render)
 
         async def run_playwright(tid, coro_fn, browser):
             async with sem:

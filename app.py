@@ -74,7 +74,7 @@ def scrape_movies(selected_theaters=None, disable_cache=False):
         letterboxd = LetterboxdAPI()
         
         # Process all movies at once with caching and multithreading
-        movies = letterboxd.process_movie_batch(movies, progress_callback=log_status, max_workers=15)
+        movies = letterboxd.process_movie_batch(movies, progress_callback=log_status, max_workers=8)
         
         # Get movies that weren't found
         movies_not_found = [movie for movie in movies if movie.get('letterboxd_rating') is None and movie.get('letterboxd_url') is None]
