@@ -6,7 +6,7 @@
     <title>{% block title %}NYC Movie Finder{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poiret+One&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0d0c0a;
@@ -19,7 +19,7 @@
             --gold: #d4a94e;
             --gold-dim: rgba(212, 169, 78, 0.35);
             --green: #7dc98f;
-            --serif: 'Instrument Serif', Georgia, serif;
+            --serif: 'Poiret One', sans-serif;
             --sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
 
@@ -69,6 +69,8 @@
         }
 
         .masthead h1 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
             font-family: var(--serif);
             font-weight: 400;
             font-size: 58px;
@@ -389,6 +391,9 @@
         }
 
         .sec-head h2 {
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-size: 27px;
             font-family: var(--serif);
             font-weight: 400;
             font-size: 34px;
@@ -471,6 +476,9 @@
         }
 
         .card-title {
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 24px;
             font-family: var(--serif);
             font-weight: 400;
             font-size: 29px;
@@ -615,7 +623,9 @@
         @media (max-width: 900px) {
             body { padding: 28px 16px; }
             .masthead { flex-direction: column; gap: 24px; }
-            .masthead h1 { font-size: 42px; }
+            .masthead h1 {
+            text-transform: uppercase;
+            letter-spacing: 2px; font-size: 42px; }
             .journal-card { width: 100%; }
             .btn-refresh { margin-left: 0; width: 100%; justify-content: center; }
             .filter-group select, .filter-group input[type="date"] { min-width: 130px; }
