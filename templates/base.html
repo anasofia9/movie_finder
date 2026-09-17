@@ -952,7 +952,12 @@
             return Array.from(checkboxes).map(checkbox => checkbox.id);
         }
 
-        // Genre + date filter functions
+        // Theater + genre + date filter functions
+        function setAllTheaterFilters(checked) {
+            document.querySelectorAll('.theater-filter-checkbox').forEach(cb => cb.checked = checked);
+            applyFilters();
+        }
+
         function selectAllGenres() {
             document.querySelectorAll('.genre-checkbox').forEach(cb => cb.checked = true);
             applyFilters();
@@ -972,6 +977,10 @@
         }
 
         function applyFilters() {
+            const theaterBoxes = Array.from(document.querySelectorAll('.theater-filter-checkbox'));
+            const selectedTheaters = new Set(theaterBoxes.filter(cb => cb.checked).map(cb => cb.value));
+            const theaterFilterActive = theaterBoxes.length > 0 && selectedTheaters.size < theaterBoxes.length;
+
             const genreBoxes = Array.from(document.querySelectorAll('.genre-checkbox'));
             const selected = new Set(genreBoxes.filter(cb => cb.checked).map(cb => cb.value));
             const genreFilterActive = genreBoxes.length > 0 && selected.size < genreBoxes.length;
@@ -985,7 +994,11 @@
 
             document.querySelectorAll('.section .movie').forEach(card => {
                 let visible = true;
-                if (genreFilterActive) {
+                if (theaterFilterActive) {
+                    const theaters = (card.dataset.theaters || '').split('|').filter(t => t);
+                    visible = theaters.some(t => selectedTheaters.has(t));
+                }
+                if (visible && genreFilterActive) {
                     const genres = (card.dataset.genres || '').split('|').filter(g => g);
                     visible = genres.some(g => selected.has(g));
                 }

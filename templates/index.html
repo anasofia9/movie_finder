@@ -63,35 +63,6 @@
             <button class="btn-small" onclick="deselectAllTheaters()">Deselect All</button>
         </div>
     </div>
-    {% if all_genres %}
-    <div class="filter-panel">
-        <h3>Filter by Genre:</h3>
-        <div class="genre-grid">
-            {% for genre in all_genres %}
-            <label class="theater-checkbox">
-                <input type="checkbox" class="genre-checkbox" value="{{ genre }}" checked onchange="applyFilters()">
-                <span class="checkmark"></span>
-                {{ genre }}
-            </label>
-            {% endfor %}
-        </div>
-        <div class="selection-controls">
-            <button class="btn-small" onclick="selectAllGenres()">Select All</button>
-            <button class="btn-small" onclick="deselectAllGenres()">Deselect All</button>
-        </div>
-    </div>
-    {% endif %}
-    <div class="filter-panel date-filter">
-        <h3>Filter by Date:</h3>
-        <div class="date-inputs">
-            <label for="dateFrom">From</label>
-            <input type="date" id="dateFrom" onchange="applyFilters()">
-            <label for="dateTo">To</label>
-            <input type="date" id="dateTo" onchange="applyFilters()">
-            <button class="btn-small" onclick="clearDateFilter()">Clear</button>
-        </div>
-        <span class="rating-help">Movies without listed dates are assumed to be showing today.</span>
-    </div>
     <div class="rating-threshold">
         <label for="ratingThreshold">⭐ Minimum Rating for "Highly Rated" Movies:</label>
         <input type="number" id="ratingThreshold" min="1.0" max="5.0" step="0.1" value="{{ rating_threshold or 4.0 }}">
@@ -144,6 +115,74 @@
     <p>Scraping movie data... Results will appear here when complete.</p>
 </div>
 {% elif movies %}
+{% set theater_names = {
+    'alamo': '🎬 Alamo Drafthouse',
+    'metrograph': '📽️ Metrograph',
+    'ifc': '🎭 IFC Center',
+    'angelika': '🎪 Angelika Film Center',
+    'angelika_village_east': '🎨 Angelika Village East',
+    'paris_theater': '🏛️ Paris Theater',
+    'nitehawk_williamsburg': '🦉 Nitehawk Williamsburg',
+    'nitehawk_prospect_park': '🌳 Nitehawk Prospect Park',
+    'moving_image': '🎞️ Museum of Moving Image',
+    'film_forum': '📺 Film Forum'
+} %}
+{% set present_theaters = [] %}
+{% for movie in movies %}
+    {% for s in movie.sources or [movie.source] %}
+        {% if s and s not in present_theaters %}{% set _ = present_theaters.append(s) %}{% endif %}
+    {% endfor %}
+{% endfor %}
+<div class="section filter-bar">
+    <h2>🔍 Filter Results</h2>
+    {% if present_theaters|length > 1 %}
+    <div class="filter-panel">
+        <h3>Theater:</h3>
+        <div class="genre-grid">
+            {% for tid in present_theaters %}
+            <label class="theater-checkbox">
+                <input type="checkbox" class="theater-filter-checkbox" value="{{ tid }}" checked onchange="applyFilters()">
+                <span class="checkmark"></span>
+                {{ theater_names.get(tid, tid.replace('_', ' ').title()) }}
+            </label>
+            {% endfor %}
+        </div>
+        <div class="selection-controls">
+            <button class="btn-small" onclick="setAllTheaterFilters(true)">Select All</button>
+            <button class="btn-small" onclick="setAllTheaterFilters(false)">Deselect All</button>
+        </div>
+    </div>
+    {% endif %}
+    {% if all_genres %}
+    <div class="filter-panel">
+        <h3>Genre:</h3>
+        <div class="genre-grid">
+            {% for genre in all_genres %}
+            <label class="theater-checkbox">
+                <input type="checkbox" class="genre-checkbox" value="{{ genre }}" checked onchange="applyFilters()">
+                <span class="checkmark"></span>
+                {{ genre }}
+            </label>
+            {% endfor %}
+        </div>
+        <div class="selection-controls">
+            <button class="btn-small" onclick="selectAllGenres()">Select All</button>
+            <button class="btn-small" onclick="deselectAllGenres()">Deselect All</button>
+        </div>
+    </div>
+    {% endif %}
+    <div class="filter-panel date-filter">
+        <h3>Date:</h3>
+        <div class="date-inputs">
+            <label for="dateFrom">From</label>
+            <input type="date" id="dateFrom" onchange="applyFilters()">
+            <label for="dateTo">To</label>
+            <input type="date" id="dateTo" onchange="applyFilters()">
+            <button class="btn-small" onclick="clearDateFilter()">Clear</button>
+        </div>
+        <span class="rating-help">Movies without listed dates are assumed to be showing today.</span>
+    </div>
+</div>
 <div class="section">
     <h2 id="high-rated-title">🌟 Highly Rated Movies (≥{{ rating_threshold or 4.0 }}⭐)</h2>
     {% set threshold = rating_threshold or 4.0 %}
@@ -152,7 +191,7 @@
     {% if high_rated %}
         <div class="movies-grid">
             {% for movie in high_rated %}
-            <div class="movie" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}">
+            <div class="movie" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}" data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
                 <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
                 {% if movie.genres %}
                 <div class="movie-genres">{{ movie.genres|join(' · ') }}</div>
@@ -185,7 +224,7 @@
     {% if no_rating_movies %}
         <div class="movies-grid">
             {% for movie in no_rating_movies %}
-            <div class="movie dimmed" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}">
+            <div class="movie dimmed" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}" data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
                 <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
                 {% if movie.genres %}
                 <div class="movie-genres">{{ movie.genres|join(' · ') }}</div>
@@ -218,7 +257,7 @@
     {% if not_found_movies %}
         <div class="movies-grid">
             {% for movie in not_found_movies %}
-            <div class="movie dimmed" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}">
+            <div class="movie dimmed" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}" data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
                 <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
                 <div class="rating error">❌ Not found</div>
                 <div class="venue">📍 {{ movie.venue }}</div>
