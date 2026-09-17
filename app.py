@@ -101,12 +101,19 @@ def index():
             movies_data['movies_found_no_rating']
         )
     
-    return render_template('index.html', 
+    # All genres saved in the ratings DB (Supabase or local CSV) for the filter checkboxes
+    try:
+        all_genres = LetterboxdAPI().get_all_genres()
+    except Exception:
+        all_genres = []
+
+    return render_template('index.html',
                          movies=movies_data['movies'],
                          last_updated=movies_data['last_updated'],
                          is_scraping=movies_data['is_scraping'],
                          rating_threshold=movies_data['rating_threshold'],
                          status_messages=status_messages[-10:],
+                         all_genres=all_genres,
                          newsletter_content=newsletter_content)
 
 @app.route('/api/movies')
@@ -142,12 +149,21 @@ def api_refresh():
         return jsonify({'status': 'already_running', 'message': 'Scraping already in progress'})
 
 
+# Memoized cache status (avoids a Supabase query on every 5s status poll)
+_cache_status_memo = {'time': 0, 'value': None}
+
+def get_cache_status_memoized(max_age_seconds=60):
+    now = time.time()
+    if _cache_status_memo['value'] is None or now - _cache_status_memo['time'] > max_age_seconds:
+        scraper = MovieScraper(log_callback=lambda msg: None)
+        _cache_status_memo['value'] = scraper.get_cache_status()
+        _cache_status_memo['time'] = now
+    return _cache_status_memo['value']
+
 @app.route('/api/status')
 def api_status():
     """Get current scraping status"""
-    # Get cache status
-    scraper = MovieScraper()
-    cache_status = scraper.get_cache_status()
+    cache_status = get_cache_status_memoized()
     
     return jsonify({
         'is_scraping': movies_data['is_scraping'],

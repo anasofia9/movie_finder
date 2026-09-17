@@ -12,6 +12,11 @@ from typing import Optional, Dict, List
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import threading
 
+try:
+    from . import db
+except ImportError:
+    import db
+
 class LetterboxdAPI:
     """Fetch Letterboxd ratings for movies"""
     
@@ -24,81 +29,175 @@ class LetterboxdAPI:
         self.movies_found_no_rating = []
         self.cache_file = 'letterboxd_cache.csv'
         self.csv_cache = {}
-        self._load_csv_cache()
+        if not db.is_enabled():
+            # Local file fallback when Supabase isn't configured
+            self._load_csv_cache()
         self._lock = threading.Lock()  # For thread-safe operations
+        self._browser_sem = threading.Semaphore(2)  # Cap concurrent Playwright fallbacks
     
     def _load_csv_cache(self):
-        """Load existing cache from CSV file"""
+        """Load existing cache from CSV file (includes negative results: no-rating/not-found)"""
         if os.path.exists(self.cache_file):
             try:
+                # Legacy files may have no header row at all
                 with open(self.cache_file, 'r', newline='', encoding='utf-8') as csvfile:
-                    reader = csv.DictReader(csvfile)
+                    first_line = csvfile.readline()
+                has_header = first_line.startswith('letterboxd_url')
+
+                with open(self.cache_file, 'r', newline='', encoding='utf-8') as csvfile:
+                    if has_header:
+                        reader = csv.DictReader(csvfile)
+                    else:
+                        reader = csv.DictReader(csvfile, fieldnames=self.CSV_FIELDS[:6])
+                    has_resolved_url = 'resolved_url' in (reader.fieldnames or [])
+                    has_genres = 'genres' in (reader.fieldnames or [])
                     for row in reader:
                         letterboxd_url = row['letterboxd_url']
                         rating = float(row['rating']) if row['rating'] and row['rating'] != 'None' else None
-                        
-                        # Only load cached entries that have ratings
-                        if rating is not None:
-                            self.csv_cache[letterboxd_url] = {
-                                'title': row['title'],
-                                'rating': rating,
-                                'rating_count': row['rating_count'] if row['rating_count'] and row['rating_count'] != 'None' else None,
-                                'year': row['year'] if row['year'] and row['year'] != 'None' else None,
-                                'updated': row['updated'],
-                                'url': letterboxd_url
-                            }
-                # print(f"Loaded {len(self.csv_cache)} cached ratings from {self.cache_file}")
+
+                        if has_resolved_url:
+                            resolved = row['resolved_url'] if row['resolved_url'] and row['resolved_url'] != 'None' else None
+                        else:
+                            # Legacy rows (pre-resolved_url): only positives were saved, keyed by their own URL
+                            resolved = letterboxd_url
+
+                        self.csv_cache[letterboxd_url] = {
+                            'title': row['title'],
+                            'rating': rating,
+                            'rating_count': row['rating_count'] if row['rating_count'] and row['rating_count'] != 'None' else None,
+                            'year': row['year'] if row['year'] and row['year'] != 'None' else None,
+                            'updated': row['updated'],
+                            'url': resolved,
+                            'genres': self._decode_genres(row.get('genres')) if has_genres else None
+                        }
+
+                # One-time migration: rewrite legacy file with the new header so appends stay aligned
+                if (not has_resolved_url or not has_genres) and self.csv_cache:
+                    self._rewrite_csv_cache()
             except Exception as e:
                 print(f"Error loading cache: {e}")
                 self.csv_cache = {}
+
+    def _rewrite_csv_cache(self):
+        """Rewrite the whole CSV cache file with the current schema"""
+        try:
+            with open(self.cache_file, 'w', newline='', encoding='utf-8') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=self.CSV_FIELDS)
+                writer.writeheader()
+                for key, entry in self.csv_cache.items():
+                    writer.writerow({
+                        'letterboxd_url': key,
+                        'title': entry['title'],
+                        'rating': entry['rating'],
+                        'rating_count': entry['rating_count'],
+                        'year': entry['year'],
+                        'updated': entry['updated'],
+                        'resolved_url': entry['url'],
+                        'genres': self._encode_genres(entry.get('genres'))
+                    })
+        except Exception as e:
+            print(f"Error rewriting cache: {e}")
     
+    CSV_FIELDS = ['letterboxd_url', 'title', 'rating', 'rating_count', 'year', 'updated', 'resolved_url', 'genres']
+
+    # In-memory 'genres' values: None = never fetched, '' = fetched but none found,
+    # 'Drama|Comedy' = '|'-joined genre list. CSV can't store None vs '', so we
+    # encode never-fetched as '' and fetched-none as '-' on disk.
+    @staticmethod
+    def _encode_genres(genres):
+        if genres is None:
+            return ''
+        return genres if genres else '-'
+
+    @staticmethod
+    def _decode_genres(value):
+        if not value:
+            return None
+        if value == '-':
+            return ''
+        return value
+
     def _save_to_csv_cache(self, letterboxd_url: str, title: str, rating_data: Dict):
-        """Save rating data to CSV cache"""
+        """Save rating data (including negative results) to the cache.
+
+        Keyed by the originally generated letterboxd_url; rating_data['url'] holds
+        the resolved URL (may differ if a fallback URL matched, or be None if not found).
+        """
         self.csv_cache[letterboxd_url] = {
             'title': title,
             'rating': rating_data['rating'],
             'rating_count': rating_data['rating_count'],
             'year': rating_data['year'],
             'updated': datetime.now().isoformat(),
-            'url': letterboxd_url
+            'url': rating_data['url'],
+            'genres': rating_data.get('genres')
         }
-        
+
+        if db.is_enabled():
+            db.upsert_rating(
+                letterboxd_url,
+                title,
+                rating_data['rating'],
+                rating_data['rating_count'],
+                rating_data['year'],
+                rating_data['url'],
+                rating_data.get('genres')
+            )
+            return
+
         # Write to CSV file
         try:
             # Check if file exists to determine if we need to write headers
             file_exists = os.path.exists(self.cache_file)
-            
-            with open(self.cache_file, 'a', newline='', encoding='utf-8') as csvfile:
-                fieldnames = ['letterboxd_url', 'title', 'rating', 'rating_count', 'year', 'updated']
-                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-                
-                if not file_exists:
-                    writer.writeheader()
-                
-                writer.writerow({
-                    'letterboxd_url': letterboxd_url,
-                    'title': title,
-                    'rating': rating_data['rating'],
-                    'rating_count': rating_data['rating_count'],
-                    'year': rating_data['year'],
-                    'updated': datetime.now().isoformat()
-                })
+
+            with self._lock:
+                with open(self.cache_file, 'a', newline='', encoding='utf-8') as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=self.CSV_FIELDS)
+
+                    if not file_exists:
+                        writer.writeheader()
+
+                    writer.writerow({
+                        'letterboxd_url': letterboxd_url,
+                        'title': title,
+                        'rating': rating_data['rating'],
+                        'rating_count': rating_data['rating_count'],
+                        'year': rating_data['year'],
+                        'updated': datetime.now().isoformat(),
+                        'resolved_url': rating_data['url'],
+                        'genres': self._encode_genres(rating_data.get('genres'))
+                    })
         except Exception as e:
             print(f"Error saving to cache: {e}")
     
     def _get_from_cache(self, letterboxd_url: str) -> Optional[Dict]:
-        """Get rating data from cache if updated within the last day"""
+        """Get rating data from cache.
+
+        Ratings stay fresh for 7 days; negative results (no rating / not found)
+        are only reused for 1 day so new ratings show up quickly."""
         if letterboxd_url in self.csv_cache:
             cached_data = self.csv_cache[letterboxd_url].copy()
-            
-            # Check if cached data is fresh (updated within last 24 hours)
+
             try:
                 updated_time = datetime.fromisoformat(cached_data['updated'])
-                time_diff = datetime.now() - updated_time
-                
-                if time_diff <= timedelta(days=1):
+                # Supabase timestamps are tz-aware; CSV timestamps are naive local
+                now = datetime.now(updated_time.tzinfo) if updated_time.tzinfo else datetime.now()
+                time_diff = now - updated_time
+
+                # Entries cached before genre support have genres=None ('' means
+                # "fetched, none found") — refetch found movies so genres populate
+                if cached_data.get('url') is not None and cached_data.get('genres') is None:
+                    return None
+
+                max_age = timedelta(days=7) if cached_data['rating'] is not None else timedelta(days=1)
+                if time_diff <= max_age:
                     hours_ago = time_diff.total_seconds() // 3600
                     # print(f"Using cached rating for: {cached_data['title']} (cached {int(hours_ago)}h ago)")
+                    # Cached "found but no rating" result — keep the tracking list accurate
+                    if cached_data['rating'] is None and cached_data['url'] is not None:
+                        with self._lock:
+                            if cached_data['url'] not in self.movies_found_no_rating:
+                                self.movies_found_no_rating.append(cached_data['url'])
                     return cached_data
                 else:
                     print(f"Cache expired for: {cached_data['title']} (cached {time_diff.days} days ago), fetching fresh data")
@@ -131,17 +230,29 @@ class LetterboxdAPI:
     
     def get_rating_from_url(self, letterboxd_url: str, title: str) -> Dict:
         """Get rating and metadata for a movie using direct Letterboxd URL"""
-        # Check CSV cache first
+        # Check cache first (positive AND negative results, 24h freshness)
         cached_data = self._get_from_cache(letterboxd_url)
         if cached_data:
             return cached_data
-            
+
         if title in self.cache:
             return self.cache[title]
-        
+
+        result = self._resolve_rating(letterboxd_url, title)
+
+        # Cache every outcome (rated / found-no-rating / not-found) keyed by the
+        # originally generated URL so restarts within 24h skip the re-fetch.
+        # Transient fetch errors are not cached.
+        self.cache[title] = result
+        if not result.get('error'):
+            self._save_to_csv_cache(letterboxd_url, title, result)
+        return result
+
+    def _resolve_rating(self, letterboxd_url: str, title: str) -> Dict:
+        """Fetch rating from Letterboxd, trying URL fallbacks (no caching here)"""
         # Rate limiting - commented out for maximum speed with threading
         # time.sleep(0.2)
-        
+
         # Try the original URL first
         result = self._fetch_rating_from_url(letterboxd_url, title)
         if result['url'] is not None:  # Found the movie (even if no rating)
@@ -151,7 +262,7 @@ class LetterboxdAPI:
         if re.search(r'-\d{4}/?$', letterboxd_url):
             # Import the scraper to regenerate clean URL without year
             from .scraper import MovieScraper
-            scraper = MovieScraper()
+            scraper = MovieScraper(use_cache=False)  # only used for URL generation
             # Remove year from title and regenerate URL
             title_without_year = re.sub(r'\s*\(\d{4}\)', '', title)
             # The generate_letterboxd_url expects just the clean title, not a title with year
@@ -163,7 +274,7 @@ class LetterboxdAPI:
             
             # Both attempts failed - try more fallbacks
             from .scraper import MovieScraper
-            scraper = MovieScraper()
+            scraper = MovieScraper(use_cache=False)  # only used for URL generation
             
             # Try removing "with xxxxx" suffix
             if ' with ' in title.lower():
@@ -187,16 +298,18 @@ class LetterboxdAPI:
             # All attempts failed, so truly not found
             return {
                 'rating': None,
-                'rating_count': None, 
+                'rating_count': None,
                 'url': None,  # Truly not found
-                'year': None
+                'year': None,
+                'genres': None,
+                'error': result.get('error', False)
             }
         
         # If URL doesn't have year and failed, try removing "with xxxxx" suffix
         if ' with ' in title.lower():
             # print(f"Movie not found at {letterboxd_url} - trying without 'with' suffix...")
             from .scraper import MovieScraper
-            scraper = MovieScraper()
+            scraper = MovieScraper(use_cache=False)  # only used for URL generation
             # Remove "with xxxxx" suffix and regenerate URL
             title_without_with = re.sub(r'\s+with\s+.*$', '', title, flags=re.IGNORECASE)
             clean_url_without_with = scraper.generate_letterboxd_url(title_without_with)
@@ -208,7 +321,7 @@ class LetterboxdAPI:
         if '&' in title:
             # print(f"Movie not found at {letterboxd_url} - trying without ampersand...")
             from .scraper import MovieScraper
-            scraper = MovieScraper()
+            scraper = MovieScraper(use_cache=False)  # only used for URL generation
             title_no_ampersand = re.sub(r'\s*&\s*', ' ', title)
             title_no_ampersand = re.sub(r'\s+', ' ', title_no_ampersand).strip()  # Clean up extra spaces
             clean_url_no_ampersand = scraper.generate_letterboxd_url(title_no_ampersand)
@@ -221,7 +334,8 @@ class LetterboxdAPI:
             'rating': None,
             'rating_count': None,
             'url': None,  # Truly not found
-            'year': None
+            'year': None,
+            'error': result.get('error', False)
         }
     
     def _fetch_rating_from_url(self, letterboxd_url: str, title: str) -> Dict:
@@ -230,15 +344,16 @@ class LetterboxdAPI:
         try:
             response = requests.get(letterboxd_url, headers=self.headers, timeout=10)
             if response.status_code != 200:
-                return {'rating': None, 'rating_count': None, 'url': None, 'year': None}  # Not found
-            
+                return {'rating': None, 'rating_count': None, 'url': None, 'year': None, 'genres': None}  # Not found
+
             soup = BeautifulSoup(response.content, 'lxml')
-            
+
             # Look for JSON-LD structured data
             json_scripts = soup.find_all('script', type='application/ld+json')
             rating = None
             rating_count = None
             year = None
+            genres = None
             found_movie_data = False
             
             for script in json_scripts:
@@ -257,6 +372,15 @@ class LetterboxdAPI:
                         if isinstance(data, dict) and data.get('@type') == 'Movie':
                             found_movie_data = True
                             
+                            # Extract genres ('genre' may be a string or a list)
+                            genre_data = data.get('genre')
+                            if isinstance(genre_data, str):
+                                genres = genre_data
+                            elif isinstance(genre_data, list):
+                                genres = '|'.join(str(g) for g in genre_data)
+                            else:
+                                genres = ''  # fetched, none found
+
                             # Extract year from dateCreated
                             if 'dateCreated' in data:
                                 year_match = re.search(r'\d{4}', data['dateCreated'])
@@ -269,7 +393,9 @@ class LetterboxdAPI:
                                 rating_count = int(aggregate.get('ratingCount', 0))
                             else:
                                 # Movie found but no aggregateRating - try dynamic loading with Playwright
-                                rating, rating_count, is_computed = asyncio.run(self._get_dynamic_rating(letterboxd_url))
+                                # Semaphore caps concurrent Chromium launches (memory on Render)
+                                with self._browser_sem:
+                                    rating, rating_count, is_computed = asyncio.run(self._get_dynamic_rating(letterboxd_url))
                                 if rating is not None and is_computed:
                                     # Mark this as computed from histogram
                                     rating_count = f"{rating_count}*"
@@ -312,25 +438,24 @@ class LetterboxdAPI:
                 'rating_count': rating_count,
                 'url': letterboxd_url if found_movie_data else None,
                 'year': year,
+                # '' (fetched, none) when found via HTML fallback without JSON-LD genres
+                'genres': (genres if genres is not None else '') if found_movie_data else None,
                 'computed_from_histogram': isinstance(rating_count, str) and rating_count.endswith('*')
             }
             
-            # Only save to cache if we found the movie AND it has a rating
-            # Movies without ratings should not be cached so they can be checked again
-            if result['url'] is not None and result['rating'] is not None:
-                self.cache[title] = result
-                self._save_to_csv_cache(letterboxd_url, title, result)
-            elif result['url'] is not None and result['rating'] is None:
-                # Movie found but no rating - don't cache, add to special tracking list
-                if letterboxd_url not in self.movies_found_no_rating:
-                    self.movies_found_no_rating.append(letterboxd_url)
-            
-            
+            # Caching happens in get_rating_from_url (keyed by the original URL)
+            if result['url'] is not None and result['rating'] is None:
+                # Movie found but no rating - add to special tracking list
+                with self._lock:
+                    if letterboxd_url not in self.movies_found_no_rating:
+                        self.movies_found_no_rating.append(letterboxd_url)
+
             return result
             
         except Exception as e:
             print(f"Error getting rating from URL {letterboxd_url}: {e}")
-            return {'rating': None, 'rating_count': None, 'url': None, 'year': None}  # Error = not found
+            # 'error' flag prevents caching a transient failure as "not found" for 24h
+            return {'rating': None, 'rating_count': None, 'url': None, 'year': None, 'genres': None, 'error': True}
 
     def get_rating(self, title: str) -> Dict:
         """Get rating and metadata for a movie using search"""
@@ -435,6 +560,17 @@ class LetterboxdAPI:
         
         return None, None, False
     
+    def get_all_genres(self) -> List[str]:
+        """Distinct genres across the whole ratings cache (Supabase or local CSV)."""
+        if db.is_enabled():
+            return db.get_all_genres()
+        genres = set()
+        for entry in self.csv_cache.values():
+            for g in (entry.get('genres') or '').split('|'):
+                if g.strip():
+                    genres.add(g.strip())
+        return sorted(genres)
+
     def filter_movies_by_cache(self, movies: List[Dict]) -> tuple[List[Dict], List[Dict]]:
         """Separate movies into cached and uncached lists"""
         cached_movies = []
@@ -442,12 +578,13 @@ class LetterboxdAPI:
         
         for movie in movies:
             letterboxd_url = movie.get('letterboxd_url')
-            if letterboxd_url and letterboxd_url in self.csv_cache:
-                # Movie is in cache, add cached data
-                cached_data = self.csv_cache[letterboxd_url]
+            cached_data = self._get_from_cache(letterboxd_url) if letterboxd_url else None
+            if cached_data:
+                # Movie is in cache (rated, no-rating, or not-found), add cached data
                 movie['letterboxd_rating'] = cached_data['rating']
                 movie['letterboxd_url'] = cached_data['url']
                 movie['year'] = cached_data['year']
+                movie['genres'] = [g for g in (cached_data.get('genres') or '').split('|') if g]
                 cached_movies.append(movie)
             else:
                 # Movie needs to be processed
@@ -459,7 +596,25 @@ class LetterboxdAPI:
         """Process multiple movies concurrently with threading"""
         if not movies:
             return []
-        
+
+        # Bulk-preload fresh ratings from Supabase into the in-memory cache
+        # (single main-thread query; worker threads below only write/upsert)
+        if db.is_enabled():
+            urls = [m['letterboxd_url'] for m in movies if m.get('letterboxd_url')]
+            # 7-day window; _get_from_cache applies stricter 1-day freshness to negatives
+            for url, row in db.get_fresh_ratings(urls, max_age_hours=24 * 7).items():
+                # Include negative results (rating None); resolved_url distinguishes
+                # found-but-unrated (set) from not-found (None)
+                self.csv_cache[url] = {
+                    'title': row.get('title'),
+                    'rating': row.get('rating'),
+                    'rating_count': row.get('rating_count'),
+                    'year': row.get('year'),
+                    'updated': row.get('updated_at'),
+                    'url': row.get('resolved_url'),
+                    'genres': row.get('genres')
+                }
+
         # Filter movies by cache first
         cached_movies, uncached_movies = self.filter_movies_by_cache(movies)
         
@@ -485,6 +640,7 @@ class LetterboxdAPI:
                 movie['letterboxd_rating'] = rating_data['rating']
                 movie['letterboxd_url'] = rating_data['url']
                 movie['year'] = rating_data['year']
+                movie['genres'] = [g for g in (rating_data.get('genres') or '').split('|') if g]
                 
                 if rating_data['rating'] is None and rating_data['url'] is None:
                     with self._lock:

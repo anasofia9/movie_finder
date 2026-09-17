@@ -63,8 +63,37 @@
             <button class="btn-small" onclick="deselectAllTheaters()">Deselect All</button>
         </div>
     </div>
+    {% if all_genres %}
+    <div class="filter-panel">
+        <h3>Filter by Genre:</h3>
+        <div class="genre-grid">
+            {% for genre in all_genres %}
+            <label class="theater-checkbox">
+                <input type="checkbox" class="genre-checkbox" value="{{ genre }}" checked onchange="applyFilters()">
+                <span class="checkmark"></span>
+                {{ genre }}
+            </label>
+            {% endfor %}
+        </div>
+        <div class="selection-controls">
+            <button class="btn-small" onclick="selectAllGenres()">Select All</button>
+            <button class="btn-small" onclick="deselectAllGenres()">Deselect All</button>
+        </div>
+    </div>
+    {% endif %}
+    <div class="filter-panel date-filter">
+        <h3>Filter by Date:</h3>
+        <div class="date-inputs">
+            <label for="dateFrom">From</label>
+            <input type="date" id="dateFrom" onchange="applyFilters()">
+            <label for="dateTo">To</label>
+            <input type="date" id="dateTo" onchange="applyFilters()">
+            <button class="btn-small" onclick="clearDateFilter()">Clear</button>
+        </div>
+        <span class="rating-help">Movies without listed dates are assumed to be showing today.</span>
+    </div>
     <div class="rating-threshold">
-        <label for="ratingThreshold">⭐ Minimum Rating for "High-Rated" Movies:</label>
+        <label for="ratingThreshold">⭐ Minimum Rating for "Highly Rated" Movies:</label>
         <input type="number" id="ratingThreshold" min="1.0" max="5.0" step="0.1" value="{{ rating_threshold or 4.0 }}">
         <span class="rating-help">Ratings from 1.0 to 5.0 stars</span>
     </div>
@@ -110,23 +139,29 @@
 {% if is_scraping and not movies %}
 <div class="loading-section">
     <div class="goose-container">
-        <img src="https://media.tenor.com/BfOZ3AhO2C0AAAAM/honk-gooooseszn.gif" alt="Waddling goose" class="goose">
+        <img src="{{ url_for('static', filename='goose.png') }}" alt="Waddling goose" class="goose">
     </div>
     <p>Scraping movie data... Results will appear here when complete.</p>
 </div>
 {% elif movies %}
 <div class="section">
-    <h2 id="high-rated-title">🌟 High-Rated Movies (≥{{ rating_threshold or 4.0 }}⭐)</h2>
+    <h2 id="high-rated-title">🌟 Highly Rated Movies (≥{{ rating_threshold or 4.0 }}⭐)</h2>
     {% set threshold = rating_threshold or 4.0 %}
     {% set high_rated = movies | selectattr('letterboxd_rating') | selectattr('letterboxd_rating', '>=', threshold) | sort(attribute='letterboxd_rating', reverse=true) %}
     
     {% if high_rated %}
         <div class="movies-grid">
             {% for movie in high_rated %}
-            <div class="movie">
+            <div class="movie" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}">
                 <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
+                {% if movie.genres %}
+                <div class="movie-genres">{{ movie.genres|join(' · ') }}</div>
+                {% endif %}
                 <div class="rating high">⭐ {{ "%.1f"|format(movie.letterboxd_rating) }}</div>
                 <div class="venue">📍 {{ movie.venue }}</div>
+                {% if movie.dates_display %}
+                <div class="movie-dates">📅 {{ movie.dates_display }}</div>
+                {% endif %}
                 <div class="links">
                     {% if movie.letterboxd_url %}
                     <a href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd</a>
@@ -150,10 +185,16 @@
     {% if no_rating_movies %}
         <div class="movies-grid">
             {% for movie in no_rating_movies %}
-            <div class="movie" style="opacity: 0.7;">
+            <div class="movie dimmed" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}">
                 <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
+                {% if movie.genres %}
+                <div class="movie-genres">{{ movie.genres|join(' · ') }}</div>
+                {% endif %}
                 <div class="rating warning">⚠️ No rating yet</div>
                 <div class="venue">📍 {{ movie.venue }}</div>
+                {% if movie.dates_display %}
+                <div class="movie-dates">📅 {{ movie.dates_display }}</div>
+                {% endif %}
                 <div class="links">
                     {% if movie.letterboxd_url %}
                     <a href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd</a>
@@ -177,15 +218,18 @@
     {% if not_found_movies %}
         <div class="movies-grid">
             {% for movie in not_found_movies %}
-            <div class="movie" style="opacity: 0.6;">
+            <div class="movie dimmed" data-genres="{{ (movie.genres or [])|join('|') }}" data-dates="{{ (movie.show_dates or [])|join(',') }}">
                 <div class="movie-title">{{ loop.index }}. {{ movie.title }}</div>
                 <div class="rating error">❌ Not found</div>
                 <div class="venue">📍 {{ movie.venue }}</div>
+                {% if movie.dates_display %}
+                <div class="movie-dates">📅 {{ movie.dates_display }}</div>
+                {% endif %}
                 <div class="links">
                     {% if movie.url %}
                     <a href="{{ movie.url }}" target="_blank">Tickets</a>
                     {% else %}
-                    <span style="color: #999;">No ticket link available</span>
+                    <span class="no-link">No ticket link available</span>
                     {% endif %}
                 </div>
             </div>
@@ -199,7 +243,7 @@
 {% else %}
 <div class="loading">
     <div class="goose-container">
-        <img src="https://media.tenor.com/BfOZ3AhO2C0AAAAM/honk-gooooseszn.gif" alt="Waddling goose" class="goose">
+        <img src="{{ url_for('static', filename='goose.png') }}" alt="Waddling goose" class="goose">
     </div>
     <p>Loading movie data...</p>
 </div>

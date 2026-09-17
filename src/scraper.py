@@ -6,7 +6,12 @@ import asyncio
 import json
 import os
 import pytz
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright, TimeoutError as PWTimeoutError
+
+try:
+    from . import db
+except ImportError:
+    import db
 
 class MovieScraper:
     """Scrape movie listings from various NYC sources"""
@@ -24,7 +29,15 @@ class MovieScraper:
             self._load_theater_cache()
     
     def _load_theater_cache(self):
-        """Load theater cache from JSON file"""
+        """Load theater cache from Supabase (if configured) or local JSON file"""
+        if db.is_enabled():
+            today = self._get_eastern_date_string()
+            db.delete_stale_showings(today)  # 1-day TTL cleanup
+            self.theater_cache = db.get_todays_showings(today)
+            if self.theater_cache:
+                self.log(f"📂 Loaded theater cache from Supabase with {len(self.theater_cache)} entries")
+            return
+
         if os.path.exists(self.cache_file):
             try:
                 with open(self.cache_file, 'r', encoding='utf-8') as f:
@@ -65,12 +78,16 @@ class MovieScraper:
     
     def _cache_movies(self, theater_id: str, movies: List[Dict]):
         """Cache movies for a theater with current date"""
+        date_str = self._get_eastern_date_string()
         self.theater_cache[theater_id] = {
-            'date': self._get_eastern_date_string(),
+            'date': date_str,
             'movies': movies,
             'cached_at': datetime.now(self.eastern_tz).isoformat()
         }
-        self._save_theater_cache()
+        if db.is_enabled():
+            db.upsert_theater_showings(theater_id, date_str, movies)
+        else:
+            self._save_theater_cache()
     
     def get_cache_status(self) -> Dict:
         """Get cache status for all theaters"""
@@ -193,81 +210,128 @@ class MovieScraper:
             slug = f"{slug}-{year}"
         
         final_url = f"https://letterboxd.com/film/{slug}/"
-        
-        
+
+
         return final_url
-    
-    async def scrape_alamo_drafthouse_async(self) -> List[Dict]:
-        """Scrape Alamo Drafthouse NYC using Playwright"""
-        movies = []
-        
+
+    async def _goto_and_wait(self, page, url: str, content_selector: str,
+                             goto_timeout: int = 30000, selector_timeout: int = 15000):
+        """Navigate and wait for real content instead of flaky 'networkidle'.
+
+        Uses domcontentloaded, then waits for the selector the scraper actually
+        extracts from. Falls back gracefully if the selector never appears.
+        """
+        await page.goto(url, wait_until='domcontentloaded', timeout=goto_timeout)
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                
-                await page.goto('https://drafthouse.com/nyc', wait_until='networkidle')
-                
-                # Wait for movie content to load
-                await page.wait_for_timeout(3000)
-                
-                # Click "Load more" button if it exists
-                try:
-                    load_more_button = page.locator('ion-button:has-text("Load more"), button:has-text("Load more"), [aria-label*="load more" i]')
-                    while await load_more_button.count() > 0:
-                        self.log("Found 'Load more' button, clicking...")
-                        await load_more_button.first.click()
-                        await page.wait_for_timeout(2000)  # Wait for new content to load
-                except Exception as e:
-                    self.log(f"No 'Load more' button found or error clicking: {e}")
-                
-                # Get the rendered HTML content
-                # html_content = await page.content()
-                # print("=== RENDERED HTML CONTENT ===")
-                # print(html_content)
-                # print("=== END HTML CONTENT ===")
-                
-                # Get all movie elements using the ion-card-title structure
-                movie_data = await page.evaluate('''
-                    () => {
-                        const movieTitles = document.querySelectorAll('ion-card-title div');
-                        return Array.from(movieTitles).map(el => {
-                            const title = el.textContent?.trim();
-                            const card = el.closest('ion-card');
-                            const link = card?.querySelector('a')?.href || '';
-                            return {
-                                title: title || 'Unknown',
-                                url: link,
-                                text: el.textContent.trim()
-                            };
-                        });
-                    }
-                ''')
-                # print(f"movie data = {movie_data}")
-                
-                await browser.close()
-                
-                for item in movie_data:
-                    if item['title'] and item['title'] != 'Unknown':
-                        movies.append({
-                            'title': item['title'],
-                            'venue': 'Alamo Drafthouse',
-                            'url': item['url'],
-                            'source': 'alamo',
-                            'letterboxd_url': self.generate_letterboxd_url(item['title'])
-                        })
-                
-                self.log(f"Found {len(movies)} movies at Alamo Drafthouse")
-                
-        except Exception as e:
-            self.log(f"Error scraping Alamo with Playwright: {e}")
-        
-        return movies
-    
+            await page.wait_for_selector(content_selector, timeout=selector_timeout)
+        except PWTimeoutError:
+            self.log(f"⚠️ Content selector not found at {url}; extracting whatever loaded")
+            await page.wait_for_timeout(2000)
+
+    _MONTHS = {'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
+               'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12}
+
+    def _month_day_to_iso(self, month_str: str, day_str: str):
+        """('Sep', '17') -> '2026-09-17'. Infers the year (rolls over near Dec/Jan)."""
+        from datetime import date
+        month = self._MONTHS.get((month_str or '').strip().lower()[:3])
+        try:
+            day = int(day_str)
+        except (TypeError, ValueError):
+            return None
+        if not month:
+            return None
+        today = datetime.now(self.eastern_tz).date()
+        for year in (today.year, today.year + 1):
+            try:
+                candidate = date(year, month, day)
+            except ValueError:
+                continue
+            if candidate >= today - timedelta(days=45):
+                return candidate.isoformat()
+        return None
+
+    def _parse_date_range_text(self, text: str) -> List[str]:
+        """Parse 'OCT 3 — OCT 9' / 'SEP 26' style text into a list of ISO dates."""
+        import re
+        matches = re.findall(r'([A-Za-z]{3,9})\.?\s+(\d{1,2})', text or '')
+        isos = []
+        for month_str, day_str in matches:
+            iso = self._month_day_to_iso(month_str, day_str)
+            if iso:
+                isos.append(iso)
+        if len(isos) >= 2:
+            start = datetime.strptime(isos[0], '%Y-%m-%d').date()
+            end = datetime.strptime(isos[-1], '%Y-%m-%d').date()
+            if start <= end and (end - start).days <= 90:
+                return [(start + timedelta(days=i)).isoformat() for i in range((end - start).days + 1)]
+        return sorted(set(isos))
+
+    def _format_dates_display(self, dates: List[str]) -> str:
+        """Compact display for ISO dates: 'Sep 17–23, Oct 1'."""
+        try:
+            objs = sorted({datetime.strptime(d, '%Y-%m-%d').date() for d in dates})
+        except ValueError:
+            return ''
+        if not objs:
+            return ''
+        ranges = []
+        start = prev = objs[0]
+        for d in objs[1:]:
+            if (d - prev).days == 1:
+                prev = d
+                continue
+            ranges.append((start, prev))
+            start = prev = d
+        ranges.append((start, prev))
+        parts = []
+        for a, b in ranges:
+            if a == b:
+                parts.append(f"{a.strftime('%b')} {a.day}")
+            elif a.month == b.month:
+                parts.append(f"{a.strftime('%b')} {a.day}–{b.day}")
+            else:
+                parts.append(f"{a.strftime('%b')} {a.day} – {b.strftime('%b')} {b.day}")
+        return ', '.join(parts)
+
     def scrape_alamo_drafthouse(self) -> List[Dict]:
-        """Scrape Alamo Drafthouse NYC - wrapper for async method"""
-        return asyncio.run(self.scrape_alamo_drafthouse_async())
-    
+        """Scrape Alamo Drafthouse NYC via its public schedule API (includes show dates)"""
+        movies = []
+        try:
+            response = requests.get(
+                'https://drafthouse.com/s/mother/v2/schedule/market/nyc',
+                headers=self.headers, timeout=15
+            )
+            data = response.json()['data']
+
+            # Map presentation slug -> set of dates with bookable sessions
+            dates_by_slug = {}
+            for session in data.get('sessions', []):
+                slug = session.get('presentationSlug')
+                date_str = session.get('businessDateClt')  # 'YYYY-MM-DD'
+                if slug and date_str:
+                    dates_by_slug.setdefault(slug, set()).add(date_str)
+
+            for presentation in data.get('presentations', []):
+                slug = presentation.get('slug')
+                title = (presentation.get('show') or {}).get('title')
+                if not title or slug not in dates_by_slug:
+                    continue  # skip announced titles with no sessions on sale
+                movies.append({
+                    'title': title,
+                    'venue': 'Alamo Drafthouse',
+                    'url': f'https://drafthouse.com/nyc/show/{slug}',
+                    'source': 'alamo',
+                    'letterboxd_url': self.generate_letterboxd_url(title),
+                    'show_dates': sorted(dates_by_slug[slug]),
+                })
+
+            self.log(f"Found {len(movies)} movies at Alamo Drafthouse")
+        except Exception as e:
+            self.log(f"Error scraping Alamo schedule API: {e}")
+
+        return movies
+
     def scrape_metrograph(self) -> List[Dict]:
         """Scrape Metrograph"""
         movies = []
@@ -282,12 +346,24 @@ class MovieScraper:
             for title_elem in soup.select('h3.movie_title a'):
                 title = title_elem.text.strip()
                 if title:
+                    # Dates live in sibling .film_day divs with ids like "day_Fri_Sep_18"
+                    show_dates = set()
+                    container = title_elem.find_parent('div', class_='col-sm-6')
+                    if container:
+                        for day_div in container.select('.film_day[id^="day_"]'):
+                            parts = day_div.get('id', '').split('_')  # ['day', 'Fri', 'Sep', '18']
+                            if len(parts) == 4:
+                                iso = self._month_day_to_iso(parts[2], parts[3])
+                                if iso:
+                                    show_dates.add(iso)
+
                     movies.append({
                         'title': title,
                         'venue': 'Metrograph',
                         'url': 'https://metrograph.com' + title_elem.get('href', ''),
                         'source': 'metrograph',
-                        'letterboxd_url': self.generate_letterboxd_url(title)
+                        'letterboxd_url': self.generate_letterboxd_url(title),
+                        'show_dates': sorted(show_dates)
                     })
         except Exception as e:
             self.log(f"Error scraping Metrograph: {e}")
@@ -301,25 +377,47 @@ class MovieScraper:
         try:
             response = requests.get(url, headers=self.headers, timeout=10)
             soup = BeautifulSoup(response.content, 'lxml')
-            # print(soup)
+
+            # The weekly schedule widget maps each film to the days it screens
+            # (.daily-schedule divs: h3 "Thu Sep 17" + film links per day)
+            dates_by_title = {}
+            for day_div in soup.select('.daily-schedule'):
+                if 'show-coming-soon' in (day_div.get('class') or []):
+                    continue
+                h3 = day_div.select_one('h3')
+                parts = h3.text.strip().split() if h3 else []  # ['Thu', 'Sep', '17']
+                iso = self._month_day_to_iso(parts[1], parts[2]) if len(parts) == 3 else None
+                if not iso:
+                    continue
+                for link in day_div.select('.details h3 a'):
+                    key = link.text.strip().lower().replace('\u2019', "'")
+                    dates_by_title.setdefault(key, set()).add(iso)
+
             # Look for movie titles only in the "Now Playing" section
             now_playing_section = soup.select_one('.ifc-now-playing')
             if now_playing_section:
                 grid_items = now_playing_section.select('.ifc-grid-item')
-                
+
                 for i, item in enumerate(grid_items):
                     title_elem = item.select_one('.ifc-grid-info h2')
                     link_elem = item.select_one('a[href]')
                     if title_elem and link_elem:
                         title = title_elem.text.strip()
-                        
-                       
+
+                        # Match schedule entries, including variants like "Title (Open Captioning)"
+                        title_key = title.lower().replace('\u2019', "'")
+                        show_dates = set(dates_by_title.get(title_key, set()))
+                        for key, day_set in dates_by_title.items():
+                            if key.startswith(title_key + ' ('):
+                                show_dates |= day_set
+
                         movies.append({
                             'title': title,
                             'venue': 'IFC Center',
                             'url': link_elem.get('href', ''),
                             'source': 'ifc',
-                            'letterboxd_url': self.generate_letterboxd_url(title)
+                            'letterboxd_url': self.generate_letterboxd_url(title),
+                            'show_dates': sorted(show_dates)
                         })
                         
             
@@ -328,19 +426,22 @@ class MovieScraper:
         
         return movies
     
-    async def scrape_angelika_async(self) -> List[Dict]:
+    async def scrape_angelika_async(self, browser) -> List[Dict]:
         """Scrape Angelika Film Center NYC using Playwright"""
         movies = []
-        
+
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                
-                await page.goto('https://angelikafilmcenter.com/nyc/now-playing', wait_until='networkidle')
-                
-                # Wait for movie content to load
-                await page.wait_for_timeout(3000)
+            context = await browser.new_context()
+            try:
+                page = await context.new_page()
+
+                # Movie cards only render after the ANYTIME filter click,
+                # so wait for the filter bar (or cards, if already present)
+                await self._goto_and_wait(
+                    page,
+                    'https://angelikafilmcenter.com/nyc/now-playing',
+                    '.common-filter, .showtime-section-thumbnail .card'
+                )
                 
                 # Click the ANYTIME filter first to show all movies
                 try:
@@ -409,9 +510,7 @@ class MovieScraper:
                         return movies;
                     }
                 ''')
-                
-                await browser.close()
-                
+
                 # Process and deduplicate movie data
                 seen_titles = set()
                 for item in movie_data:
@@ -427,29 +526,29 @@ class MovieScraper:
                         })
                 
                 self.log(f"Found {len(movies)} movies at Angelika Film Center")
-                
+            finally:
+                await context.close()
         except Exception as e:
             self.log(f"Error scraping Angelika with Playwright: {e}")
-        
+
         return movies
-    
-    def scrape_angelika(self) -> List[Dict]:
-        """Scrape Angelika Film Center NYC - wrapper for async method"""
-        return asyncio.run(self.scrape_angelika_async())
-    
-    async def scrape_angelika_village_east_async(self) -> List[Dict]:
+
+    async def scrape_angelika_village_east_async(self, browser) -> List[Dict]:
         """Scrape Angelika Village East using Playwright"""
         movies = []
-        
+
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                
-                await page.goto('https://angelikafilmcenter.com/villageeast/now-playing', wait_until='networkidle')
-                
-                # Wait for movie content to load
-                await page.wait_for_timeout(3000)
+            context = await browser.new_context()
+            try:
+                page = await context.new_page()
+
+                # Movie cards only render after the ANYTIME filter click,
+                # so wait for the filter bar (or cards, if already present)
+                await self._goto_and_wait(
+                    page,
+                    'https://angelikafilmcenter.com/villageeast/now-playing',
+                    '.common-filter, .showtime-section-thumbnail .card'
+                )
                 
                 # Click the ANYTIME filter first to show all movies
                 try:
@@ -518,9 +617,7 @@ class MovieScraper:
                         return movies;
                     }
                 ''')
-                
-                await browser.close()
-                
+
                 # Process and deduplicate movie data
                 seen_titles = set()
                 for item in movie_data:
@@ -535,30 +632,28 @@ class MovieScraper:
                             'letterboxd_url': self.generate_letterboxd_url(title)
                         })
                 
-                print(f"Found {len(movies)} movies at Angelika Village East")
-                
+                self.log(f"Found {len(movies)} movies at Angelika Village East")
+            finally:
+                await context.close()
         except Exception as e:
-            print(f"Error scraping Angelika Village East with Playwright: {e}")
-        
+            self.log(f"Error scraping Angelika Village East with Playwright: {e}")
+
         return movies
-    
-    def scrape_angelika_village_east(self) -> List[Dict]:
-        """Scrape Angelika Village East - wrapper for async method"""
-        return asyncio.run(self.scrape_angelika_village_east_async())
-    
-    async def scrape_paris_theater_async(self) -> List[Dict]:
+
+    async def scrape_paris_theater_async(self, browser) -> List[Dict]:
         """Scrape Paris Theater special engagements using Playwright"""
         movies = []
-        
+
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                
-                await page.goto('https://www.paristheaternyc.com/special-engagements', wait_until='networkidle')
-                
-                # Wait for content to load
-                await page.wait_for_timeout(3000)
+            context = await browser.new_context()
+            try:
+                page = await context.new_page()
+
+                await self._goto_and_wait(
+                    page,
+                    'https://www.paristheaternyc.com/special-engagements',
+                    'div[class*="special_engagements_all_films_grid_item"]'
+                )
                 
                 # Extract special engagement movies using the correct selectors
                 movie_data = await page.evaluate('''
@@ -596,9 +691,7 @@ class MovieScraper:
                         return movies;
                     }
                 ''')
-                
-                await browser.close()
-                
+
                 # Process movie data
                 seen_titles = set()
                 for item in movie_data:
@@ -617,33 +710,34 @@ class MovieScraper:
                             'venue': 'Paris Theater',
                             'url': item['url'] if item['url'].startswith('http') else f"https://www.paristheaternyc.com{item['url']}" if item['url'] else '',
                             'source': 'paris_theater',
-                            'letterboxd_url': self.generate_letterboxd_url(title)
+                            'letterboxd_url': self.generate_letterboxd_url(title),
+                            'show_dates': self._parse_date_range_text(item.get('date', ''))
                         })
                 
-                print(f"Found {len(movies)} special engagement movies at Paris Theater")
-                
+                self.log(f"Found {len(movies)} special engagement movies at Paris Theater")
+            finally:
+                await context.close()
         except Exception as e:
-            print(f"Error scraping Paris Theater with Playwright: {e}")
-        
+            self.log(f"Error scraping Paris Theater with Playwright: {e}")
+
         return movies
-    
-    def scrape_paris_theater(self) -> List[Dict]:
-        """Scrape Paris Theater special engagements - wrapper for async method"""
-        return asyncio.run(self.scrape_paris_theater_async())
-    
-    async def scrape_nitehawk_williamsburg_async(self) -> List[Dict]:
+
+    async def scrape_nitehawk_williamsburg_async(self, browser) -> List[Dict]:
         """Scrape Nitehawk Cinema Williamsburg using Playwright"""
         movies = []
-        
+
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                
-                await page.goto('https://nitehawkcinema.com/williamsburg', wait_until='networkidle')
-                
-                # Wait for dynamic content to load
-                await page.wait_for_timeout(5000)
+            context = await browser.new_context()
+            try:
+                page = await context.new_page()
+
+                await self._goto_and_wait(
+                    page,
+                    'https://nitehawkcinema.com/williamsburg',
+                    '#buy-tickets-listview .show-container'
+                )
+                # List is populated incrementally by JS - brief settle
+                await page.wait_for_timeout(1000)
                 
                 # Extract movie information using the correct selectors
                 movie_data = await page.evaluate('''
@@ -681,9 +775,7 @@ class MovieScraper:
                         return movies;
                     }
                 ''')
-                
-                await browser.close()
-                
+
                 # Process and filter movie data
                 seen_titles = set()
                 for item in movie_data:
@@ -700,30 +792,30 @@ class MovieScraper:
                                 'letterboxd_url': self.generate_letterboxd_url(title)
                             })
                 
-                print(f"Found {len(movies)} movies at Nitehawk Cinema Williamsburg")
-                
+                self.log(f"Found {len(movies)} movies at Nitehawk Cinema Williamsburg")
+            finally:
+                await context.close()
         except Exception as e:
-            print(f"Error scraping Nitehawk Williamsburg with Playwright: {e}")
-        
+            self.log(f"Error scraping Nitehawk Williamsburg with Playwright: {e}")
+
         return movies
-    
-    def scrape_nitehawk_williamsburg(self) -> List[Dict]:
-        """Scrape Nitehawk Cinema Williamsburg - wrapper for async method"""
-        return asyncio.run(self.scrape_nitehawk_williamsburg_async())
-    
-    async def scrape_nitehawk_prospect_park_async(self) -> List[Dict]:
+
+    async def scrape_nitehawk_prospect_park_async(self, browser) -> List[Dict]:
         """Scrape Nitehawk Cinema Prospect Park using Playwright"""
         movies = []
-        
+
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                
-                await page.goto('https://nitehawkcinema.com/prospectpark', wait_until='networkidle')
-                
-                # Wait for dynamic content to load
-                await page.wait_for_timeout(5000)
+            context = await browser.new_context()
+            try:
+                page = await context.new_page()
+
+                await self._goto_and_wait(
+                    page,
+                    'https://nitehawkcinema.com/prospectpark',
+                    '#buy-tickets-listview .show-container'
+                )
+                # List is populated incrementally by JS - brief settle
+                await page.wait_for_timeout(1000)
                 
                 # Extract movie information using the correct selectors (same as Williamsburg)
                 movie_data = await page.evaluate('''
@@ -761,9 +853,7 @@ class MovieScraper:
                         return movies;
                     }
                 ''')
-                
-                await browser.close()
-                
+
                 # Process and filter movie data
                 seen_titles = set()
                 for item in movie_data:
@@ -780,35 +870,31 @@ class MovieScraper:
                                 'letterboxd_url': self.generate_letterboxd_url(title)
                             })
                 
-                print(f"Found {len(movies)} movies at Nitehawk Cinema Prospect Park")
-                
+                self.log(f"Found {len(movies)} movies at Nitehawk Cinema Prospect Park")
+            finally:
+                await context.close()
         except Exception as e:
-            print(f"Error scraping Nitehawk Prospect Park with Playwright: {e}")
-        
+            self.log(f"Error scraping Nitehawk Prospect Park with Playwright: {e}")
+
         return movies
-    
-    def scrape_nitehawk_prospect_park(self) -> List[Dict]:
-        """Scrape Nitehawk Cinema Prospect Park - wrapper for async method"""
-        return asyncio.run(self.scrape_nitehawk_prospect_park_async())
-    
-    async def scrape_moving_image_async(self) -> List[Dict]:
+
+    async def scrape_moving_image_async(self, browser) -> List[Dict]:
         """Scrape Museum of the Moving Image film events using Playwright"""
         movies = []
-        
+
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                
-                # Set user agent to avoid bot detection
-                await page.set_extra_http_headers({
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                })
-                
-                await page.goto('https://movingimage.org/events/list/?tribe_filterbar_category_custom%5B0%5D=230', wait_until='networkidle')
-                
-                # Wait for content to load
-                await page.wait_for_timeout(3000)
+            # Custom user agent to avoid bot detection
+            context = await browser.new_context(
+                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            )
+            try:
+                page = await context.new_page()
+
+                await self._goto_and_wait(
+                    page,
+                    'https://movingimage.org/events/list/?tribe_filterbar_category_custom%5B0%5D=230',
+                    '.tribe-events-calendar-list__event-row'
+                )
                 
                 # Extract movie event information using the correct selectors
                 movie_data = await page.evaluate('''
@@ -854,80 +940,74 @@ class MovieScraper:
                         return events;
                     }
                 ''')
-                
-                await browser.close()
-                
-                # Process and filter movie data
-                seen_titles = set()
+
+                # Process and filter movie data (accumulate dates across repeat screenings)
+                import re
+                by_title = {}
                 for item in movie_data:
                     title = item['title'].strip()
-                    if title and title.lower() not in seen_titles:
-                        # Filter out clearly non-movie events
-                        if not any(exclude in title.lower() for exclude in ['workshop', 'discussion', 'panel', 'lecture', 'tour', 'class', 'exhibition']):
-                            seen_titles.add(title.lower())
-                            
-                            # Clean title for Letterboxd matching - remove date suffixes and event info
-                            clean_title = title
-                            # Remove date patterns like "December 15, 2024" or "Dec 15"
-                            import re
-                            clean_title = re.sub(r'\s*-?\s*(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,?\s+\d{4})?', '', clean_title)
-                            clean_title = re.sub(r'\s*-?\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:,?\s+\d{4})?', '', clean_title)
-                            # Remove time patterns like "7:00 PM" or "at 7pm"
-                            clean_title = re.sub(r'\s*-?\s*(?:at\s+)?\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)', '', clean_title)
-                            clean_title = re.sub(r'\s*-?\s*(?:at\s+)?\d{1,2}\s*(?:AM|PM|am|pm)', '', clean_title)
-                            # Remove parenthetical notes at end of string like "(with live piano)", "(3D)", etc.
-                            clean_title = re.sub(r'\s*\([^)]*\)$', '', clean_title)
-                            # Remove "3D" suffix
-                            clean_title = re.sub(r'\s+3D$', '', clean_title)
-                            clean_title = clean_title.strip(' -')
-                            
-                            movies.append({
-                                'title': clean_title,
-                                'venue': 'Museum of the Moving Image',
-                                'url': item['url'] if item['url'].startswith('http') else f"https://movingimage.org{item['url']}" if item['url'] else '',
-                                'source': 'moving_image',
-                                'letterboxd_url': self.generate_letterboxd_url(clean_title)
-                            })
+                    if not title:
+                        continue
+                    # Filter out clearly non-movie events
+                    if any(exclude in title.lower() for exclude in ['workshop', 'discussion', 'panel', 'lecture', 'tour', 'class', 'exhibition']):
+                        continue
+
+                    # Clean title for Letterboxd matching - remove date suffixes and event info
+                    clean_title = title
+                    # Remove date patterns like "December 15, 2024" or "Dec 15"
+                    clean_title = re.sub(r'\s*-?\s*(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}(?:,?\s+\d{4})?', '', clean_title)
+                    clean_title = re.sub(r'\s*-?\s*(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\s+\d{1,2}(?:,?\s+\d{4})?', '', clean_title)
+                    # Remove time patterns like "7:00 PM" or "at 7pm"
+                    clean_title = re.sub(r'\s*-?\s*(?:at\s+)?\d{1,2}:\d{2}\s*(?:AM|PM|am|pm)', '', clean_title)
+                    clean_title = re.sub(r'\s*-?\s*(?:at\s+)?\d{1,2}\s*(?:AM|PM|am|pm)', '', clean_title)
+                    # Remove parenthetical notes at end of string like "(with live piano)", "(3D)", etc.
+                    clean_title = re.sub(r'\s*\([^)]*\)$', '', clean_title)
+                    # Remove "3D" suffix
+                    clean_title = re.sub(r'\s+3D$', '', clean_title)
+                    clean_title = clean_title.strip(' -')
+
+                    # Event date like "September 20 @ 2:00 pm"
+                    show_dates = self._parse_date_range_text(item.get('date', ''))
+
+                    key = clean_title.lower()
+                    if key in by_title:
+                        by_title[key]['show_dates'] = sorted(set(by_title[key]['show_dates']) | set(show_dates))
+                    else:
+                        by_title[key] = {
+                            'title': clean_title,
+                            'venue': 'Museum of the Moving Image',
+                            'url': item['url'] if item['url'].startswith('http') else f"https://movingimage.org{item['url']}" if item['url'] else '',
+                            'source': 'moving_image',
+                            'letterboxd_url': self.generate_letterboxd_url(clean_title),
+                            'show_dates': show_dates
+                        }
+                movies.extend(by_title.values())
                 
-                print(f"Found {len(movies)} film events at Museum of the Moving Image")
-                
+                self.log(f"Found {len(movies)} film events at Museum of the Moving Image")
+            finally:
+                await context.close()
         except Exception as e:
-            print(f"Error scraping Museum of the Moving Image with Playwright: {e}")
-        
+            self.log(f"Error scraping Museum of the Moving Image with Playwright: {e}")
+
         return movies
-    
-    def scrape_moving_image(self) -> List[Dict]:
-        """Scrape Museum of the Moving Image - wrapper for async method"""
-        return asyncio.run(self.scrape_moving_image_async())
-    
-    async def scrape_film_forum_async(self) -> List[Dict]:
+
+    async def scrape_film_forum_async(self, browser) -> List[Dict]:
         """Scrape Film Forum using Playwright"""
         movies = []
-        
+
         try:
-            async with async_playwright() as p:
-                browser = await p.chromium.launch(headless=True)
-                page = await browser.new_page()
-                
-                # Set user agent to avoid bot detection
-                await page.set_extra_http_headers({
-                    'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                })
-                
-                # Try to go to the page with a longer timeout
-                try:
-                    await page.goto('https://filmforum.org/now_playing', wait_until='networkidle', timeout=60000)
-                except Exception as goto_error:
-                    print(f"Film Forum: Failed to load page with networkidle, trying domcontentloaded: {goto_error}")
-                    try:
-                        await page.goto('https://filmforum.org/now_playing', wait_until='domcontentloaded', timeout=30000)
-                    except Exception as fallback_error:
-                        print(f"Film Forum: Failed to load page entirely: {fallback_error}")
-                        await browser.close()
-                        return movies
-                
-                # Wait for content to load
-                await page.wait_for_timeout(5000)
+            # Custom user agent to avoid bot detection
+            context = await browser.new_context(
+                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            )
+            try:
+                page = await context.new_page()
+
+                await self._goto_and_wait(
+                    page,
+                    'https://filmforum.org/now_playing',
+                    '.film-details .title.style-a a'
+                )
                 
                 # Extract movie information using the correct selectors
                 movie_data = await page.evaluate('''
@@ -963,16 +1043,14 @@ class MovieScraper:
                         return movies;
                     }
                 ''')
-                
-                await browser.close()
-                
+
                 # Process and filter movie data
                 seen_titles = set()
                 for item in movie_data:
                     title = item['title'].strip()
                     if title and title.lower() not in seen_titles:
                         seen_titles.add(title.lower())
-                        
+
                         # Clean title for Letterboxd matching - remove director prefixes and format suffixes
                         clean_title = title
                         import re
@@ -995,61 +1073,108 @@ class MovieScraper:
                             'letterboxd_url': self.generate_letterboxd_url(clean_title)
                         })
                 
-                print(f"Found {len(movies)} films at Film Forum")
-                
+                self.log(f"Found {len(movies)} films at Film Forum")
+            finally:
+                await context.close()
         except Exception as e:
-            print(f"Error scraping Film Forum with Playwright: {e}")
-        
+            self.log(f"Error scraping Film Forum with Playwright: {e}")
+
         return movies
-    
-    def scrape_film_forum(self) -> List[Dict]:
-        """Scrape Film Forum - wrapper for async method"""
-        return asyncio.run(self.scrape_film_forum_async())
-    
-    def get_all_movies(self, selected_theaters=None) -> List[Dict]:
-        """Aggregate movies from selected sources"""
-        if selected_theaters is None:
-            # Default to all theaters if none specified
-            selected_theaters = ['alamo', 'metrograph', 'ifc', 'angelika', 'angelika_village_east', 
-                               'paris_theater', 'nitehawk_williamsburg', 'nitehawk_prospect_park', 
-                               'moving_image', 'film_forum']
-        
-        all_movies = []
-        theater_scrapers = {
+
+    async def _scrape_all_async(self, theater_ids: List[str]) -> Dict[str, List[Dict]]:
+        """Scrape all requested theaters concurrently, sharing one browser."""
+        playwright_scrapers = {
+            'angelika': self.scrape_angelika_async,
+            'angelika_village_east': self.scrape_angelika_village_east_async,
+            'paris_theater': self.scrape_paris_theater_async,
+            'nitehawk_williamsburg': self.scrape_nitehawk_williamsburg_async,
+            'nitehawk_prospect_park': self.scrape_nitehawk_prospect_park_async,
+            'moving_image': self.scrape_moving_image_async,
+            'film_forum': self.scrape_film_forum_async,
+        }
+        sync_scrapers = {
             'alamo': self.scrape_alamo_drafthouse,
             'metrograph': self.scrape_metrograph,
             'ifc': self.scrape_ifc_center,
-            'angelika': self.scrape_angelika,
-            'angelika_village_east': self.scrape_angelika_village_east,
-            'paris_theater': self.scrape_paris_theater,
-            'nitehawk_williamsburg': self.scrape_nitehawk_williamsburg,
-            'nitehawk_prospect_park': self.scrape_nitehawk_prospect_park,
-            'moving_image': self.scrape_moving_image,
-            'film_forum': self.scrape_film_forum
         }
-        
+
+        sem = asyncio.Semaphore(4)  # cap concurrent pages (memory on Render)
+
+        async def run_playwright(tid, coro_fn, browser):
+            async with sem:
+                self.log(f"🎭 Scraping {tid.replace('_', ' ').title()}...")
+                try:
+                    return await asyncio.wait_for(coro_fn(browser), timeout=90)
+                except Exception as e:
+                    self.log(f"❌ Error scraping {tid}: {e}")
+                    return []
+
+        async def run_sync(tid, fn):
+            self.log(f"🎭 Scraping {tid.replace('_', ' ').title()}...")
+            try:
+                return await asyncio.to_thread(fn)
+            except Exception as e:
+                self.log(f"❌ Error scraping {tid}: {e}")
+                return []
+
+        tasks = {}
+        needs_browser = any(tid in playwright_scrapers for tid in theater_ids)
+        done = []
+        if needs_browser:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True, args=['--disable-dev-shm-usage'])
+                try:
+                    for tid in theater_ids:
+                        if tid in playwright_scrapers:
+                            tasks[tid] = run_playwright(tid, playwright_scrapers[tid], browser)
+                        elif tid in sync_scrapers:
+                            tasks[tid] = run_sync(tid, sync_scrapers[tid])
+                    done = await asyncio.gather(*tasks.values(), return_exceptions=True)
+                finally:
+                    await browser.close()
+        else:
+            for tid in theater_ids:
+                if tid in sync_scrapers:
+                    tasks[tid] = run_sync(tid, sync_scrapers[tid])
+            if tasks:
+                done = await asyncio.gather(*tasks.values(), return_exceptions=True)
+
+        return {tid: (res if isinstance(res, list) else []) for tid, res in zip(tasks.keys(), done)}
+
+    def get_all_movies(self, selected_theaters=None) -> List[Dict]:
+        """Aggregate movies from selected sources"""
+        known_theaters = ['alamo', 'metrograph', 'ifc', 'angelika', 'angelika_village_east',
+                          'paris_theater', 'nitehawk_williamsburg', 'nitehawk_prospect_park',
+                          'moving_image', 'film_forum']
+        if selected_theaters is None:
+            # Default to all theaters if none specified
+            selected_theaters = known_theaters
+
+        all_movies = []
+        to_scrape = []
         for theater_id in selected_theaters:
-            if theater_id in theater_scrapers:
-                # Check cache first (only if use_cache is True)
-                cached_movies = self._get_cached_movies(theater_id) if self.use_cache else []
-                if cached_movies and self.use_cache:
-                    self.log(f"📂 Using cached data for {theater_id.replace('_', ' ').title()} ({len(cached_movies)} movies)")
-                    all_movies.extend(cached_movies)
-                else:
-                    if not self.use_cache:
-                        self.log(f"🔄 Cache disabled - Scraping {theater_id.replace('_', ' ').title()}...")
-                    else:
-                        self.log(f"🎭 Scraping {theater_id.replace('_', ' ').title()}...")
-                    try:
-                        movies = theater_scrapers[theater_id]()
-                        all_movies.extend(movies)
-                        # Cache the results (only if use_cache is True)
-                        if self.use_cache:
-                            self._cache_movies(theater_id, movies)
-                            self.log(f"💾 Cached {len(movies)} movies for {theater_id.replace('_', ' ').title()}")
-                    except Exception as e:
-                        self.log(f"❌ Error scraping {theater_id}: {e}")
-        
+            if theater_id not in known_theaters:
+                continue
+            # Check cache first (only if use_cache is True)
+            cached_movies = self._get_cached_movies(theater_id) if self.use_cache else []
+            if cached_movies and self.use_cache:
+                self.log(f"📂 Using cached data for {theater_id.replace('_', ' ').title()} ({len(cached_movies)} movies)")
+                all_movies.extend(cached_movies)
+            else:
+                if not self.use_cache:
+                    self.log(f"🔄 Cache disabled - will scrape {theater_id.replace('_', ' ').title()}")
+                to_scrape.append(theater_id)
+
+        if to_scrape:
+            results = asyncio.run(self._scrape_all_async(to_scrape))
+            for theater_id, movies in results.items():
+                all_movies.extend(movies)
+                # Cache the results (only if use_cache is True and the scrape succeeded)
+                if self.use_cache and movies:
+                    self._cache_movies(theater_id, movies)
+                    self.log(f"💾 Cached {len(movies)} movies for {theater_id.replace('_', ' ').title()}")
+
+
         # Deduplicate by Letterboxd URL and collect all sources
         movie_dict = {}
         for movie in all_movies:
@@ -1066,7 +1191,14 @@ class MovieScraper:
                 existing_venue = movie_dict[letterboxd_url]['venue']
                 if movie['venue'] not in existing_venue:
                     movie_dict[letterboxd_url]['venue'] = f"{existing_venue}, {movie['venue']}"
-        
+                # Merge show dates across venues/listings
+                if movie.get('show_dates'):
+                    existing_dates = movie_dict[letterboxd_url].get('show_dates') or []
+                    movie_dict[letterboxd_url]['show_dates'] = sorted(set(existing_dates) | set(movie['show_dates']))
+
         deduplicated_movies = list(movie_dict.values())
+        for movie in deduplicated_movies:
+            if movie.get('show_dates'):
+                movie['dates_display'] = self._format_dates_display(movie['show_dates'])
         self.log(f"📊 Deduplicated from {len(all_movies)} to {len(deduplicated_movies)} unique movies")
         return deduplicated_movies

@@ -1,0 +1,14 @@
+# Secrets
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+
+# Local cache files (Supabase replaces these; still used as fallback)
+letterboxd_cache.csv
+theater_cache.json
+
+# OS
+.DS_Store

@@ -9,3 +9,7 @@ services:
         value: 3.11.0
       - key: PLAYWRIGHT_BROWSERS_PATH
         value: /opt/render/project/.cache/ms-playwright
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false

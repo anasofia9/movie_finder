@@ -4,552 +4,777 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}NYC Movie Finder{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg: #0d0d10;
+            --surface: #17171e;
+            --surface-2: #1e1e28;
+            --border: #2a2a35;
+            --text: #ece7dc;
+            --muted: #9a94a6;
+            --gold: #d4a94e;
+            --gold-bright: #e8c168;
+            --gold-dim: rgba(212, 169, 78, 0.15);
+            --green: #7dc98f;
+            --red: #e07a6b;
+            --orange: #e0b06b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f8f9fa;
-            color: #333;
+            background-color: var(--bg);
+            background-image: radial-gradient(ellipse at top, #16121e 0%, var(--bg) 55%);
+            background-repeat: no-repeat;
+            color: var(--text);
+            line-height: 1.5;
         }
-        
+
+        /* ------------------------------------------------------------------ */
+        /* Header — marquee                                                    */
+        /* ------------------------------------------------------------------ */
         .header {
             text-align: center;
             margin-bottom: 30px;
-            padding: 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 40px 30px 34px;
+            background: linear-gradient(180deg, var(--surface-2) 0%, var(--surface) 100%);
+            border: 1px solid var(--border);
+            border-bottom: 3px solid var(--gold);
+            border-radius: 14px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+            position: relative;
+            overflow: hidden;
         }
-        
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            opacity: 0.7;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+        }
+
         .header h1 {
             margin: 0;
-            font-size: 2.5em;
-            font-weight: 300;
+            font-family: 'Bebas Neue', 'Inter', sans-serif;
+            font-size: 3.4em;
+            font-weight: 400;
+            letter-spacing: 6px;
+            color: var(--text);
+            text-shadow: 0 0 30px rgba(212, 169, 78, 0.25);
         }
-        
+
+        .header h1 .gold {
+            color: var(--gold);
+        }
+
+        .header-goose {
+            height: 56px;
+            width: auto;
+            /* tint the gray silhouette gold */
+            filter: brightness(0) saturate(100%) invert(72%) sepia(38%) saturate(551%) hue-rotate(1deg) brightness(95%) contrast(88%);
+            transform: scaleX(-1);
+            animation: headerGooseWaddle 2.5s ease-in-out infinite;
+        }
+
+        @keyframes headerGooseWaddle {
+            0%, 100% {
+                transform: scaleX(-1) translateY(0px) rotate(0deg);
+            }
+            25% {
+                transform: scaleX(-1) translateY(-3px) rotate(2deg);
+            }
+            50% {
+                transform: scaleX(-1) translateY(0px) rotate(0deg);
+            }
+            75% {
+                transform: scaleX(-1) translateY(-3px) rotate(-2deg);
+            }
+        }
+
         .header p {
-            margin: 10px 0 0 0;
-            opacity: 0.9;
+            margin: 12px 0 0 0;
+            color: var(--muted);
+            font-size: 0.95em;
+            letter-spacing: 0.4px;
         }
-        
+
+        /* ------------------------------------------------------------------ */
+        /* Controls                                                            */
+        /* ------------------------------------------------------------------ */
         .controls {
             margin-bottom: 30px;
         }
-        
-        .theater-selection {
-            background: white;
+
+        .theater-selection,
+        .filter-panel,
+        .rating-threshold,
+        .cache-control {
+            background: var(--surface);
+            border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 16px;
         }
-        
+
+        .filter-panel h3,
         .theater-selection h3 {
-            margin: 0 0 15px 0;
-            color: #2c3e50;
+            margin: 0 0 16px 0;
             text-align: center;
+            font-family: 'Bebas Neue', 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 1.5em;
+            letter-spacing: 3px;
+            color: var(--gold);
         }
-        
+
         .theater-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 18px;
         }
-        
+
         .theater-checkbox {
             display: flex;
             align-items: center;
             cursor: pointer;
             padding: 12px 15px;
             border-radius: 8px;
-            border: 2px solid #e9ecef;
-            background: #f8f9fa;
-            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+            background: var(--surface-2);
+            transition: border-color 0.2s ease, background 0.2s ease;
             font-weight: 500;
+            font-size: 0.92em;
             width: 100%;
-            box-sizing: border-box;
+            color: var(--text);
         }
-        
+
         .theater-checkbox:hover {
-            border-color: #007bff;
-            background: #e3f2fd;
+            border-color: var(--gold);
+            background: var(--gold-dim);
         }
-        
+
         .theater-checkbox input[type="checkbox"] {
             margin-right: 10px;
-            transform: scale(1.2);
+            transform: scale(1.15);
+            accent-color: var(--gold);
         }
-        
-        .theater-checkbox input[type="checkbox"]:checked + .checkmark {
-            color: #007bff;
-        }
-        
+
         .selection-controls {
             display: flex;
             justify-content: center;
             gap: 10px;
-            margin-bottom: 20px;
         }
-        
+
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+
+        .genre-grid .theater-checkbox {
+            padding: 8px 12px;
+            font-size: 0.85em;
+        }
+
+        .date-inputs {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 18px;
+            flex-wrap: wrap;
+            margin-bottom: 10px;
+        }
+
+        .date-inputs label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text);
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .date-inputs input[type="date"] {
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface-2);
+            color: var(--text);
+            font-family: inherit;
+            color-scheme: dark;
+        }
+
+        .date-inputs input[type="date"]:focus {
+            outline: none;
+            border-color: var(--gold);
+        }
+
+        .date-filter .rating-help {
+            text-align: center;
+        }
+
         .btn-small {
-            background: #6c757d;
-            color: white;
+            background: transparent;
+            color: var(--muted);
             padding: 8px 16px;
-            border: none;
+            border: 1px solid var(--border);
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.85em;
             font-weight: 500;
+            font-family: inherit;
+            transition: all 0.2s ease;
         }
-        
+
         .btn-small:hover {
-            background: #545b62;
+            color: var(--gold);
+            border-color: var(--gold);
         }
-        
-        .controls .btn {
-            display: block;
-            margin: 0 auto 10px;
-            text-align: center;
-        }
-        
+
         .rating-threshold {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
             text-align: center;
         }
-        
+
         .rating-threshold label {
             display: block;
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--text);
             margin-bottom: 10px;
-            font-size: 1.1em;
+            font-size: 1em;
         }
-        
+
         .rating-threshold input[type="number"] {
-            padding: 12px 20px;
-            border: 2px solid #e9ecef;
+            padding: 10px 16px;
+            border: 1px solid var(--border);
             border-radius: 8px;
+            background: var(--surface-2);
+            color: var(--gold-bright);
             font-size: 1.2em;
             font-weight: 600;
+            font-family: inherit;
             text-align: center;
-            width: 80px;
+            width: 90px;
             margin: 0 10px;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.2s ease;
         }
-        
+
         .rating-threshold input[type="number"]:focus {
             outline: none;
-            border-color: #007bff;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px var(--gold-dim);
         }
-        
+
         .rating-help {
             display: block;
-            font-size: 0.85em;
-            color: #6c757d;
+            font-size: 0.82em;
+            color: var(--muted);
             margin-top: 8px;
             font-style: italic;
         }
-        
+
+        .cache-control {
+            padding: 8px 20px;
+        }
+
+        .cache-control .theater-checkbox {
+            border: none;
+            background: transparent;
+            justify-content: center;
+        }
+
+        .cache-control .theater-checkbox:hover {
+            background: transparent;
+            color: var(--gold-bright);
+        }
+
         .btn {
-            background: #007bff;
-            color: white;
-            padding: 12px 24px;
+            background: var(--gold);
+            color: #14100a;
+            padding: 14px 34px;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-weight: 700;
+            font-family: inherit;
+            font-size: 1em;
+            letter-spacing: 0.5px;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 18px rgba(212, 169, 78, 0.25);
         }
-        
+
         .btn:hover {
-            background: #0056b3;
+            background: var(--gold-bright);
             transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(212, 169, 78, 0.4);
         }
-        
+
+        .controls .btn {
+            display: block;
+            margin: 0 auto 10px;
+            text-align: center;
+        }
+
         .btn.secondary {
-            background: #6c757d;
+            background: var(--surface-2);
+            color: var(--text);
+            border: 1px solid var(--border);
         }
-        
+
         .btn.secondary:hover {
-            background: #545b62;
+            border-color: var(--gold);
         }
-        
+
+        /* ------------------------------------------------------------------ */
+        /* Status                                                              */
+        /* ------------------------------------------------------------------ */
         .status {
             text-align: center;
             margin: 20px 0;
-            padding: 15px;
-            border-radius: 8px;
-            background: #e3f2fd;
-            border-left: 4px solid #2196f3;
+            padding: 16px;
+            border-radius: 10px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--gold);
+            color: var(--muted);
+            font-size: 0.95em;
         }
-        
+
         .status.loading {
-            background: #fff3e0;
-            border-left-color: #ff9800;
+            border-left-color: var(--orange);
+            color: var(--text);
         }
-        
+
         .status-header {
-            font-weight: bold;
+            font-weight: 600;
             margin-bottom: 15px;
+            color: var(--text);
         }
-        
+
         .status-log {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
+            background: #0a0a0d;
+            border: 1px solid var(--border);
+            border-radius: 8px;
             padding: 15px;
             margin-top: 15px;
             max-height: 300px;
             overflow-y: auto;
             text-align: left;
         }
-        
+
         .status-message {
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
-            font-size: 0.85em;
+            font-size: 0.82em;
             padding: 4px 0;
-            border-bottom: 1px solid #e9ecef;
-            color: #495057;
+            border-bottom: 1px solid #1c1c24;
+            color: #b8b2a4;
         }
-        
+
         .status-message:last-child {
             border-bottom: none;
         }
-        
+
         .status-details {
             margin-top: 15px;
         }
-        
+
         .status-details summary {
             cursor: pointer;
-            color: #007bff;
+            color: var(--gold);
             font-weight: 500;
         }
-        
+
         .status-details summary:hover {
-            text-decoration: underline;
+            color: var(--gold-bright);
         }
-        
+
         .cache-status {
             margin-top: 15px;
             padding: 12px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            border-left: 4px solid #28a745;
+            background: var(--surface-2);
+            border-radius: 8px;
+            border-left: 3px solid var(--green);
             font-size: 0.9em;
+            text-align: left;
         }
-        
+
         .cache-status-title {
             font-weight: 600;
-            color: #2c3e50;
+            color: var(--text);
             margin-bottom: 8px;
         }
-        
+
         .cache-item {
             display: inline-block;
             margin: 2px 8px 2px 0;
-            padding: 4px 8px;
-            border-radius: 4px;
+            padding: 4px 10px;
+            border-radius: 20px;
             font-size: 0.8em;
             font-weight: 500;
         }
-        
+
         .cache-item.cached {
-            background: #d4edda;
-            color: #155724;
+            background: rgba(125, 201, 143, 0.12);
+            color: var(--green);
+            border: 1px solid rgba(125, 201, 143, 0.3);
         }
-        
+
         .cache-item.not-cached {
-            background: #f8d7da;
-            color: #721c24;
+            background: rgba(224, 122, 107, 0.1);
+            color: var(--red);
+            border: 1px solid rgba(224, 122, 107, 0.3);
         }
-        
-        .newsletter-section {
-            background: #fff;
-            border-radius: 12px;
-            padding: 30px;
-            margin-top: 40px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
-            border-left: 4px solid #6f42c1;
-        }
-        
-        .newsletter-content {
-            line-height: 1.6;
-        }
-        
-        .newsletter-content h1,
-        .newsletter-content h2,
-        .newsletter-content h3 {
-            color: #2c3e50;
-            margin-top: 30px;
-            margin-bottom: 15px;
-        }
-        
-        .newsletter-content h1 {
-            font-size: 1.8em;
-            border-bottom: 2px solid #6f42c1;
-            padding-bottom: 10px;
-        }
-        
-        .newsletter-content h2 {
-            font-size: 1.4em;
-        }
-        
-        .newsletter-content h3 {
-            font-size: 1.2em;
-        }
-        
-        .newsletter-content ul {
-            padding-left: 20px;
-        }
-        
-        .newsletter-content li {
-            margin-bottom: 10px;
-        }
-        
-        .newsletter-content strong {
-            color: #2c3e50;
-        }
-        
-        .newsletter-content a {
-            color: #6f42c1;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .newsletter-content a:hover {
-            text-decoration: underline;
-        }
-        
-        /* 3-column layout for newsletter movies */
-        .newsletter-content .movie {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
-            border-radius: 8px;
-            padding: 15px;
-            margin: 10px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            break-inside: avoid;
-        }
-        
-        .newsletter-content {
-            column-count: 3;
-            column-gap: 20px;
-            column-fill: balance;
-        }
-        
-        .newsletter-content h1,
-        .newsletter-content h2,
-        .newsletter-content h3,
-        .newsletter-content p:first-child {
-            column-span: all;
-        }
-        
-        .newsletter-content .movie-title {
-            font-size: 16px !important;
-            font-weight: 600 !important;
-            color: #2c3e50 !important;
-            margin-bottom: 8px !important;
-        }
-        
-        .newsletter-content .rating {
-            font-size: 14px !important;
-            font-weight: 600 !important;
-            margin-bottom: 5px !important;
-        }
-        
-        .newsletter-content .venue {
-            font-size: 13px !important;
-            color: #6c757d !important;
-            margin-bottom: 8px !important;
-        }
-        
-        @media (max-width: 1200px) {
-            .newsletter-content {
-                column-count: 2;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .newsletter-content {
-                column-count: 1;
-            }
-        }
-        
-        .movie {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            transition: transform 0.2s ease;
-        }
-        
-        .movie:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-        }
-        
-        .movie-title {
-            font-size: 1.3em;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-        
-        .rating {
-            font-weight: bold;
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
-        
-        .rating.high {
-            color: #27ae60;
-        }
-        
-        .rating.warning {
-            color: #f39c12;
-        }
-        
-        .rating.error {
-            color: #e74c3c;
-        }
-        
-        .venue {
-            color: #7f8c8d;
-            font-size: 0.9em;
-            margin-bottom: 10px;
-        }
-        
-        .links {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .links a {
-            color: #3498db;
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .links a:hover {
-            text-decoration: underline;
-        }
-        
+
+        /* ------------------------------------------------------------------ */
+        /* Movie sections + cards                                              */
+        /* ------------------------------------------------------------------ */
         .section {
-            margin: 40px 0;
+            margin: 44px 0;
         }
-        
+
         .section h2 {
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
+            font-family: 'Bebas Neue', 'Inter', sans-serif;
+            font-weight: 400;
+            font-size: 2em;
+            letter-spacing: 3px;
+            color: var(--text);
+            border-bottom: 2px solid var(--gold);
             padding-bottom: 10px;
             margin-bottom: 25px;
         }
-        
+
         .movies-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 18px;
             margin-bottom: 20px;
         }
-        
+
         @media (max-width: 1200px) {
             .movies-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        
+
         @media (max-width: 768px) {
             .movies-grid {
                 grid-template-columns: 1fr;
             }
         }
-        
+
+        .movie {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 0;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .movie:hover {
+            transform: translateY(-3px);
+            border-color: var(--gold);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--gold-dim);
+        }
+
+        .movie.dimmed {
+            opacity: 0.65;
+        }
+
+        .movie.dimmed:hover {
+            opacity: 1;
+        }
+
+        .movie-title {
+            font-size: 1.15em;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .movie-genres {
+            color: var(--gold);
+            font-size: 0.8em;
+            letter-spacing: 0.3px;
+            margin: -4px 0 10px;
+        }
+
+        .movie-dates {
+            color: var(--muted);
+            font-size: 0.85em;
+            margin-bottom: 12px;
+        }
+
+        .rating {
+            display: inline-block;
+            font-weight: 700;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .rating.high {
+            color: var(--gold-bright);
+            background: var(--gold-dim);
+            border: 1px solid rgba(212, 169, 78, 0.35);
+        }
+
+        .rating.warning {
+            color: var(--orange);
+            background: rgba(224, 176, 107, 0.1);
+            border: 1px solid rgba(224, 176, 107, 0.3);
+        }
+
+        .rating.error {
+            color: var(--red);
+            background: rgba(224, 122, 107, 0.1);
+            border: 1px solid rgba(224, 122, 107, 0.3);
+        }
+
+        .venue {
+            color: var(--muted);
+            font-size: 0.88em;
+            margin-bottom: 12px;
+        }
+
+        .links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .links a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9em;
+            transition: color 0.15s ease;
+        }
+
+        .links a:hover {
+            color: var(--gold-bright);
+            text-decoration: underline;
+        }
+
+        .no-link {
+            color: #5a5563;
+            font-size: 0.9em;
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* Newsletter                                                          */
+        /* ------------------------------------------------------------------ */
+        .newsletter-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--gold);
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+        }
+
+        .newsletter-content {
+            line-height: 1.6;
+            column-count: 3;
+            column-gap: 20px;
+            column-fill: balance;
+        }
+
+        .newsletter-content h1,
+        .newsletter-content h2,
+        .newsletter-content h3 {
+            color: var(--text);
+            margin-top: 30px;
+            margin-bottom: 15px;
+            column-span: all;
+        }
+
+        .newsletter-content h1 {
+            font-size: 1.8em;
+            border-bottom: 2px solid var(--gold);
+            padding-bottom: 10px;
+        }
+
+        .newsletter-content h2 {
+            font-size: 1.4em;
+        }
+
+        .newsletter-content h3 {
+            font-size: 1.2em;
+        }
+
+        .newsletter-content p:first-child {
+            column-span: all;
+        }
+
+        .newsletter-content ul {
+            padding-left: 20px;
+        }
+
+        .newsletter-content li {
+            margin-bottom: 10px;
+        }
+
+        .newsletter-content strong {
+            color: var(--text);
+        }
+
+        .newsletter-content a {
+            color: var(--gold);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .newsletter-content a:hover {
+            text-decoration: underline;
+        }
+
+        .newsletter-content .movie {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            break-inside: avoid;
+        }
+
+        .newsletter-content .movie-title {
+            font-size: 16px !important;
+            font-weight: 600 !important;
+            color: var(--text) !important;
+            margin-bottom: 8px !important;
+        }
+
+        .newsletter-content .rating {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            margin-bottom: 5px !important;
+        }
+
+        .newsletter-content .venue {
+            font-size: 13px !important;
+            color: var(--muted) !important;
+            margin-bottom: 8px !important;
+        }
+
+        @media (max-width: 1200px) {
+            .newsletter-content {
+                column-count: 2;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .newsletter-content {
+                column-count: 1;
+            }
+        }
+
+        /* ------------------------------------------------------------------ */
+        /* Loading + goose                                                     */
+        /* ------------------------------------------------------------------ */
         .loading, .loading-section {
             text-align: center;
             padding: 50px;
+            color: var(--muted);
         }
-        
+
         .loading-newsletter {
             text-align: center;
             padding: 40px;
-            color: #6c757d;
+            color: var(--muted);
         }
-        
+
         .loading-newsletter p {
             margin-top: 15px;
             font-style: italic;
         }
-        
+
         .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
+            border: 3px solid var(--border);
+            border-top: 3px solid var(--gold);
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
         }
-        
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-        
+
         .goose-container {
             height: 150px;
             width: 100%;
             position: relative;
-            overflow: visible;
+            overflow: hidden;
             margin: 20px 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
-        
+
         .goose {
-            max-width: 120px;
-            max-height: 120px;
+            max-width: 110px;
+            max-height: 110px;
             width: auto;
             height: auto;
+            position: absolute;
+            bottom: 10px;
+            left: -60px;
+            filter: brightness(0) saturate(100%) invert(72%) sepia(38%) saturate(551%) hue-rotate(1deg) brightness(95%) contrast(88%);
+            animation: gooseWalk 14s linear infinite;
         }
-        
+
+        .goose-inner {
+            animation: gooseWaddle 0.8s ease-in-out infinite;
+        }
+
         @keyframes gooseWalk {
             0% {
-                left: -60px;
-                transform: scaleX(1);
+                left: -110px;
+                transform: scaleX(-1);
             }
             45% {
-                left: calc(100% - 30px);
-                transform: scaleX(1);
+                left: calc(100% + 10px);
+                transform: scaleX(-1);
             }
             50% {
-                left: calc(100% - 30px);
-                transform: scaleX(-1);
-            }
-            95% {
-                left: -60px;
-                transform: scaleX(-1);
-            }
-            100% {
-                left: -60px;
+                left: calc(100% + 10px);
                 transform: scaleX(1);
             }
+            95% {
+                left: -110px;
+                transform: scaleX(1);
+            }
+            100% {
+                left: -110px;
+                transform: scaleX(-1);
+            }
         }
-        
+
         @keyframes gooseWaddle {
             0%, 100% {
                 transform: translateY(0px) rotate(0deg);
@@ -564,21 +789,29 @@
                 transform: translateY(-3px) rotate(2deg);
             }
         }
-        
+
+        /* ------------------------------------------------------------------ */
+        /* Responsive                                                          */
+        /* ------------------------------------------------------------------ */
         @media (max-width: 768px) {
             body {
                 padding: 10px;
             }
-            
+
             .header h1 {
-                font-size: 2em;
+                font-size: 2.2em;
+                letter-spacing: 3px;
             }
-            
+
+            .header-goose {
+                height: 38px;
+            }
+
             .controls {
                 flex-direction: column;
                 align-items: center;
             }
-            
+
             .theater-grid {
                 grid-template-columns: 1fr;
             }
@@ -587,17 +820,20 @@
 </head>
 <body>
     <div class="header">
-        <h1>🎬 NYC Movie Finder</h1>
+        <div class="header-title">
+            <img src="{{ url_for('static', filename='goose.png') }}" alt="Goose" class="header-goose">
+            <h1>NYC <span class="gold">Movie</span> Finder</h1>
+        </div>
         <p>Finding movie listings can feel like a goose chase. Discover the best rated movies playing in (some) New York City theaters.</p>
     </div>
-    
+
     {% block content %}{% endblock %}
-    
+
     <script>
         // Auto-refresh status every 10 seconds when scraping
         let statusInterval;
         let wasScraping = false;
-        
+
         function updateStatus() {
             fetch('/api/status')
                 .then(response => response.json())
@@ -608,7 +844,7 @@
                             wasScraping = true;
                             statusDiv.className = 'status loading';
                             let html = '<div class="spinner"></div><div class="status-header">Scraping movie data... This may take a few minutes.</div>';
-                            
+
                             if (data.status_messages && data.status_messages.length > 0) {
                                 html += '<div class="status-log">';
                                 data.status_messages.forEach(msg => {
@@ -616,15 +852,15 @@
                                 });
                                 html += '</div>';
                             }
-                            
+
                             statusDiv.innerHTML = html;
-                            
+
                             // Auto-scroll to bottom of status log
                             const statusLog = statusDiv.querySelector('.status-log');
                             if (statusLog) {
                                 statusLog.scrollTop = statusLog.scrollHeight;
                             }
-                            
+
                             if (!statusInterval) {
                                 statusInterval = setInterval(updateStatus, 5000); // Check every 5 seconds
                             }
@@ -640,7 +876,7 @@
                             if (data.last_updated) {
                                 const lastUpdate = new Date(data.last_updated).toLocaleString();
                                 html = `Last updated: ${lastUpdate} | ${data.total_movies} movies found`;
-                                
+
                                 if (data.status_messages && data.status_messages.length > 0) {
                                     html += `
                                         <details class="status-details">
@@ -651,26 +887,26 @@
                                     });
                                     html += `</div></details>`;
                                 }
-                                
+
                                 // Add cache status
                                 if (data.cache_status) {
                                     html += `<div class="cache-status">
                                         <div class="cache-status-title">📂 Theater Cache Status (${data.cache_status[Object.keys(data.cache_status)[0]]?.date || 'today'})</div>`;
-                                    
+
                                     Object.entries(data.cache_status).forEach(([theaterId, status]) => {
                                         const className = status.cached ? 'cached' : 'not-cached';
                                         const icon = status.cached ? '✅' : '🔄';
                                         const movieText = status.cached ? ` (${status.movie_count})` : '';
                                         html += `<span class="cache-item ${className}">${icon} ${status.name}${movieText}</span>`;
                                     });
-                                    
+
                                     html += `</div>`;
                                 }
                             } else {
                                 html = 'No data available. Click refresh to start scraping.';
                             }
                             statusDiv.innerHTML = html;
-                            
+
                             if (statusInterval) {
                                 clearInterval(statusInterval);
                                 statusInterval = null;
@@ -679,43 +915,90 @@
                     }
                 });
         }
-        
+
         // Update rating threshold display
         function updateRatingThreshold() {
             const threshold = document.getElementById('ratingThreshold').value;
             const titleElement = document.getElementById('high-rated-title');
             if (titleElement) {
-                titleElement.textContent = `🌟 High-Rated Movies (≥${threshold}⭐)`;
+                titleElement.textContent = `🌟 Highly Rated Movies (≥${threshold}⭐)`;
             }
         }
-        
+
         // Initial status check
         document.addEventListener('DOMContentLoaded', function() {
             updateStatus();
-            
+
             // Add event listener for rating threshold changes
             const ratingInput = document.getElementById('ratingThreshold');
             if (ratingInput) {
                 ratingInput.addEventListener('input', updateRatingThreshold);
             }
         });
-        
+
         // Theater selection functions
         function selectAllTheaters() {
-            const checkboxes = document.querySelectorAll('.theater-checkbox input[type="checkbox"]');
+            const checkboxes = document.querySelectorAll('.theater-selection .theater-checkbox input[type="checkbox"]');
             checkboxes.forEach(checkbox => checkbox.checked = true);
         }
-        
+
         function deselectAllTheaters() {
-            const checkboxes = document.querySelectorAll('.theater-checkbox input[type="checkbox"]');
+            const checkboxes = document.querySelectorAll('.theater-selection .theater-checkbox input[type="checkbox"]');
             checkboxes.forEach(checkbox => checkbox.checked = false);
         }
-        
+
         function getSelectedTheaters() {
-            const checkboxes = document.querySelectorAll('.theater-checkbox input[type="checkbox"]:checked');
+            const checkboxes = document.querySelectorAll('.theater-selection .theater-checkbox input[type="checkbox"]:checked');
             return Array.from(checkboxes).map(checkbox => checkbox.id);
         }
-        
+
+        // Genre + date filter functions
+        function selectAllGenres() {
+            document.querySelectorAll('.genre-checkbox').forEach(cb => cb.checked = true);
+            applyFilters();
+        }
+
+        function deselectAllGenres() {
+            document.querySelectorAll('.genre-checkbox').forEach(cb => cb.checked = false);
+            applyFilters();
+        }
+
+        function clearDateFilter() {
+            const from = document.getElementById('dateFrom');
+            const to = document.getElementById('dateTo');
+            if (from) from.value = '';
+            if (to) to.value = '';
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const genreBoxes = Array.from(document.querySelectorAll('.genre-checkbox'));
+            const selected = new Set(genreBoxes.filter(cb => cb.checked).map(cb => cb.value));
+            const genreFilterActive = genreBoxes.length > 0 && selected.size < genreBoxes.length;
+
+            const fromVal = document.getElementById('dateFrom')?.value || '';
+            const toVal = document.getElementById('dateTo')?.value || '';
+            const dateFilterActive = !!(fromVal || toVal);
+
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+            document.querySelectorAll('.section .movie').forEach(card => {
+                let visible = true;
+                if (genreFilterActive) {
+                    const genres = (card.dataset.genres || '').split('|').filter(g => g);
+                    visible = genres.some(g => selected.has(g));
+                }
+                if (visible && dateFilterActive) {
+                    const dates = (card.dataset.dates || '').split(',').filter(d => d);
+                    const inRange = d => (!fromVal || d >= fromVal) && (!toVal || d <= toVal);
+                    // Movies without listed dates are assumed to be showing today
+                    visible = dates.length ? dates.some(inRange) : inRange(today);
+                }
+                card.style.display = visible ? '' : 'none';
+            });
+        }
+
         // Function to immediately hide old content and show loading
         function hideOldContentAndShowLoading() {
             // Hide movie sections
@@ -723,30 +1006,30 @@
             movieSections.forEach(section => {
                 section.style.display = 'none';
             });
-            
+
             // Hide newsletter section
             const newsletterSection = document.querySelector('.newsletter-section');
             if (newsletterSection) {
                 newsletterSection.style.display = 'none';
             }
-            
+
             // Show loading states
             const loadingHTML = `
                 <div class="loading-section" id="temp-loading">
                     <div class="goose-container">
-                        <img src="https://media.tenor.com/BfOZ3AhO2C0AAAAM/honk-gooooseszn.gif" alt="Waddling goose" class="goose">
+                        <img src="/static/goose.png" alt="Waddling goose" class="goose">
                     </div>
                     <p>Scraping movie data... Results will appear here when complete.</p>
                 </div>
             `;
-            
+
             // Insert loading content after the status div
             const statusDiv = document.getElementById('status');
             if (statusDiv) {
                 statusDiv.insertAdjacentHTML('afterend', loadingHTML);
             }
         }
-        
+
         // Refresh button handler
         function refreshData() {
             const selectedTheaters = getSelectedTheaters();
@@ -754,18 +1037,18 @@
                 alert('Please select at least one theater to scrape.');
                 return;
             }
-            
+
             const ratingThreshold = document.getElementById('ratingThreshold').value;
             if (!ratingThreshold || ratingThreshold < 1.0 || ratingThreshold > 5.0) {
                 alert('Please enter a valid rating threshold between 1.0 and 5.0');
                 return;
             }
-            
+
             const disableCache = document.getElementById('disableCache').checked;
-            
+
             // Immediately hide old content and show loading
             hideOldContentAndShowLoading();
-            
+
             fetch('/api/refresh', {
                 method: 'POST',
                 headers: {
@@ -784,6 +1067,5 @@
                 });
         }
     </script>
-    <script type="text/javascript" async src="https://tenor.com/embed.js"></script>
 </body>
 </html>
