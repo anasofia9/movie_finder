@@ -1,5 +1,12 @@
 from flask import Flask, render_template, jsonify, request, Response
 from datetime import datetime
+from zoneinfo import ZoneInfo
+
+EASTERN = ZoneInfo('America/New_York')
+
+def eastern_now():
+    """Naive Eastern-time now (the server runs in UTC on Render)."""
+    return datetime.now(EASTERN).replace(tzinfo=None)
 import threading
 import time
 import json
@@ -78,7 +85,7 @@ def scrape_movies(selected_theaters=None, disable_cache=False):
         movies_data['movies'] = movies
         movies_data['movies_not_found'] = movies_not_found
         movies_data['movies_found_no_rating'] = letterboxd.movies_found_no_rating
-        movies_data['last_updated'] = datetime.now()
+        movies_data['last_updated'] = eastern_now()
         movies_data['is_scraping'] = False
         
         log_status("✅ Scraping completed successfully!")
@@ -115,10 +122,10 @@ def load_cached_data():
         ]
         movies_data['movies_found_no_rating'] = []
 
-        last_updated = datetime.now()
+        last_updated = eastern_now()
         if newest_cached_at:
             try:
-                last_updated = datetime.fromisoformat(str(newest_cached_at)).astimezone().replace(tzinfo=None)
+                last_updated = datetime.fromisoformat(str(newest_cached_at)).astimezone(EASTERN).replace(tzinfo=None)
             except ValueError:
                 pass
         movies_data['last_updated'] = last_updated
