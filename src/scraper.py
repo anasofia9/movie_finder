@@ -103,7 +103,10 @@ class MovieScraper:
             'nitehawk_williamsburg': 'Nitehawk Williamsburg',
             'nitehawk_prospect_park': 'Nitehawk Prospect Park',
             'moving_image': 'Museum of Moving Image',
-            'film_forum': 'Film Forum'
+            'film_forum': 'Film Forum',
+            'bam': 'BAM Rose Cinemas',
+            'roxy': 'Roxy Cinema',
+            'film_linc': 'Film at Lincoln Center'
         }
         
         current_date = self._get_eastern_date_string()
@@ -428,6 +431,168 @@ class MovieScraper:
         
         return movies
     
+    def _parse_bam_dates(self, text: str) -> List[str]:
+        """Parse BAM date labels ('Now Playing', 'Opens Sep 18', 'Sep 11—17, 2026',
+        'Nov 6 & 7, 2026', 'Wed, Jun 17, 2026') into ISO dates.
+        Uses the explicit year when present; otherwise assumes the current year
+        (the /film page lists past and future events, callers drop past ones)."""
+        import re
+        from datetime import date as date_cls
+        text = (text or '').strip()
+        if not text:
+            return []
+        today = datetime.now(self.eastern_tz).date()
+        if 'now playing' in text.lower():
+            # Open-ended run — assume showing daily for the coming week
+            return [(today + timedelta(days=i)).isoformat() for i in range(7)]
+        text = re.sub(r'^Opens\s+', '', text, flags=re.IGNORECASE)
+        year_match = re.search(r'(\d{4})', text)
+        year = int(year_match.group(1)) if year_match else today.year
+        # Expand same-month ranges: 'Sep 11—17' -> 'Sep 11 - Sep 17'
+        text = re.sub(r'([A-Za-z]{3,9})\.?\s+(\d{1,2})\s*[—–-]\s*(\d{1,2})\b', r'\1 \2 - \1 \3', text)
+        days = []
+        for month_str, day_str in re.findall(r'([A-Za-z]{3,9})\.?\s+(\d{1,2})', text):
+            month = self._MONTHS.get(month_str.strip().lower()[:3])
+            if not month:
+                continue
+            try:
+                days.append(date_cls(year, month, int(day_str)))
+            except ValueError:
+                continue
+        if not days:
+            return []
+        # '&' joins discrete dates ('Nov 6 & 7'); otherwise two dates are a range
+        if '&' not in text and len(days) >= 2:
+            start, end = min(days), max(days)
+            if start <= end and (end - start).days <= 90:
+                return [(start + timedelta(days=i)).isoformat() for i in range((end - start).days + 1)]
+        return sorted({d.isoformat() for d in days})
+
+    def scrape_bam(self) -> List[Dict]:
+        """Scrape BAM Rose Cinemas film listings"""
+        movies = []
+        try:
+            response = requests.get('https://www.bam.org/film', headers=self.headers, timeout=15)
+            soup = BeautifulSoup(response.content, 'lxml')
+            today = self._get_eastern_date_string()
+            seen = set()
+            for event in soup.select('.eventInfo'):
+                title_elem = event.select_one('.title')
+                if not title_elem:
+                    continue
+                # Skip 'FILM SERIES' umbrella entries — series names ('Jane Fonda',
+                # 'Electronica') would falsely match Letterboxd films
+                genre_elem = event.select_one('.genre')
+                if genre_elem and genre_elem.get_text(strip=True).lower() != 'film':
+                    continue
+                title = title_elem.get_text(strip=True)
+                key = title.lower()
+                if not title or key in seen:
+                    continue
+                date_elem = event.select_one('.mobileModuleDate')
+                dates = self._parse_bam_dates(date_elem.get_text(strip=True) if date_elem else '')
+                # The /film page lists the whole year — keep current/upcoming only
+                show_dates = [d for d in dates if d >= today]
+                if not show_dates:
+                    continue
+                seen.add(key)
+                link = event.find_parent('a')
+                href = link.get('href', '') if link else ''
+                movies.append({
+                    'title': title,
+                    'venue': 'BAM Rose Cinemas',
+                    'url': f"https://www.bam.org{href}" if href.startswith('/') else href,
+                    'source': 'bam',
+                    'letterboxd_url': self.generate_letterboxd_url(title),
+                    'show_dates': show_dates
+                })
+            self.log(f"Found {len(movies)} movies at BAM Rose Cinemas")
+        except Exception as e:
+            self.log(f"Error scraping BAM: {e}")
+        return movies
+
+    @staticmethod
+    def _clean_roxy_title(title: str) -> str:
+        """'Viva Las Vegas - 35MM + Learning from...' -> 'Viva Las Vegas';
+        'Titane | Sex, Death, Cars!' -> 'Titane'; strips '+ Q&A' suffixes."""
+        import re
+        clean = title.split('|')[0]
+        clean = re.sub(r'\s*\+\s*Q\s*&\s*A\s*$', '', clean, flags=re.IGNORECASE)
+        clean = clean.split(' + ')[0]  # double feature: keep the first feature
+        clean = re.sub(r'\s*-\s*\d+\s*mm\s*$', '', clean, flags=re.IGNORECASE)
+        return clean.strip()
+
+    def scrape_roxy(self) -> List[Dict]:
+        """Scrape Roxy Cinema's day-by-day now-showing calendar"""
+        movies = []
+        try:
+            response = requests.get('https://www.roxycinemanewyork.com/now-showing',
+                                    headers=self.headers, timeout=15)
+            soup = BeautifulSoup(response.content, 'lxml')
+            by_title = {}
+            for group in soup.select('.js-grid-group[data-date]'):
+                date_str = group.get('data-date')
+                for card in group.select('.detailed-screening__card'):
+                    title_elem = card.select_one('.detailed-screening__title')
+                    if not title_elem:
+                        continue
+                    title = self._clean_roxy_title(title_elem.get_text(strip=True))
+                    if not title:
+                        continue
+                    link = next((a.get('href') for a in card.find_all('a')
+                                 if '/screenings/' in (a.get('href') or '')), '')
+                    entry = by_title.setdefault(title.lower(), {
+                        'title': title,
+                        'venue': 'Roxy Cinema',
+                        'url': link or 'https://www.roxycinemanewyork.com/now-showing',
+                        'source': 'roxy',
+                        'letterboxd_url': self.generate_letterboxd_url(title),
+                        'show_dates': set()
+                    })
+                    if date_str:
+                        entry['show_dates'].add(date_str)
+            for entry in by_title.values():
+                entry['show_dates'] = sorted(entry['show_dates'])
+                movies.append(entry)
+            self.log(f"Found {len(movies)} movies at Roxy Cinema")
+        except Exception as e:
+            self.log(f"Error scraping Roxy Cinema: {e}")
+        return movies
+
+    def scrape_film_linc(self) -> List[Dict]:
+        """Scrape Film at Lincoln Center via its public showtimes API"""
+        movies = []
+        try:
+            response = requests.get('https://api.filmlinc.org/showtimes',
+                                    headers=self.headers, timeout=15)
+            films = response.json().get('films') or []
+            today = self._get_eastern_date_string()
+            import re
+            for film in films:
+                title = (film.get('title') or '').strip()
+                # The feed includes non-film products (festival passes, vouchers)
+                if re.search(r'\b(pass|passes|vouchers?)\b', title, re.IGNORECASE):
+                    continue
+                show_dates = sorted({
+                    s['date'] for s in (film.get('showtimes') or [])
+                    if s.get('date') and s['date'] >= today
+                })
+                if not title or not show_dates:
+                    continue
+                slug = film.get('slug')
+                movies.append({
+                    'title': title,
+                    'venue': 'Film at Lincoln Center',
+                    'url': f"https://www.filmlinc.org/films/{slug}/" if slug else 'https://www.filmlinc.org/now-playing/',
+                    'source': 'film_linc',
+                    'letterboxd_url': self.generate_letterboxd_url(title),
+                    'show_dates': show_dates
+                })
+            self.log(f"Found {len(movies)} movies at Film at Lincoln Center")
+        except Exception as e:
+            self.log(f"Error scraping Film at Lincoln Center: {e}")
+        return movies
+
     async def scrape_angelika_async(self, browser) -> List[Dict]:
         """Scrape Angelika Film Center NYC using Playwright"""
         movies = []
@@ -1098,6 +1263,9 @@ class MovieScraper:
             'alamo': self.scrape_alamo_drafthouse,
             'metrograph': self.scrape_metrograph,
             'ifc': self.scrape_ifc_center,
+            'bam': self.scrape_bam,
+            'roxy': self.scrape_roxy,
+            'film_linc': self.scrape_film_linc,
         }
 
         sem = asyncio.Semaphore(2)  # cap concurrent pages (memory on Render)
@@ -1147,7 +1315,7 @@ class MovieScraper:
         """Aggregate movies from selected sources"""
         known_theaters = ['alamo', 'metrograph', 'ifc', 'angelika', 'angelika_village_east',
                           'paris_theater', 'nitehawk_williamsburg', 'nitehawk_prospect_park',
-                          'moving_image', 'film_forum']
+                          'moving_image', 'film_forum', 'bam', 'roxy', 'film_linc']
         if selected_theaters is None:
             # Default to all theaters if none specified
             selected_theaters = known_theaters

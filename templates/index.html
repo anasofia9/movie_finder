@@ -57,6 +57,21 @@
                 <span class="checkmark"></span>
                 📺 Film Forum
             </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="bam" checked>
+                <span class="checkmark"></span>
+                🎩 BAM Rose Cinemas
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="roxy" checked>
+                <span class="checkmark"></span>
+                🍸 Roxy Cinema
+            </label>
+            <label class="theater-checkbox">
+                <input type="checkbox" id="film_linc" checked>
+                <span class="checkmark"></span>
+                🎼 Film at Lincoln Center
+            </label>
         </div>
         <div class="selection-controls">
             <button class="btn-small" onclick="selectAllTheaters()">Select All</button>
@@ -125,7 +140,10 @@
     'nitehawk_williamsburg': '🦉 Nitehawk Williamsburg',
     'nitehawk_prospect_park': '🌳 Nitehawk Prospect Park',
     'moving_image': '🎞️ Museum of Moving Image',
-    'film_forum': '📺 Film Forum'
+    'film_forum': '📺 Film Forum',
+    'bam': '🎩 BAM Rose Cinemas',
+    'roxy': '🍸 Roxy Cinema',
+    'film_linc': '🎼 Film at Lincoln Center'
 } %}
 {% set present_theaters = [] %}
 {% for movie in movies %}
