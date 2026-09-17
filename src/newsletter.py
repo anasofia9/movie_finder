@@ -12,117 +12,122 @@ class NewsletterGenerator:
         self.recipient = os.getenv('RECIPIENT_EMAIL')
         self.rating_threshold = rating_threshold
     
+
+    # Metallic tones matching the main site's card headers: (bg, accent)
+    METALS = [
+        ('#262013', '#d4a94e'),  # brass
+        ('#271b12', '#c98a63'),  # copper
+        ('#161e27', '#8badc9'),  # steel
+        ('#142420', '#74b295'),  # verdigris
+        ('#201f26', '#b2b2c4'),  # pewter
+        ('#271a1d', '#cf9288'),  # rose gold
+        ('#181d20', '#93a4ad'),  # gunmetal
+        ('#231c10', '#bd9a60'),  # bronze
+    ]
+
+    def _movie_row(self, i, title, badge, badge_color, venue, dates, links_html, dim=False):
+        bg, accent = self.METALS[i % len(self.METALS)]
+        opacity = 'opacity: 0.75;' if dim else ''
+        dates_html = f"<div style='color: #97907f; font-size: 12.5px; margin-top: 6px;'>Showing {dates}</div>" if dates else ''
+        return f"""
+        <div style="background: #161511; border: 1px solid #292620; border-radius: 12px; margin-bottom: 14px; overflow: hidden; {opacity}">
+            <div style="background: {bg}; padding: 14px 18px 15px; border-bottom: 1px solid #292620;">
+                <table width="100%" cellpadding="0" cellspacing="0"><tr>
+                    <td><span style="display: inline-block; border: 1px solid rgba(212,169,78,0.35); border-radius: 6px; background: rgba(0,0,0,0.3); padding: 2px 9px; font-size: 12.5px; font-weight: 600; color: {badge_color};">{badge}</span></td>
+                    <td align="right" style="font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase; color: #6e6858;">Letterboxd</td>
+                </tr></table>
+                <div style="font-family: 'Poiret One', sans-serif; font-size: 23px; text-transform: uppercase; letter-spacing: 0.5px; color: #ece7dc; margin-top: 10px; line-height: 1.1;">{title}</div>
+                <div style="width: 40px; height: 2px; background: {accent}; margin-top: 10px;"></div>
+            </div>
+            <div style="padding: 12px 18px 14px;">
+                <div style="font-size: 13.5px; font-weight: 500; color: #ece7dc;"><span style="display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: {accent}; margin-right: 8px; vertical-align: 1px;"></span>{venue}</div>
+                {dates_html}
+                <div style="margin-top: 10px; font-size: 12.5px;">{links_html}</div>
+            </div>
+        </div>
+        """
+
     def generate_html(self, movies: List[Dict], movies_not_found: List[Dict] = None, movies_found_no_rating: List[str] = None) -> str:
-        """Generate HTML newsletter with rating threshold filtering"""
+        """Generate the weekly journal HTML, styled to match the main site."""
         today = datetime.now().strftime('%B %d, %Y')
-        
-        # Filter movies by rating threshold and sort by rating (descending)
+
         high_rated_movies = [m for m in movies if m.get('letterboxd_rating') and m.get('letterboxd_rating') >= self.rating_threshold]
         high_rated_movies.sort(key=lambda x: x.get('letterboxd_rating', 0), reverse=True)
-        
-       
-        for movie in high_rated_movies:
-            print(f"  - {movie.get('title')}: {movie.get('letterboxd_rating')}")
-        
-        
-        html = f"""
-        <!DOCTYPE html>
+
+        lb_link = "color: #d4a94e; font-weight: 600; text-decoration: none;"
+        mut_link = "color: #97907f; font-weight: 600; text-decoration: none;"
+
+        html = f"""<!DOCTYPE html>
         <html>
         <head>
-            <style>
-                body {{ font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }}
-                h1 {{ color: #2c3e50; }}
-                .movie {{ border-bottom: 1px solid #eee; padding: 15px 0; }}
-                .movie-title {{ font-size: 18px; font-weight: bold; color: #34495e; }}
-                .rating {{ color: #27ae60; font-weight: bold; font-size: 16px; }}
-                .venue {{ color: #7f8c8d; font-size: 14px; }}
-                .high-rating {{ background-color: #d5f4e6; padding: 2px 8px; border-radius: 3px; }}
-                a {{ color: #3498db; text-decoration: none; }}
-            </style>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Weekly Cinephile Journal — {today}</title>
+            <link href="https://fonts.googleapis.com/css2?family=Poiret+One&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
         </head>
-        <body>
-            <h1>🎬 NYC Movie Picks - {today}</h1>
-            <p>Here are this week's top-rated movies (≥{self.rating_threshold}⭐) playing in NYC theaters:</p>
+        <body style="margin: 0; padding: 36px 20px; background-color: #0d0c0a; font-family: 'Inter', -apple-system, sans-serif; color: #ece7dc;">
+        <div style="max-width: 640px; margin: 0 auto;">
+            <div style="font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #d4a94e; margin-bottom: 10px;">Cinephile Editions &middot; {today}</div>
+            <h1 style="font-family: 'Poiret One', sans-serif; font-weight: 400; font-size: 40px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px; color: #ece7dc;">Weekly Cinephile Journal</h1>
+            <p style="margin: 0 0 26px; color: #97907f; font-size: 14.5px;">This week's top-rated films (&ge;{self.rating_threshold}&#9733; on Letterboxd) playing at NYC's independent theaters.</p>
+            <hr style="border: none; border-top: 1px solid #292620; margin: 0 0 26px;">
         """
-        
+
         if not high_rated_movies:
-            html += f"<p>No movies found with rating >= {self.rating_threshold} this week.</p>"
+            html += f"<p style='color: #6e6858;'>No movies rated {self.rating_threshold}&#9733; or higher this week.</p>"
         else:
-            for i, movie in enumerate(high_rated_movies, 1):
+            for i, movie in enumerate(high_rated_movies):
                 rating = movie.get('letterboxd_rating')
-                rating_display = f"⭐ {rating:.1f}" if rating else "N/A"
-                rating_class = "high-rating" if rating and rating >= 4.0 else ""
-                
-                html += f"""
-                <div class="movie">
-                    <div class="movie-title">{i}. {movie['title']}</div>
-                    <div class="rating {rating_class}">{rating_display}</div>
-                    <div class="venue">📍 {movie['venue']}</div>
-                    <div>
-                        <a href="{movie.get('letterboxd_url', '#')}">Letterboxd</a>
-                        {f" | <a href='{movie['url']}'>Tickets</a>" if movie.get('url') else ""}
-                    </div>
-                </div>
-                """
-        
-        # Add section for movies found but with no ratings
+                links = []
+                if movie.get('letterboxd_url'):
+                    links.append(f"<a href='{movie['letterboxd_url']}' style='{lb_link}'>Letterboxd Review &#8599;</a>")
+                if movie.get('url'):
+                    links.append(f"<a href='{movie['url']}' style='{mut_link}'>Venue Tickets &rsaquo;</a>")
+                html += self._movie_row(
+                    i, movie['title'], f"{rating:.1f} &#9733;", '#d4a94e',
+                    movie.get('venue', ''), movie.get('dates_display') or '',
+                    ' &nbsp;&middot;&nbsp; '.join(links)
+                )
+
         if movies_found_no_rating:
-            html += f"""
-            <h2 style="color: #f39c12; margin-top: 30px;">⚠️ Movies Found on Letterboxd (No Ratings Yet)</h2>
-            <p style="color: #7f8c8d;">These movies are on Letterboxd but don't have ratings yet:</p>
+            html += """
+            <h2 style="font-family: 'Poiret One', sans-serif; font-weight: 400; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; margin: 34px 0 6px;">Awaiting ratings</h2>
+            <p style="margin: 0 0 16px; color: #6e6858; font-size: 12.5px;">On Letterboxd, not enough audience scores yet.</p>
             """
-            
-            # Get movie titles from the movies list that correspond to the URLs
-            for i, url in enumerate(movies_found_no_rating, 1):
-                # Find the movie with this URL
-                movie_title = "Unknown Title"
-                movie_venue = "Unknown Venue"
+            for i, url in enumerate(movies_found_no_rating):
+                movie_title, movie_venue, dates = 'Unknown Title', '', ''
                 for movie in movies:
                     if movie.get('letterboxd_url') == url:
                         movie_title = movie['title']
-                        movie_venue = movie.get('venue', 'Unknown Venue')
+                        movie_venue = movie.get('venue', '')
+                        dates = movie.get('dates_display') or ''
                         break
-                
-                html += f"""
-                <div class="movie" style="opacity: 0.7;">
-                    <div class="movie-title">{i}. {movie_title}</div>
-                    <div style="color: #f39c12; font-weight: bold;">⚠️ No rating yet</div>
-                    <div class="venue">📍 {movie_venue}</div>
-                    <div>
-                        <a href="{url}">Letterboxd</a>
-                    </div>
-                </div>
-                """
-        
-        # Add section for movies not found on Letterboxd
+                html += self._movie_row(
+                    4, movie_title, 'Unrated', '#97907f', movie_venue, dates,
+                    f"<a href='{url}' style='{lb_link}'>Letterboxd &#8599;</a>", dim=True
+                )
+
         if movies_not_found:
-            html += f"""
-            <h2 style="color: #e74c3c; margin-top: 30px;">❌ Screenings Not Found on Letterboxd</h2>
-            <p style="color: #7f8c8d;">These movies could not be found on Letterboxd:</p>
+            html += """
+            <h2 style="font-family: 'Poiret One', sans-serif; font-weight: 400; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; margin: 34px 0 6px;">Off the record</h2>
+            <p style="margin: 0 0 16px; color: #6e6858; font-size: 12.5px;">Screenings we couldn't match on Letterboxd.</p>
             """
-            
-            for i, movie in enumerate(movies_not_found, 1):
-                sources = movie.get('sources', [movie.get('source', 'unknown')])
-                sources_str = ', '.join(sources)
-                
-                html += f"""
-                <div class="movie" style="opacity: 0.6;">
-                    <div class="movie-title">{i}. {movie['title']}</div>
-                    <div style="color: #e74c3c; font-weight: bold;">❌ Not found</div>
-                    <div class="venue">📍 {movie.get('venue', 'Unknown Venue')} | Sources: {sources_str}</div>
-                    <div>
-                        {f"<a href='{movie['url']}'>Tickets</a>" if movie.get('url') else "No ticket link available"}
-                    </div>
-                </div>
-                """
-        
+            for movie in movies_not_found:
+                link = f"<a href='{movie['url']}' style='{mut_link}'>Venue Tickets &rsaquo;</a>" if movie.get('url') else "<span style='color: #6e6858;'>No ticket link</span>"
+                html += self._movie_row(
+                    6, movie['title'], 'Not matched', '#97907f',
+                    movie.get('venue', ''), movie.get('dates_display') or '', link, dim=True
+                )
+
         html += """
+            <hr style="border: none; border-top: 1px solid #292620; margin: 30px 0 18px;">
+            <p style="font-size: 11.5px; color: #6e6858;">&copy; 2026 NYC Movie Finder. Not affiliated with Letterboxd or its associated platforms.</p>
+        </div>
         </body>
         </html>
         """
-        
         return html
-    
+
     def save_to_file(self, content: str):
         """Save newsletter to file"""
         os.makedirs('newsletters', exist_ok=True)

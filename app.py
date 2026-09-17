@@ -151,16 +151,6 @@ threading.Thread(target=load_cached_data, daemon=True).start()
 @app.route('/')
 def index():
     """Main page showing movie listings"""
-    # Generate newsletter content if we have movies
-    newsletter_content = ""
-    if movies_data['movies']:
-        generator = NewsletterGenerator(rating_threshold=movies_data['rating_threshold'])
-        newsletter_content = generator.generate_html(
-            movies_data['movies'], 
-            movies_data['movies_not_found'], 
-            movies_data['movies_found_no_rating']
-        )
-    
     # All genres saved in the ratings DB (Supabase or local CSV) for the filter checkboxes
     try:
         all_genres = LetterboxdAPI().get_all_genres()
@@ -174,8 +164,7 @@ def index():
                          rating_threshold=movies_data['rating_threshold'],
                          status_messages=status_messages[-10:],
                          all_genres=all_genres,
-                         data_notice=movies_data['data_notice'],
-                         newsletter_content=newsletter_content)
+                         data_notice=movies_data['data_notice'])
 
 @app.route('/newsletter')
 def newsletter():
