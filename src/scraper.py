@@ -1171,8 +1171,10 @@ class MovieScraper:
             results = asyncio.run(self._scrape_all_async(to_scrape))
             for theater_id, movies in results.items():
                 all_movies.extend(movies)
-                # Cache the results (only if use_cache is True and the scrape succeeded)
-                if self.use_cache and movies:
+                # Always persist successful scrapes — use_cache only controls
+                # whether cached data is *read*, so 'Disable Cache' refreshes
+                # still save their results for startup hydration
+                if movies:
                     self._cache_movies(theater_id, movies)
                     self.log(f"💾 Cached {len(movies)} movies for {theater_id.replace('_', ' ').title()}")
 
