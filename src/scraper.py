@@ -1175,7 +1175,10 @@ class MovieScraper:
                     self.log(f"💾 Cached {len(movies)} movies for {theater_id.replace('_', ' ').title()}")
 
 
-        # Deduplicate by Letterboxd URL and collect all sources
+        return self._dedupe_movies(all_movies)
+
+    def _dedupe_movies(self, all_movies: List[Dict]) -> List[Dict]:
+        """Deduplicate by Letterboxd URL, merging sources/venues/show dates."""
         movie_dict = {}
         for movie in all_movies:
             letterboxd_url = movie['letterboxd_url']
@@ -1202,3 +1205,22 @@ class MovieScraper:
                 movie['dates_display'] = self._format_dates_display(movie['show_dates'])
         self.log(f"📊 Deduplicated from {len(all_movies)} to {len(deduplicated_movies)} unique movies")
         return deduplicated_movies
+
+    def get_cached_movies_only(self) -> tuple:
+        """Return (movies, newest_cached_at) from today's theater cache only.
+        Never scrapes; returns ([], None) if nothing fresh is cached."""
+        all_movies = []
+        newest_cached_at = None
+        for theater_id in list(self.theater_cache.keys()):
+            if not self._is_cache_valid(theater_id):
+                continue
+            movies = self._get_cached_movies(theater_id)
+            if not movies:
+                continue
+            all_movies.extend(movies)
+            cached_at = self.theater_cache[theater_id].get('cached_at')
+            if cached_at and (newest_cached_at is None or str(cached_at) > str(newest_cached_at)):
+                newest_cached_at = cached_at
+        if not all_movies:
+            return [], None
+        return self._dedupe_movies(all_movies), newest_cached_at

@@ -88,6 +88,52 @@ def scrape_movies(selected_theaters=None, disable_cache=False):
         log_status(error_msg)
         movies_data['is_scraping'] = False
 
+def load_cached_data():
+    """Hydrate movies_data from caches only (Supabase or local files).
+    Never scrapes — if today's cache is empty/stale, leaves the app in the
+    'no data' state so the user can trigger a refresh."""
+    global movies_data
+    try:
+        scraper = MovieScraper(log_callback=log_status)
+        movies, newest_cached_at = scraper.get_cached_movies_only()
+        if not movies:
+            log_status("📭 No fresh cached data for today — click Refresh Data to scrape.")
+            return
+
+        letterboxd = LetterboxdAPI()
+        with_data, without_data = letterboxd.apply_cached_ratings(movies)
+        movies = with_data + without_data
+
+        # Don't clobber a scrape the user kicked off in the meantime
+        if movies_data['is_scraping'] or movies_data['movies']:
+            return
+
+        movies_data['movies'] = movies
+        movies_data['movies_not_found'] = [
+            m for m in movies
+            if m.get('letterboxd_rating') is None and m.get('letterboxd_url') is None
+        ]
+        movies_data['movies_found_no_rating'] = []
+
+        last_updated = datetime.now()
+        if newest_cached_at:
+            try:
+                last_updated = datetime.fromisoformat(str(newest_cached_at)).astimezone().replace(tzinfo=None)
+            except ValueError:
+                pass
+        movies_data['last_updated'] = last_updated
+
+        rated = len([m for m in with_data if m.get('letterboxd_rating')])
+        log_status(f"📦 Loaded {len(movies)} movies from today's cache ({rated} with ratings)")
+    except Exception as e:
+        log_status(f"⚠️ Could not load cached data: {e}")
+
+
+# Hydrate from caches on startup (import time, so it also runs under
+# gunicorn on Render). Cache-only: never triggers a scrape.
+threading.Thread(target=load_cached_data, daemon=True).start()
+
+
 @app.route('/')
 def index():
     """Main page showing movie listings"""
@@ -176,9 +222,4 @@ def api_status():
     })
 
 if __name__ == '__main__':
-    # Initial scrape on startup (in background) - scrape all theaters by default
-    thread = threading.Thread(target=scrape_movies, args=(None,))
-    thread.daemon = True
-    thread.start()
-    
     app.run(host='0.0.0.0', port=8000, debug=True)

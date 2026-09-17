@@ -592,28 +592,40 @@ class LetterboxdAPI:
         
         return cached_movies, uncached_movies
     
+    def _preload_db_cache(self, movies: List[Dict]) -> None:
+        """Bulk-preload fresh ratings from Supabase into the in-memory cache
+        (single main-thread query; worker threads only write/upsert)."""
+        if not db.is_enabled():
+            return
+        urls = [m['letterboxd_url'] for m in movies if m.get('letterboxd_url')]
+        # 7-day window; _get_from_cache applies stricter 1-day freshness to negatives
+        for url, row in db.get_fresh_ratings(urls, max_age_hours=24 * 7).items():
+            # Include negative results (rating None); resolved_url distinguishes
+            # found-but-unrated (set) from not-found (None)
+            self.csv_cache[url] = {
+                'title': row.get('title'),
+                'rating': row.get('rating'),
+                'rating_count': row.get('rating_count'),
+                'year': row.get('year'),
+                'updated': row.get('updated_at'),
+                'url': row.get('resolved_url'),
+                'genres': row.get('genres')
+            }
+
+    def apply_cached_ratings(self, movies: List[Dict]) -> tuple:
+        """Attach ratings/genres from caches only (Supabase or CSV) — never
+        hits the network. Returns (with_cached_data, without_cached_data)."""
+        if not movies:
+            return [], []
+        self._preload_db_cache(movies)
+        return self.filter_movies_by_cache(movies)
+
     def process_movie_batch(self, movies: List[Dict], progress_callback=None, max_workers=12) -> List[Dict]:
         """Process multiple movies concurrently with threading"""
         if not movies:
             return []
 
-        # Bulk-preload fresh ratings from Supabase into the in-memory cache
-        # (single main-thread query; worker threads below only write/upsert)
-        if db.is_enabled():
-            urls = [m['letterboxd_url'] for m in movies if m.get('letterboxd_url')]
-            # 7-day window; _get_from_cache applies stricter 1-day freshness to negatives
-            for url, row in db.get_fresh_ratings(urls, max_age_hours=24 * 7).items():
-                # Include negative results (rating None); resolved_url distinguishes
-                # found-but-unrated (set) from not-found (None)
-                self.csv_cache[url] = {
-                    'title': row.get('title'),
-                    'rating': row.get('rating'),
-                    'rating_count': row.get('rating_count'),
-                    'year': row.get('year'),
-                    'updated': row.get('updated_at'),
-                    'url': row.get('resolved_url'),
-                    'genres': row.get('genres')
-                }
+        self._preload_db_cache(movies)
 
         # Filter movies by cache first
         cached_movies, uncached_movies = self.filter_movies_by_cache(movies)
