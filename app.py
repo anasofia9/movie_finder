@@ -157,6 +157,27 @@ def index():
     except Exception:
         all_genres = []
 
+    # Next-showtime line per movie ("Fri Sep 19 · 12:30 PM, 7:00 PM"), computed
+    # at request time so "next" tracks the current date
+    today = eastern_now().date().isoformat()
+    directors = set()
+    for m in movies_data['movies']:
+        m['times_display'] = None
+        showtimes = m.get('showtimes') or {}
+        upcoming = sorted(d for d, ts in showtimes.items() if d >= today and ts)
+        if upcoming:
+            d = upcoming[0]
+            times = showtimes[d][:4]
+            extra = len(showtimes[d]) - len(times)
+            try:
+                label = datetime.strptime(d, '%Y-%m-%d').strftime('%a %b %-d')
+            except ValueError:
+                label = d
+            m['times_display'] = f"{label} · {', '.join(times)}" + (f" +{extra} more" if extra > 0 else "")
+        for name in (m.get('director') or '').split(', '):
+            if name.strip():
+                directors.add(name.strip())
+
     return render_template('index.html',
                          movies=movies_data['movies'],
                          last_updated=movies_data['last_updated'],
@@ -164,6 +185,7 @@ def index():
                          rating_threshold=movies_data['rating_threshold'],
                          status_messages=status_messages[-10:],
                          all_genres=all_genres,
+                         all_directors=sorted(directors),
                          data_notice=movies_data['data_notice'])
 
 @app.route('/newsletter')

@@ -68,6 +68,15 @@
         </select>
     </div>
     <div class="filter-group">
+        <label for="directorSelect">Director</label>
+        <select id="directorSelect" onchange="applyFilters()">
+            <option value="">All Directors</option>
+            {% for d in all_directors %}
+            <option value="{{ d }}">{{ d }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <div class="filter-group">
         <label for="dateFrom">Date from</label>
         <input type="date" id="dateFrom" onchange="applyFilters()">
     </div>
@@ -117,6 +126,7 @@
             <article class="card m-{{ loop.index0 % 8 }}"
                      data-rating="{{ movie.letterboxd_rating }}"
                      data-genres="{{ (movie.genres or [])|join('|') }}"
+                     data-director="{{ movie.director or '' }}"
                      data-dates="{{ (movie.show_dates or [])|join(',') }}"
                      data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
                 <div class="card-head">
@@ -126,6 +136,7 @@
                     </div>
                     <h3 class="card-title">{{ movie.title }}</h3>
                     <div class="title-rule"></div>
+                    {% if movie.director %}<div class="director">Dir. {{ movie.director }}</div>{% endif %}
                 </div>
                 <div class="card-body">
                     {% if movie.genres %}
@@ -134,7 +145,10 @@
                     </div>
                     {% endif %}
                     <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
-                    <div class="when"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                    <div class="when">
+                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                        {% if movie.times_display %}<div class="when-times">{{ movie.times_display }}</div>{% endif %}
+                    </div>
                 </div>
                 <div class="card-foot">
                     {% if movie.letterboxd_url %}
@@ -163,6 +177,7 @@
             {% for movie in no_rating_movies %}
             <article class="card dimmed m-4"
                      data-genres="{{ (movie.genres or [])|join('|') }}"
+                     data-director="{{ movie.director or '' }}"
                      data-dates="{{ (movie.show_dates or [])|join(',') }}"
                      data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
                 <div class="card-head">
@@ -172,6 +187,7 @@
                     </div>
                     <h3 class="card-title">{{ movie.title }}</h3>
                     <div class="title-rule"></div>
+                    {% if movie.director %}<div class="director">Dir. {{ movie.director }}</div>{% endif %}
                 </div>
                 <div class="card-body">
                     {% if movie.genres %}
@@ -180,7 +196,10 @@
                     </div>
                     {% endif %}
                     <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
-                    <div class="when"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                    <div class="when">
+                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                        {% if movie.times_display %}<div class="when-times">{{ movie.times_display }}</div>{% endif %}
+                    </div>
                 </div>
                 <div class="card-foot">
                     <a class="lb-link" href="{{ movie.letterboxd_url }}" target="_blank">Letterboxd ↗</a>
@@ -217,7 +236,10 @@
                 </div>
                 <div class="card-body">
                     <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
-                    <div class="when"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                    <div class="when">
+                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                        {% if movie.times_display %}<div class="when-times">{{ movie.times_display }}</div>{% endif %}
+                    </div>
                 </div>
                 <div class="card-foot">
                     <span class="no-link"></span>

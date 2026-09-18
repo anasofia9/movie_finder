@@ -236,6 +236,31 @@ class MovieScraper:
     _MONTHS = {'jan': 1, 'feb': 2, 'mar': 3, 'apr': 4, 'may': 5, 'jun': 6,
                'jul': 7, 'aug': 8, 'sep': 9, 'oct': 10, 'nov': 11, 'dec': 12}
 
+    @staticmethod
+    def _norm_time(text: str):
+        """Normalize a showtime string ('12:30pm', '9:30PM', '6:00 PM') to '12:30 PM'.
+        Returns None if it doesn't look like a time."""
+        import re
+        m = re.match(r'^\s*(\d{1,2})(?::(\d{2}))?\s*(am|pm)\s*$', (text or ''), re.IGNORECASE)
+        if not m:
+            return None
+        hour, minute, ampm = int(m.group(1)), m.group(2) or '00', m.group(3).upper()
+        if not 1 <= hour <= 12:
+            return None
+        return f"{hour}:{minute} {ampm}"
+
+    @staticmethod
+    def _time_sort_key(t: str):
+        """Sort key for 'H:MM AM/PM' display strings."""
+        try:
+            return datetime.strptime(t, '%I:%M %p')
+        except ValueError:
+            return datetime.max
+
+    @classmethod
+    def _sorted_times(cls, times) -> List[str]:
+        return sorted(set(times), key=cls._time_sort_key)
+
     def _month_day_to_iso(self, month_str: str, day_str: str):
         """('Sep', '17') -> '2026-09-17'. Infers the year (rolls over near Dec/Jan)."""
         from datetime import date
@@ -309,26 +334,34 @@ class MovieScraper:
             )
             data = response.json()['data']
 
-            # Map presentation slug -> set of dates with bookable sessions
-            dates_by_slug = {}
+            # Map presentation slug -> {date: [times]} from bookable sessions
+            times_by_slug = {}
             for session in data.get('sessions', []):
                 slug = session.get('presentationSlug')
                 date_str = session.get('businessDateClt')  # 'YYYY-MM-DD'
-                if slug and date_str:
-                    dates_by_slug.setdefault(slug, set()).add(date_str)
+                if not slug or not date_str:
+                    continue
+                day = times_by_slug.setdefault(slug, {}).setdefault(date_str, [])
+                show_time = session.get('showTimeClt')  # '2026-12-15T18:00:00'
+                try:
+                    day.append(datetime.fromisoformat(show_time).strftime('%-I:%M %p'))
+                except (TypeError, ValueError):
+                    pass
 
             for presentation in data.get('presentations', []):
                 slug = presentation.get('slug')
                 title = (presentation.get('show') or {}).get('title')
-                if not title or slug not in dates_by_slug:
+                if not title or slug not in times_by_slug:
                     continue  # skip announced titles with no sessions on sale
+                showtimes = {d: self._sorted_times(ts) for d, ts in times_by_slug[slug].items()}
                 movies.append({
                     'title': title,
                     'venue': 'Alamo Drafthouse',
                     'url': f'https://drafthouse.com/nyc/show/{slug}',
                     'source': 'alamo',
                     'letterboxd_url': self.generate_letterboxd_url(title),
-                    'show_dates': sorted(dates_by_slug[slug]),
+                    'show_dates': sorted(showtimes),
+                    'showtimes': showtimes,
                 })
 
             self.log(f"Found {len(movies)} movies at Alamo Drafthouse")
@@ -351,16 +384,18 @@ class MovieScraper:
             for title_elem in soup.select('h3.movie_title a'):
                 title = title_elem.text.strip()
                 if title:
-                    # Dates live in sibling .film_day divs with ids like "day_Fri_Sep_18"
-                    show_dates = set()
+                    # Dates live in sibling .film_day divs with ids like "day_Fri_Sep_18";
+                    # each day's ticket links carry the showtimes ('12:30pm')
+                    showtimes = {}
                     container = title_elem.find_parent('div', class_='col-sm-6')
                     if container:
                         for day_div in container.select('.film_day[id^="day_"]'):
                             parts = day_div.get('id', '').split('_')  # ['day', 'Fri', 'Sep', '18']
-                            if len(parts) == 4:
-                                iso = self._month_day_to_iso(parts[2], parts[3])
-                                if iso:
-                                    show_dates.add(iso)
+                            iso = self._month_day_to_iso(parts[2], parts[3]) if len(parts) == 4 else None
+                            if not iso:
+                                continue
+                            times = [self._norm_time(a.get_text(strip=True)) for a in day_div.select('a')]
+                            showtimes[iso] = self._sorted_times(t for t in times if t)
 
                     movies.append({
                         'title': title,
@@ -368,7 +403,8 @@ class MovieScraper:
                         'url': 'https://metrograph.com' + title_elem.get('href', ''),
                         'source': 'metrograph',
                         'letterboxd_url': self.generate_letterboxd_url(title),
-                        'show_dates': sorted(show_dates)
+                        'show_dates': sorted(showtimes),
+                        'showtimes': showtimes
                     })
         except Exception as e:
             self.log(f"Error scraping Metrograph: {e}")
@@ -384,8 +420,9 @@ class MovieScraper:
             soup = BeautifulSoup(response.content, 'lxml')
 
             # The weekly schedule widget maps each film to the days it screens
-            # (.daily-schedule divs: h3 "Thu Sep 17" + film links per day)
+            # (.daily-schedule divs: h3 "Thu Sep 17" + film blocks with ul.times per day)
             dates_by_title = {}
+            times_by_title = {}
             for day_div in soup.select('.daily-schedule'):
                 if 'show-coming-soon' in (day_div.get('class') or []):
                     continue
@@ -394,9 +431,17 @@ class MovieScraper:
                 iso = self._month_day_to_iso(parts[1], parts[2]) if len(parts) == 3 else None
                 if not iso:
                     continue
-                for link in day_div.select('.details h3 a'):
+                for details in day_div.select('.details'):
+                    link = details.select_one('h3 a')
+                    if not link:
+                        continue
                     key = link.text.strip().lower().replace('\u2019', "'")
                     dates_by_title.setdefault(key, set()).add(iso)
+                    times = [self._norm_time(a.get_text(strip=True)) for a in details.select('ul.times a')]
+                    times = [t for t in times if t]
+                    if times:
+                        day = times_by_title.setdefault(key, {}).setdefault(iso, [])
+                        day.extend(times)
 
             # Look for movie titles only in the "Now Playing" section
             now_playing_section = soup.select_one('.ifc-now-playing')
@@ -412,9 +457,17 @@ class MovieScraper:
                         # Match schedule entries, including variants like "Title (Open Captioning)"
                         title_key = title.lower().replace('\u2019', "'")
                         show_dates = set(dates_by_title.get(title_key, set()))
+                        matched_keys = [title_key]
                         for key, day_set in dates_by_title.items():
                             if key.startswith(title_key + ' ('):
                                 show_dates |= day_set
+                                matched_keys.append(key)
+
+                        showtimes = {}
+                        for key in matched_keys:
+                            for iso, times in times_by_title.get(key, {}).items():
+                                showtimes.setdefault(iso, []).extend(times)
+                        showtimes = {d: self._sorted_times(ts) for d, ts in showtimes.items()}
 
                         movies.append({
                             'title': title,
@@ -422,7 +475,8 @@ class MovieScraper:
                             'url': link_elem.get('href', ''),
                             'source': 'ifc',
                             'letterboxd_url': self.generate_letterboxd_url(title),
-                            'show_dates': sorted(show_dates)
+                            'show_dates': sorted(show_dates),
+                            'showtimes': showtimes
                         })
                         
             
@@ -547,12 +601,19 @@ class MovieScraper:
                         'url': link or 'https://www.roxycinemanewyork.com/now-showing',
                         'source': 'roxy',
                         'letterboxd_url': self.generate_letterboxd_url(title),
-                        'show_dates': set()
+                        'show_dates': set(),
+                        'showtimes': {}
                     })
                     if date_str:
                         entry['show_dates'].add(date_str)
+                        times = [self._norm_time(t.get_text(strip=True))
+                                 for t in card.select('.detailed-screening__actions--time')]
+                        times = [t for t in times if t]
+                        if times:
+                            entry['showtimes'].setdefault(date_str, []).extend(times)
             for entry in by_title.values():
                 entry['show_dates'] = sorted(entry['show_dates'])
+                entry['showtimes'] = {d: self._sorted_times(ts) for d, ts in entry['showtimes'].items()}
                 movies.append(entry)
             self.log(f"Found {len(movies)} movies at Roxy Cinema")
         except Exception as e:
@@ -573,11 +634,15 @@ class MovieScraper:
                 # The feed includes non-film products (festival passes, vouchers)
                 if re.search(r'\b(pass|passes|vouchers?)\b', title, re.IGNORECASE):
                     continue
-                show_dates = sorted({
-                    s['date'] for s in (film.get('showtimes') or [])
-                    if s.get('date') and s['date'] >= today
-                })
-                if not title or not show_dates:
+                showtimes = {}
+                for s in film.get('showtimes') or []:
+                    if s.get('date') and s['date'] >= today:
+                        t = self._norm_time(s.get('time') or '')
+                        showtimes.setdefault(s['date'], [])
+                        if t:
+                            showtimes[s['date']].append(t)
+                showtimes = {d: self._sorted_times(ts) for d, ts in showtimes.items()}
+                if not title or not showtimes:
                     continue
                 slug = film.get('slug')
                 movies.append({
@@ -586,7 +651,8 @@ class MovieScraper:
                     'url': f"https://www.filmlinc.org/films/{slug}/" if slug else 'https://www.filmlinc.org/now-playing/',
                     'source': 'film_linc',
                     'letterboxd_url': self.generate_letterboxd_url(title),
-                    'show_dates': show_dates
+                    'show_dates': sorted(showtimes),
+                    'showtimes': showtimes
                 })
             self.log(f"Found {len(movies)} movies at Film at Lincoln Center")
         except Exception as e:
@@ -1358,6 +1424,10 @@ class MovieScraper:
                 # First time seeing this movie - initialize with sources as list
                 movie_dict[letterboxd_url] = movie.copy()
                 movie_dict[letterboxd_url]['sources'] = [movie['source']]
+                # Own copy of the nested showtimes dict so merges don't mutate cached data
+                movie_dict[letterboxd_url]['showtimes'] = {
+                    d: list(ts) for d, ts in (movie.get('showtimes') or {}).items()
+                }
             else:
                 # Movie already exists - add source to list if not already there
                 if movie['source'] not in movie_dict[letterboxd_url]['sources']:
@@ -1370,6 +1440,10 @@ class MovieScraper:
                 if movie.get('show_dates'):
                     existing_dates = movie_dict[letterboxd_url].get('show_dates') or []
                     movie_dict[letterboxd_url]['show_dates'] = sorted(set(existing_dates) | set(movie['show_dates']))
+                # Merge showtimes per date
+                for d, ts in (movie.get('showtimes') or {}).items():
+                    merged = movie_dict[letterboxd_url]['showtimes'].setdefault(d, [])
+                    movie_dict[letterboxd_url]['showtimes'][d] = self._sorted_times(merged + list(ts))
 
         deduplicated_movies = list(movie_dict.values())
         for movie in deduplicated_movies:

@@ -83,25 +83,44 @@ def get_fresh_ratings(urls: List[str], max_age_hours: int = 24) -> Dict[str, Dic
     return results
 
 
-def upsert_rating(letterboxd_url: str, title: str, rating, rating_count, year, resolved_url=None, genres=None) -> None:
+_warned_director_column = False
+
+
+def upsert_rating(letterboxd_url: str, title: str, rating, rating_count, year, resolved_url=None, genres=None, director=None) -> None:
     """Upsert a rating row. Negative results are stored too:
     rating None + resolved_url set = found but unrated; both None = not found.
     genres is a '|'-joined string ('' = fetched, none found; None = never fetched)."""
+    global _warned_director_column
     client = get_client()
     if client is None:
         return
+    row = {
+        'letterboxd_url': letterboxd_url,
+        'title': title,
+        'rating': rating,
+        'rating_count': str(rating_count) if rating_count is not None else None,
+        'year': str(year) if year is not None else None,
+        'resolved_url': resolved_url,
+        'genres': genres,
+        'director': director,
+        'updated_at': datetime.now(timezone.utc).isoformat(),
+    }
     try:
-        client.table('letterboxd_ratings').upsert({
-            'letterboxd_url': letterboxd_url,
-            'title': title,
-            'rating': rating,
-            'rating_count': str(rating_count) if rating_count is not None else None,
-            'year': str(year) if year is not None else None,
-            'resolved_url': resolved_url,
-            'genres': genres,
-            'updated_at': datetime.now(timezone.utc).isoformat(),
-        }).execute()
+        client.table('letterboxd_ratings').upsert(row).execute()
     except Exception as e:
+        # Tolerate a missing 'director' column so the app keeps working
+        # until the ALTER TABLE has been run in Supabase
+        if 'director' in str(e):
+            if not _warned_director_column:
+                print("⚠️  letterboxd_ratings has no 'director' column yet — run: "
+                      "alter table letterboxd_ratings add column director text;")
+                _warned_director_column = True
+            row.pop('director', None)
+            try:
+                client.table('letterboxd_ratings').upsert(row).execute()
+                return
+            except Exception as e2:
+                e = e2
         print(f"⚠️  Supabase upsert_rating failed for {letterboxd_url}: {e}")
 
 

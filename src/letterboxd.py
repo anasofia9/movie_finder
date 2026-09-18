@@ -51,6 +51,7 @@ class LetterboxdAPI:
                         reader = csv.DictReader(csvfile, fieldnames=self.CSV_FIELDS[:6])
                     has_resolved_url = 'resolved_url' in (reader.fieldnames or [])
                     has_genres = 'genres' in (reader.fieldnames or [])
+                    has_director = 'director' in (reader.fieldnames or [])
                     for row in reader:
                         letterboxd_url = row['letterboxd_url']
                         rating = float(row['rating']) if row['rating'] and row['rating'] != 'None' else None
@@ -68,11 +69,12 @@ class LetterboxdAPI:
                             'year': row['year'] if row['year'] and row['year'] != 'None' else None,
                             'updated': row['updated'],
                             'url': resolved,
-                            'genres': self._decode_genres(row.get('genres')) if has_genres else None
+                            'genres': self._decode_genres(row.get('genres')) if has_genres else None,
+                            'director': (row.get('director') or None) if has_director else None
                         }
 
                 # One-time migration: rewrite legacy file with the new header so appends stay aligned
-                if (not has_resolved_url or not has_genres) and self.csv_cache:
+                if (not has_resolved_url or not has_genres or not has_director) and self.csv_cache:
                     self._rewrite_csv_cache()
             except Exception as e:
                 print(f"Error loading cache: {e}")
@@ -93,12 +95,13 @@ class LetterboxdAPI:
                         'year': entry['year'],
                         'updated': entry['updated'],
                         'resolved_url': entry['url'],
-                        'genres': self._encode_genres(entry.get('genres'))
+                        'genres': self._encode_genres(entry.get('genres')),
+                        'director': entry.get('director') or ''
                     })
         except Exception as e:
             print(f"Error rewriting cache: {e}")
     
-    CSV_FIELDS = ['letterboxd_url', 'title', 'rating', 'rating_count', 'year', 'updated', 'resolved_url', 'genres']
+    CSV_FIELDS = ['letterboxd_url', 'title', 'rating', 'rating_count', 'year', 'updated', 'resolved_url', 'genres', 'director']
 
     # In-memory 'genres' values: None = never fetched, '' = fetched but none found,
     # 'Drama|Comedy' = '|'-joined genre list. CSV can't store None vs '', so we
@@ -130,7 +133,8 @@ class LetterboxdAPI:
             'year': rating_data['year'],
             'updated': datetime.now().isoformat(),
             'url': rating_data['url'],
-            'genres': rating_data.get('genres')
+            'genres': rating_data.get('genres'),
+            'director': rating_data.get('director')
         }
 
         if db.is_enabled():
@@ -141,7 +145,8 @@ class LetterboxdAPI:
                 rating_data['rating_count'],
                 rating_data['year'],
                 rating_data['url'],
-                rating_data.get('genres')
+                rating_data.get('genres'),
+                rating_data.get('director')
             )
             return
 
@@ -165,7 +170,8 @@ class LetterboxdAPI:
                         'year': rating_data['year'],
                         'updated': datetime.now().isoformat(),
                         'resolved_url': rating_data['url'],
-                        'genres': self._encode_genres(rating_data.get('genres'))
+                        'genres': self._encode_genres(rating_data.get('genres')),
+                        'director': rating_data.get('director') or ''
                     })
         except Exception as e:
             print(f"Error saving to cache: {e}")
@@ -354,6 +360,7 @@ class LetterboxdAPI:
             rating_count = None
             year = None
             genres = None
+            director = None
             found_movie_data = False
             
             for script in json_scripts:
@@ -380,6 +387,16 @@ class LetterboxdAPI:
                                 genres = '|'.join(str(g) for g in genre_data)
                             else:
                                 genres = ''  # fetched, none found
+
+                            # Extract director(s) ('director' may be dict, list, or string)
+                            dir_data = data.get('director')
+                            if isinstance(dir_data, list):
+                                director = ', '.join(d.get('name') for d in dir_data
+                                                     if isinstance(d, dict) and d.get('name'))
+                            elif isinstance(dir_data, dict):
+                                director = dir_data.get('name')
+                            elif isinstance(dir_data, str):
+                                director = dir_data
 
                             # Extract year from dateCreated
                             if 'dateCreated' in data:
@@ -440,6 +457,7 @@ class LetterboxdAPI:
                 'year': year,
                 # '' (fetched, none) when found via HTML fallback without JSON-LD genres
                 'genres': (genres if genres is not None else '') if found_movie_data else None,
+                'director': director if found_movie_data else None,
                 'computed_from_histogram': isinstance(rating_count, str) and rating_count.endswith('*')
             }
             
@@ -585,6 +603,7 @@ class LetterboxdAPI:
                 movie['letterboxd_url'] = cached_data['url']
                 movie['year'] = cached_data['year']
                 movie['genres'] = [g for g in (cached_data.get('genres') or '').split('|') if g]
+                movie['director'] = cached_data.get('director')
                 cached_movies.append(movie)
             else:
                 # Movie needs to be processed
@@ -609,7 +628,8 @@ class LetterboxdAPI:
                 'year': row.get('year'),
                 'updated': row.get('updated_at'),
                 'url': row.get('resolved_url'),
-                'genres': row.get('genres')
+                'genres': row.get('genres'),
+                'director': row.get('director')
             }
 
     def apply_cached_ratings(self, movies: List[Dict]) -> tuple:
@@ -653,7 +673,8 @@ class LetterboxdAPI:
                 movie['letterboxd_url'] = rating_data['url']
                 movie['year'] = rating_data['year']
                 movie['genres'] = [g for g in (rating_data.get('genres') or '').split('|') if g]
-                
+                movie['director'] = rating_data.get('director')
+
                 if rating_data['rating'] is None and rating_data['url'] is None:
                     with self._lock:
                         movies_not_found.append(movie)
