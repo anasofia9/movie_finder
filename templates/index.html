@@ -102,6 +102,13 @@
         <input type="range" id="ratingSlider" min="1" max="5" step="0.1"
                value="{{ rating_threshold or 4.0 }}" oninput="applyFilters()">
     </div>
+    <div class="filter-group">
+        <label>Sort by</label>
+        <div class="seg" id="sortSeg">
+            <button type="button" class="on" data-sort="rating" onclick="setSort(this)">Rating</button>
+            <button type="button" data-sort="date" onclick="setSort(this)">Show date</button>
+        </div>
+    </div>
     <button class="btn-refresh" onclick="refreshData()">⟳ Refresh Data</button>
 </div>
 <div class="panel-foot">

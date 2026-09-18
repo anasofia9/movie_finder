@@ -311,6 +311,31 @@
             color: var(--text);
         }
 
+        .seg {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .seg button {
+            background: var(--panel-2);
+            border: none;
+            padding: 9px 14px;
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--faint);
+            cursor: pointer;
+        }
+
+        .seg button + button { border-left: 1px solid var(--border); }
+
+        .seg button.on {
+            background: rgba(212, 169, 78, 0.12);
+            color: var(--gold);
+            font-weight: 600;
+        }
+
         .rating-group { min-width: 220px; }
 
         .rating-group .rating-head {
@@ -847,6 +872,40 @@
             if (label && slider) label.textContent = `${parseFloat(slider.value).toFixed(1)}★ or higher`;
             const note = document.getElementById('highRatedNote');
             if (note && slider) note.textContent = `(Rated ${parseFloat(slider.value).toFixed(1)}★+ by Letterboxd users)`;
+        }
+
+        /* ---------------------------- sorting ---------------------------- */
+        function setSort(btn) {
+            document.querySelectorAll('#sortSeg button').forEach(b => b.classList.toggle('on', b === btn));
+            sortCards();
+        }
+
+        function nextDateKey(card, today) {
+            const dates = (card.dataset.dates || '').split(',').filter(d => d);
+            if (!dates.length) return today; // dateless movies are assumed showing today
+            const upcoming = dates.filter(d => d >= today);
+            return upcoming.length ? upcoming[0] : dates[dates.length - 1];
+        }
+
+        function sortCards() {
+            const mode = document.querySelector('#sortSeg button.on')?.dataset.sort || 'rating';
+            const now = new Date();
+            const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+            document.querySelectorAll('.grid').forEach(grid => {
+                const cards = Array.from(grid.querySelectorAll('.card[data-theaters]'));
+                cards.sort((a, b) => {
+                    const ra = parseFloat(a.dataset.rating) || 0;
+                    const rb = parseFloat(b.dataset.rating) || 0;
+                    if (mode === 'date') {
+                        const da = nextDateKey(a, today);
+                        const db = nextDateKey(b, today);
+                        if (da !== db) return da < db ? -1 : 1;
+                    }
+                    return rb - ra; // rating desc (also the tie-break for date sort)
+                });
+                cards.forEach(c => grid.appendChild(c));
+            });
         }
 
         /* --------------------------- refresh ---------------------------- */
