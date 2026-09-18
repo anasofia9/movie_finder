@@ -245,6 +245,72 @@
         .filter-group select:focus,
         .filter-group input:focus { outline: 1px solid var(--gold-dim); }
 
+        .combo { position: relative; }
+
+        .combo-input {
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 13.5px;
+            padding: 9px 30px 9px 12px;
+            min-width: 160px;
+            width: 100%;
+        }
+
+        .combo-input::placeholder { color: var(--text); opacity: 0.9; }
+
+        .combo-input:focus { outline: 1px solid var(--gold-dim); }
+
+        .combo-clear {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--faint);
+            font-size: 15px;
+            cursor: pointer;
+            padding: 2px 6px;
+            display: none;
+        }
+
+        .combo.has-value .combo-clear { display: block; }
+
+        .combo-clear:hover { color: var(--text); }
+
+        .combo-list {
+            display: none;
+            position: absolute;
+            top: calc(100% + 5px);
+            left: 0;
+            min-width: 100%;
+            max-height: 230px;
+            overflow-y: auto;
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            z-index: 30;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.55);
+        }
+
+        .combo.open .combo-list { display: block; }
+
+        .combo-item {
+            padding: 8px 12px;
+            font-size: 13px;
+            color: var(--muted);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .combo-item:hover {
+            background: rgba(212, 169, 78, 0.1);
+            color: var(--text);
+        }
+
         .rating-group { min-width: 220px; }
 
         .rating-group .rating-head {
@@ -677,6 +743,48 @@
             return Array.from(document.querySelectorAll('.chip.on')).map(c => c.dataset.id);
         }
 
+        /* ----------------------- combo (searchable) ---------------------- */
+        function comboInput(input) {
+            const combo = input.closest('.combo');
+            combo.classList.add('open');
+            combo.classList.toggle('has-value', !!input.value);
+            const q = input.value.toLowerCase();
+            let any = false;
+            combo.querySelectorAll('.combo-item').forEach(item => {
+                const show = !q || item.textContent.toLowerCase().includes(q);
+                item.style.display = show ? '' : 'none';
+                any = any || show;
+            });
+            combo.classList.toggle('open', any);
+            applyFilters();
+        }
+
+        function comboOpen(input) {
+            comboInput(input);
+        }
+
+        function comboClose(input) {
+            // Delay so a mousedown on an item lands first
+            setTimeout(() => input.closest('.combo').classList.remove('open'), 120);
+        }
+
+        function comboPick(item) {
+            const combo = item.closest('.combo');
+            const input = combo.querySelector('.combo-input');
+            input.value = item.textContent.trim();
+            combo.classList.remove('open');
+            combo.classList.add('has-value');
+            applyFilters();
+        }
+
+        function comboClear(inputId) {
+            const input = document.getElementById(inputId);
+            const combo = input.closest('.combo');
+            input.value = '';
+            combo.classList.remove('open', 'has-value');
+            applyFilters();
+        }
+
         /* --------------------------- filters --------------------------- */
         function clearDateFilter() {
             const from = document.getElementById('dateFrom');
@@ -691,10 +799,8 @@
             const selectedVenues = new Set(chips.filter(c => c.classList.contains('on')).map(c => c.dataset.id));
             const venueFilterActive = chips.length > 0 && selectedVenues.size < chips.length;
 
-            const genreSel = document.getElementById('genreSelect');
-            const genre = genreSel ? genreSel.value : '';
-            const dirSel = document.getElementById('directorSelect');
-            const director = dirSel ? dirSel.value : '';
+            const genre = (document.getElementById('genreSearch')?.value || '').trim().toLowerCase();
+            const director = (document.getElementById('directorSearch')?.value || '').trim().toLowerCase();
 
             const fromVal = document.getElementById('dateFrom')?.value || '';
             const toVal = document.getElementById('dateTo')?.value || '';
@@ -713,12 +819,11 @@
                     visible = theaters.some(t => selectedVenues.has(t));
                 }
                 if (visible && genre) {
-                    const genres = (card.dataset.genres || '').split('|').filter(g => g);
-                    visible = genres.includes(genre);
+                    // Substring match so partial typing filters live
+                    visible = (card.dataset.genres || '').toLowerCase().includes(genre);
                 }
                 if (visible && director) {
-                    const directors = (card.dataset.director || '').split(', ').filter(d => d);
-                    visible = directors.includes(director);
+                    visible = (card.dataset.director || '').toLowerCase().includes(director);
                 }
                 if (visible && dateFilterActive) {
                     const dates = (card.dataset.dates || '').split(',').filter(d => d);

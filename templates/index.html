@@ -59,22 +59,32 @@
 
 <div class="filter-panel">
     <div class="filter-group">
-        <label for="genreSelect">Genre</label>
-        <select id="genreSelect" onchange="applyFilters()">
-            <option value="">All Genres</option>
-            {% for genre in all_genres %}
-            <option value="{{ genre }}">{{ genre }}</option>
-            {% endfor %}
-        </select>
+        <label for="genreSearch">Genre</label>
+        <div class="combo">
+            <input type="text" id="genreSearch" class="combo-input" placeholder="All Genres"
+                   autocomplete="off" oninput="comboInput(this)" onfocus="comboOpen(this)" onblur="comboClose(this)">
+            <button type="button" class="combo-clear" tabindex="-1"
+                    onmousedown="event.preventDefault(); comboClear('genreSearch')">×</button>
+            <div class="combo-list">
+                {% for genre in all_genres %}
+                <div class="combo-item" onmousedown="comboPick(this)">{{ genre }}</div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
     <div class="filter-group">
-        <label for="directorSelect">Director</label>
-        <select id="directorSelect" onchange="applyFilters()">
-            <option value="">All Directors</option>
-            {% for d in all_directors %}
-            <option value="{{ d }}">{{ d }}</option>
-            {% endfor %}
-        </select>
+        <label for="directorSearch">Director</label>
+        <div class="combo">
+            <input type="text" id="directorSearch" class="combo-input" placeholder="All Directors"
+                   autocomplete="off" oninput="comboInput(this)" onfocus="comboOpen(this)" onblur="comboClose(this)">
+            <button type="button" class="combo-clear" tabindex="-1"
+                    onmousedown="event.preventDefault(); comboClear('directorSearch')">×</button>
+            <div class="combo-list">
+                {% for d in all_directors %}
+                <div class="combo-item" onmousedown="comboPick(this)">{{ d }}</div>
+                {% endfor %}
+            </div>
+        </div>
     </div>
     <div class="filter-group">
         <label for="dateFrom">Date from</label>
