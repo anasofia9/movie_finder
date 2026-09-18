@@ -336,6 +336,35 @@
             font-weight: 600;
         }
 
+        .btn-after {
+            background: var(--panel-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-family: var(--sans);
+            font-size: 13px;
+            color: var(--faint);
+            cursor: pointer;
+        }
+
+        .btn-after.on {
+            border-color: rgba(125, 201, 143, 0.45);
+            color: var(--green);
+            font-weight: 600;
+        }
+
+        .after-badge {
+            margin-left: auto;
+            padding: 2px 8px;
+            border: 1px solid rgba(125, 201, 143, 0.35);
+            border-radius: 5px;
+            color: var(--green);
+            font-size: 9.5px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
         .rating-group { min-width: 220px; }
 
         .rating-group .rating-head {
@@ -859,6 +888,15 @@
                 if (visible && card.dataset.rating) {
                     visible = parseFloat(card.dataset.rating) >= minRating;
                 }
+                if (visible && afterWorkOnly) {
+                    // Weekend showings, or weekday showings at 6 PM or later
+                    const after = (card.dataset.afterdates || '').split(',').filter(d => d);
+                    if (dateFilterActive) {
+                        visible = after.some(d => (!fromVal || d >= fromVal) && (!toVal || d <= toVal));
+                    } else {
+                        visible = after.some(d => d >= today);
+                    }
+                }
                 card.style.display = visible ? '' : 'none';
             });
 
@@ -872,6 +910,15 @@
             if (label && slider) label.textContent = `${parseFloat(slider.value).toFixed(1)}★ or higher`;
             const note = document.getElementById('highRatedNote');
             if (note && slider) note.textContent = `(Rated ${parseFloat(slider.value).toFixed(1)}★+ by Letterboxd users)`;
+        }
+
+        /* -------------------------- after work --------------------------- */
+        let afterWorkOnly = false;
+
+        function toggleAfterWork(btn) {
+            afterWorkOnly = !afterWorkOnly;
+            btn.classList.toggle('on', afterWorkOnly);
+            applyFilters();
         }
 
         /* ---------------------------- sorting ---------------------------- */

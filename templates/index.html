@@ -103,6 +103,10 @@
                value="{{ rating_threshold or 4.0 }}" oninput="applyFilters()">
     </div>
     <div class="filter-group">
+        <label>Schedule</label>
+        <button type="button" class="btn-after" id="afterWorkBtn" onclick="toggleAfterWork(this)">After work only</button>
+    </div>
+    <div class="filter-group">
         <label>Sort by</label>
         <div class="seg" id="sortSeg">
             <button type="button" class="on" data-sort="rating" onclick="setSort(this)">Rating</button>
@@ -145,6 +149,7 @@
                      data-genres="{{ (movie.genres or [])|join('|') }}"
                      data-director="{{ movie.director or '' }}"
                      data-dates="{{ (movie.show_dates or [])|join(',') }}"
+                     data-afterdates="{{ (movie.after_work_dates or [])|join(',') }}"
                      data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
                 <div class="card-head">
                     <div class="card-head-row">
@@ -163,7 +168,7 @@
                     {% endif %}
                     <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
                     <div class="when">
-                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}{% if movie.after_work %}<span class="after-badge">After work</span>{% endif %}</div>
                         {% if movie.times_display %}<div class="when-times">{{ movie.times_display }}</div>{% endif %}
                     </div>
                 </div>
@@ -196,6 +201,7 @@
                      data-genres="{{ (movie.genres or [])|join('|') }}"
                      data-director="{{ movie.director or '' }}"
                      data-dates="{{ (movie.show_dates or [])|join(',') }}"
+                     data-afterdates="{{ (movie.after_work_dates or [])|join(',') }}"
                      data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
                 <div class="card-head">
                     <div class="card-head-row">
@@ -214,7 +220,7 @@
                     {% endif %}
                     <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
                     <div class="when">
-                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}{% if movie.after_work %}<span class="after-badge">After work</span>{% endif %}</div>
                         {% if movie.times_display %}<div class="when-times">{{ movie.times_display }}</div>{% endif %}
                     </div>
                 </div>
@@ -242,6 +248,7 @@
             <article class="card dimmed m-6"
                      data-genres=""
                      data-dates="{{ (movie.show_dates or [])|join(',') }}"
+                     data-afterdates="{{ (movie.after_work_dates or [])|join(',') }}"
                      data-theaters="{{ (movie.sources or [movie.source])|join('|') }}">
                 <div class="card-head">
                     <div class="card-head-row">
@@ -254,7 +261,7 @@
                 <div class="card-body">
                     <div class="venue-line"><span class="v-dot"></span>{{ movie.venue }}</div>
                     <div class="when">
-                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}</div>
+                        <div class="when-row"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> {{ movie.dates_display or 'Showtimes at venue' }}{% if movie.after_work %}<span class="after-badge">After work</span>{% endif %}</div>
                         {% if movie.times_display %}<div class="when-times">{{ movie.times_display }}</div>{% endif %}
                     </div>
                 </div>

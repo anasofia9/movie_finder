@@ -161,7 +161,32 @@ def index():
     # at request time so "next" tracks the current date
     today = eastern_now().date().isoformat()
     directors = set()
+
+    def after_work_dates(m):
+        """Dates accessible around a 9-5: weekends (any time), or weekdays
+        with a known showtime at 6 PM or later."""
+        out = []
+        showtimes = m.get('showtimes') or {}
+        for d in (m.get('show_dates') or []):
+            try:
+                dt = datetime.strptime(d, '%Y-%m-%d')
+            except ValueError:
+                continue
+            if dt.weekday() >= 5:
+                out.append(d)
+                continue
+            for t in showtimes.get(d, []):
+                try:
+                    if datetime.strptime(t, '%I:%M %p').hour >= 18:
+                        out.append(d)
+                        break
+                except ValueError:
+                    continue
+        return out
+
     for m in movies_data['movies']:
+        m['after_work_dates'] = after_work_dates(m)
+        m['after_work'] = any(d >= today for d in m['after_work_dates'])
         m['times_display'] = None
         showtimes = m.get('showtimes') or {}
         upcoming = sorted(d for d, ts in showtimes.items() if d >= today and ts)
