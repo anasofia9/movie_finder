@@ -136,7 +136,7 @@
                     </div>
                     <h3 class="card-title">{{ movie.title }}</h3>
                     <div class="title-rule"></div>
-                    {% if movie.director %}<div class="director">Dir. {{ movie.director }}</div>{% endif %}
+                    {% if movie.year or movie.director %}<div class="director">{% if movie.year %}{{ movie.year }}{% endif %}{% if movie.year and movie.director %} · {% endif %}{% if movie.director %}Dir. {{ movie.director }}{% endif %}</div>{% endif %}
                 </div>
                 <div class="card-body">
                     {% if movie.genres %}
@@ -187,7 +187,7 @@
                     </div>
                     <h3 class="card-title">{{ movie.title }}</h3>
                     <div class="title-rule"></div>
-                    {% if movie.director %}<div class="director">Dir. {{ movie.director }}</div>{% endif %}
+                    {% if movie.year or movie.director %}<div class="director">{% if movie.year %}{{ movie.year }}{% endif %}{% if movie.year and movie.director %} · {% endif %}{% if movie.director %}Dir. {{ movie.director }}{% endif %}</div>{% endif %}
                 </div>
                 <div class="card-body">
                     {% if movie.genres %}
