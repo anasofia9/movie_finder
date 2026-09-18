@@ -35,7 +35,7 @@
     <aside class="journal-card">
         <div class="kicker">Cinephile Editions</div>
         <h2>Weekly Cinephile Journal</h2>
-        <p>This week's top-rated screenings, formatted as a shareable newsletter.</p>
+        <p>The top-rated current &amp; upcoming screenings, formatted as a shareable newsletter.</p>
         <a href="/newsletter">Explore journal →</a>
     </aside>
 </header>
@@ -107,7 +107,7 @@
 
     <section class="sec">
         <div class="sec-head">
-            <h2>Highly Rated playing this week <span class="sec-note" id="highRatedNote">(Rated {{ '%.1f'|format(rating_threshold or 4.0) }}★+ by Letterboxd users)</span></h2>
+            <h2>Highly Rated, now playing &amp; upcoming <span class="sec-note" id="highRatedNote">(Rated {{ '%.1f'|format(rating_threshold or 4.0) }}★+ by Letterboxd users)</span></h2>
             <span class="match-count"></span>
         </div>
         {% set rated = movies | selectattr('letterboxd_rating') | sort(attribute='letterboxd_rating', reverse=true) | list %}

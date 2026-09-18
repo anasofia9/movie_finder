@@ -69,12 +69,12 @@ class NewsletterGenerator:
         <div style="max-width: 640px; margin: 0 auto;">
             <div style="font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #d4a94e; margin-bottom: 10px;">Cinephile Editions &middot; {today}</div>
             <h1 style="font-family: 'Poiret One', sans-serif; font-weight: 400; font-size: 40px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 10px; color: #ece7dc;">Weekly Cinephile Journal</h1>
-            <p style="margin: 0 0 26px; color: #97907f; font-size: 14.5px;">This week's top-rated films (&ge;{self.rating_threshold}&#9733; on Letterboxd) playing at NYC's independent theaters.</p>
+            <p style="margin: 0 0 26px; color: #97907f; font-size: 14.5px;">The top-rated films (&ge;{self.rating_threshold}&#9733; on Letterboxd) now playing or coming soon at NYC's independent theaters.</p>
             <hr style="border: none; border-top: 1px solid #292620; margin: 0 0 26px;">
         """
 
         if not high_rated_movies:
-            html += f"<p style='color: #6e6858;'>No movies rated {self.rating_threshold}&#9733; or higher this week.</p>"
+            html += f"<p style='color: #6e6858;'>No movies rated {self.rating_threshold}&#9733; or higher right now.</p>"
         else:
             for i, movie in enumerate(high_rated_movies):
                 rating = movie.get('letterboxd_rating')
